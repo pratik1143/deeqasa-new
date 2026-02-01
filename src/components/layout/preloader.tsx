@@ -76,42 +76,11 @@ export function Preloader({ onLoaded }: { onLoaded: () => void }) {
           />
         </svg>
 
-        {/* DQ Monogram */}
-        <div className="absolute inset-0 flex items-center justify-center">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <motion.circle 
-                    cx="12" 
-                    cy="12" 
-                    r="8"
-                    stroke="hsl(var(--primary) / 0.7)" 
-                    strokeWidth="1"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1, transition: { duration: 1.5, delay: 0.5, ease: 'easeInOut' } }}
-                />
-                <motion.path 
-                    d="M10 8 V 16"
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1, transition: { duration: 1, delay: 1.0, ease: 'easeInOut' } }}
-                />
-                 <motion.path 
-                    d="M15 15 L 17 17"
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1, transition: { duration: 1, delay: 1.2, ease: 'easeInOut' } }}
-                />
-            </svg>
-        </div>
-
         {/* Percentage */}
         <motion.div
             className="absolute inset-0 flex items-center justify-center font-code text-2xl text-primary"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { delay: 2.5, duration: 1 } }}
+            animate={{ opacity: 1, transition: { delay: 0.5, duration: 1 } }}
         >
             {displayPercentage}
         </motion.div>
