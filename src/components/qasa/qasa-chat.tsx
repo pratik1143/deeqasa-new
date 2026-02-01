@@ -69,74 +69,76 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in">
-      <Card className="w-[90vw] max-w-2xl h-[80vh] flex flex-col bg-card/80 backdrop-blur-xl border-primary/20 shadow-2xl shadow-primary/10">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-b-primary/10">
-          <CardTitle className="flex items-center gap-2 font-headline text-primary">
-            <Bot /> QASA Assistant
-          </CardTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-4 h-4"/>
-          </Button>
-        </CardHeader>
-        <CardContent className="flex-1 overflow-hidden p-4">
-          <ScrollArea className="h-full pr-4">
-            <div className="space-y-6">
-              {messages.map((msg, index) => (
-                <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
-                  {msg.role === 'assistant' && <Bot className="text-primary flex-shrink-0 mt-1" />}
-                  <div className={cn("rounded-lg px-4 py-2 max-w-[80%] whitespace-pre-wrap", msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary')}>
-                    {msg.content}
-                  </div>
-                  {msg.role === 'user' && <User className="text-primary flex-shrink-0 mt-1" />}
-                </div>
-              ))}
-              {isPending && (
-                <div className="flex items-start gap-3">
-                  <Bot className="text-primary mt-1" />
-                  <div className="rounded-lg px-4 py-2 bg-secondary flex items-center gap-2">
-                    <div className="w-4 h-4 flex items-center">
-                      <LineLoader className="h-0.5" />
+      <div className={cn("animated-snake-wrapper rounded-lg", isPending && "is-thinking")}>
+        <Card className="w-[90vw] max-w-2xl h-[80vh] flex flex-col bg-card/90 backdrop-blur-xl border-0 shadow-2xl shadow-primary/10">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-b-primary/10">
+            <CardTitle className="flex items-center gap-2 font-headline text-primary">
+              <Bot /> QASA Assistant
+            </CardTitle>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="w-4 h-4"/>
+            </Button>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden p-4">
+            <ScrollArea className="h-full pr-4">
+              <div className="space-y-6">
+                {messages.map((msg, index) => (
+                  <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
+                    {msg.role === 'assistant' && <Bot className="text-primary flex-shrink-0 mt-1" />}
+                    <div className={cn("rounded-lg px-4 py-2 max-w-[80%] whitespace-pre-wrap", msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary')}>
+                      {msg.content}
                     </div>
-                    Thinking...
+                    {msg.role === 'user' && <User className="text-primary flex-shrink-0 mt-1" />}
                   </div>
-                </div>
-              )}
-               <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
-        </CardContent>
-        <CardFooter className="flex flex-col items-start gap-4 border-t border-t-primary/10 pt-4">
-            <RadioGroup defaultValue="generate" onValueChange={(value: AiAction) => setAiAction(value)} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="generate" id="r1" />
-                    <Label htmlFor="r1" className="flex items-center gap-2 cursor-pointer"><Wand2 size={16}/> Generate Solutions</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="summarize" id="r2" />
-                    <Label htmlFor="r2" className="flex items-center gap-2 cursor-pointer"><FileText size={16}/> Summarize Document</Label>
-                </div>
-            </RadioGroup>
-            <form onSubmit={handleSubmit} className="w-full flex items-center gap-2">
-                <Textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder={getPlaceholder()}
-                    className="flex-1 resize-none bg-background"
-                    rows={1}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSubmit(e);
-                      }
-                    }}
-                    disabled={isPending}
-                />
-                <Button type="submit" disabled={isPending || !input.trim()} className="w-20">
-                    {isPending ? <div className="w-full"><LineLoader className="h-0.5" /></div> : 'Send'}
-                </Button>
-            </form>
-        </CardFooter>
-      </Card>
+                ))}
+                {isPending && (
+                  <div className="flex items-start gap-3">
+                    <Bot className="text-primary mt-1" />
+                    <div className="rounded-lg px-4 py-2 bg-secondary flex items-center gap-2">
+                      <div className="w-4 h-4 flex items-center">
+                        <LineLoader className="h-0.5" />
+                      </div>
+                      Thinking...
+                    </div>
+                  </div>
+                )}
+                 <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+          </CardContent>
+          <CardFooter className="flex flex-col items-start gap-4 border-t border-t-primary/10 pt-4">
+              <RadioGroup defaultValue="generate" onValueChange={(value: AiAction) => setAiAction(value)} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="generate" id="r1" />
+                      <Label htmlFor="r1" className="flex items-center gap-2 cursor-pointer"><Wand2 size={16}/> Generate Solutions</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="summarize" id="r2" />
+                      <Label htmlFor="r2" className="flex items-center gap-2 cursor-pointer"><FileText size={16}/> Summarize Document</Label>
+                  </div>
+              </RadioGroup>
+              <form onSubmit={handleSubmit} className="w-full flex items-center gap-2">
+                  <Textarea
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder={getPlaceholder()}
+                      className="flex-1 resize-none bg-background"
+                      rows={1}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSubmit(e);
+                        }
+                      }}
+                      disabled={isPending}
+                  />
+                  <Button type="submit" disabled={isPending || !input.trim()} className="w-20">
+                      {isPending ? <div className="w-full"><LineLoader className="h-0.5" /></div> : 'Send'}
+                  </Button>
+              </form>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }
