@@ -25,6 +25,12 @@
     --ring: 188 100% 50%;
     --radius: 0.5rem;
     --emerald-hsl: 165 100% 50%;
+    
+    --chart-1: 188 100% 50%; /* primary */
+    --chart-2: 165 100% 50%; /* emerald */
+    --chart-3: 276 73% 53%; /* accent */
+    --chart-4: 48 100% 50%;
+    --chart-5: 300 100% 50%;
   }
 
   .dark {
