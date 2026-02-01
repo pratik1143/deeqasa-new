@@ -226,3 +226,34 @@
 .animate-scanline {
   animation: scanline 10s linear infinite;
 }
+
+/* Print styles */
+@media print {
+  body {
+    background-color: #fff;
+    color: #000;
+  }
+  .no-print {
+    display: none !important;
+  }
+  #quotation-preview {
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    box-shadow: none;
+    border: none;
+    background: #fff;
+  }
+   #quotation-preview * {
+    visibility: visible;
+    color: #000 !important;
+    background-color: transparent !important;
+  }
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}

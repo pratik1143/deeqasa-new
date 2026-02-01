@@ -7,3 +7,4 @@ import '@/ai/flows/ai-qasa-summarization.ts';
 import '@/ai/flows/ai-funnel-analyzer.ts';
 import '@/ai/flows/get-sheet-data.ts';
 import '@/ai/flows/update-sheet-data.ts';
+import '@/ai/flows/get-product-data.ts';
