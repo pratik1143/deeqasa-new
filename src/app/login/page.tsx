@@ -57,78 +57,80 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-screen h-screen relative">
-      {/* Background Video Layer */}
+    <div className="w-screen h-screen bg-background">
+      {/* Layer -2: Background Video */}
       <video
         autoPlay
         muted
         loop
         playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover"
+        className="fixed top-0 left-0 w-full h-full object-cover -z-20"
       >
         <source src="/bg-video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {/* Overlay and Content Layer */}
-      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center p-4 bg-black/65">
-          <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors">
+      {/* Layer -1: Dark Overlay */}
+      <div className="fixed inset-0 bg-black/55 -z-10" />
+      
+      {/* Layer 10: Content */}
+      <div className="relative z-10 h-full flex items-center justify-center p-4">
+        <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors">
               &larr; Back to Home
-          </Link>
-          
-          <div className="flex flex-col items-center gap-8">
-              <div className="text-center">
-                  <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
-                  <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
-              </div>
-              <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm border-border">
-                  <CardHeader className="text-center">
-                      <div className="flex justify-center mb-2">
-                          <ShieldCheck className="w-10 h-10 text-primary" />
-                      </div>
-                  <CardTitle className="text-2xl font-headline">Admin Portal Access</CardTitle>
-                  <CardDescription>
-                      Enter your credentials to access the dashboard.
-                  </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                      <form onSubmit={handleLogin} className="space-y-6">
-                          <div className="space-y-2">
-                              <Label htmlFor="email">Email</Label>
-                              <Input
-                                  id="email"
-                                  type="email"
-                                  placeholder="admin@deeqasa.tech"
-                                  value={email}
-                                  onChange={(e) => setEmail(e.target.value)}
-                                  disabled={isLoading}
-                                  required
-                                  autoComplete="email"
-                              />
-                          </div>
-                          <div className="space-y-2">
-                              <Label htmlFor="password">Password</Label>
-                              <Input
-                                  id="password"
-                                  type="password"
-                                  placeholder="••••••••"
-                                  value={password}
-                                  onChange={(e) => setPassword(e.target.value)}
-                                  disabled={isLoading}
-                                  required
-                                  autoComplete="current-password"
-                              />
-                          </div>
-                      <Button type="submit" className="w-full" disabled={isLoading}>
-                          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                          Sign In
-                      </Button>
-                      </form>
-                  {error && <p className="text-destructive text-center text-sm mt-4">{error}</p>}
-                  </CardContent>
-              </Card>
-          </div>
+        </Link>
+        <div className="flex flex-col items-center gap-8">
+            <div className="text-center">
+                <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
+                <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
+            </div>
+            <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm border-border">
+                <CardHeader className="text-center">
+                    <div className="flex justify-center mb-2">
+                        <ShieldCheck className="w-10 h-10 text-primary" />
+                    </div>
+                <CardTitle className="text-2xl font-headline">Admin Portal Access</CardTitle>
+                <CardDescription>
+                    Enter your credentials to access the dashboard.
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="admin@deeqasa.tech"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={isLoading}
+                                required
+                                autoComplete="email"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                disabled={isLoading}
+                                required
+                                autoComplete="current-password"
+                            />
+                        </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Sign In
+                    </Button>
+                    </form>
+                {error && <p className="text-destructive text-center text-sm mt-4">{error}</p>}
+                </CardContent>
+            </Card>
         </div>
+      </div>
     </div>
   );
 }
