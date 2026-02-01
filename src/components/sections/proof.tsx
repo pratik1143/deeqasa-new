@@ -1,58 +1,99 @@
-import Image from 'next/image';
-import { PlaceHolderImages, type ImagePlaceholder } from '@/lib/placeholder-images';
+"use client";
 
-const caseStudiesData = [
-  {
-    client: "Global Finance Corp",
-    result: "40% Reduction in Latency",
-    imageId: "case-study-1"
-  },
-  {
-    client: "Innovate Health",
-    result: "99.999% Uptime Achieved",
-    imageId: "case-study-2"
-  },
-];
-
-const caseStudies = caseStudiesData.map(cs => {
-  const imageData = PlaceHolderImages.find(img => img.id === cs.imageId);
-  return { ...cs, ...imageData };
-});
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShieldCheck, MicOff, Camera } from 'lucide-react';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 export function Proof() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 1, 0.5, 1],
+      },
+    },
+  };
+
   return (
-    <section className="py-24 sm:py-32">
-      <div className="container mx-auto text-center mb-16">
-        <h2 className="font-headline text-4xl md:text-6xl font-bold tracking-tighter">
-          The Proof is in the Performance
-        </h2>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-          See how we've transformed leading enterprises.
-        </p>
-      </div>
-      <div className="container mx-auto space-y-16">
-        {caseStudies.map((study, index) => (
-          <div key={index} className="relative h-[60vh] min-h-[400px] rounded-lg overflow-hidden group">
-            {study.imageUrl && (
-              <Image
-                src={study.imageUrl}
-                alt={study.description || study.client}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                data-ai-hint={study.imageHint}
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-            <div className="relative z-10 h-full flex items-end p-8 md:p-12">
-              <div className="bg-card/30 backdrop-blur-md p-6 rounded-lg border border-primary/10">
-                <h3 className="font-headline text-2xl text-muted-foreground">{study.client}</h3>
-                <p className="font-headline text-4xl md:text-5xl font-bold text-primary">{study.result}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <section ref={ref} className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden bg-background">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover -z-20"
+        poster="/poly-poster.jpg" // A poster image provides a fallback and improves perceived load time.
+      >
+        <source src="/poly.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/60 -z-10" />
+
+      {/* Content */}
+      <motion.div
+        className="relative z-10 flex flex-col items-center text-center p-4"
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={containerVariants}
+      >
+        <motion.h2
+          variants={itemVariants}
+          className="text-5xl md:text-7xl font-bold tracking-tighter text-foreground font-headline"
+        >
+          Poly Studio
+        </motion.h2>
+        
+        <motion.p
+          variants={itemVariants}
+          className="mt-4 max-w-2xl text-lg text-muted-foreground"
+        >
+          High-Quality Enterprise Video Collaboration Solution
+        </motion.p>
+        
+        <motion.p
+            variants={itemVariants}
+            className="mt-6 max-w-xl text-md text-foreground/80"
+        >
+            Crystal-clear audio, intelligent cameras, and seamless collaboration built for modern meeting rooms and hybrid work.
+        </motion.p>
+
+        <motion.div variants={itemVariants} className="mt-8 flex flex-wrap justify-center gap-3">
+            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary-foreground/90"><MicOff className="mr-2 h-3 w-3"/>AI Noise Cancellation</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary-foreground/90"><Camera className="mr-2 h-3 w-3"/>4K Camera</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary-foreground/90"><ShieldCheck className="mr-2 h-3 w-3"/>Enterprise Ready</Badge>
+        </motion.div>
+
+        <motion.div variants={itemVariants} className="mt-12 flex gap-4">
+          <Button size="lg" className="font-headline font-bold text-lg bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground hover:shadow-[0_0_20px_5px_hsl(var(--primary)/0.5)] transition-shadow duration-300 rounded-full px-8 py-6">
+            Explore Poly Studio
+          </Button>
+          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6">
+            View Specifications
+          </Button>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
