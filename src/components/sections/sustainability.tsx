@@ -1,3 +1,5 @@
+"use client";
+
 export function Sustainability() {
   return (
     <section className="bg-card py-24 sm:py-32 overflow-hidden">
