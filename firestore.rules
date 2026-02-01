@@ -62,7 +62,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isSignedIn() && request.auth.uid == userId;
       allow list: if false;
-      allow create: if false;
+      // WARNING: This rule allows any new user to assign themselves the 'admin' role upon signup.
+      // This is insecure for most production environments.
+      // For a secure setup, restrict role assignment to a trusted backend (e.g., Cloud Function)
+      // or manage roles manually in the Firebase Console.
+      allow create: if request.auth.uid == userId && request.resource.data.role in ['admin', 'user'];
       allow update: if false;
       allow delete: if false;
     }
