@@ -55,75 +55,62 @@ const getProductDataFlow = ai.defineFlow(
       const response = await sheets.spreadsheets.values.get({ spreadsheetId: PRODUCT_SHEET_ID, range });
 
       const rows = response.data.values;
-      if (!rows || rows.length < 2) return [];
+      if (!rows || rows.length < 2) {
+        console.warn("Product sheet is empty or has only a header row.");
+        return [];
+      };
 
       const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
       const dataRows = rows.slice(1);
       
-      const headerMap: { [key: string]: string } = {
-        'sku': 'id',
-        'processor': 'processor',
-        'memory': 'memory',
-        'hdd': 'storage',
-        'hdd 2': 'hdd2',
-        'gfx': 'gpu',
-        'os': 'os',
-        'warranty': 'warranty',
-        'ftp': 'price',
-      };
-      
-      const indexMap: { [key: string]: number } = {};
-      for (const header in headerMap) {
-          const idx = headers.indexOf(header);
-          if (idx !== -1) {
-            indexMap[headerMap[header]] = idx;
-          }
-      }
+      const headerIndexMap: { [key: string]: number } = {};
+      headers.forEach((header, index) => {
+        if(header) headerIndexMap[header] = index;
+      });
        
-      if (indexMap['id'] === undefined || indexMap['price'] === undefined) {
-          throw new Error("Missing required columns in Product sheet. Expected at least: 'SKU' and 'FTP'.");
+      if (headerIndexMap['sku'] === undefined || headerIndexMap['ftp'] === undefined) {
+          throw new Error("Missing required columns in Product sheet. The header must contain 'SKU' and 'FTP'.");
       }
       
       const parsedData = dataRows.map((row) => {
+        const sku = String(row[headerIndexMap['sku']] || '').trim();
+        if (!sku) return null;
+
         const descriptionParts = [
-            row[indexMap['processor']],
-            row[indexMap['memory']],
-            row[indexMap['storage']], // Mapped from HDD
-            row[indexMap['hdd2']],    // Mapped from HDD 2
-            row[indexMap['gpu']]      // Mapped from GFX
+            row[headerIndexMap['processor']],
+            row[headerIndexMap['memory']],
+            row[headerIndexMap['hdd']],
+            row[headerIndexMap['hdd 2']],
+            row[headerIndexMap['gfx']]
         ].filter(part => part && String(part).trim() !== '');
         
         const name = descriptionParts.join(' / ');
 
-        const priceStr = indexMap['price'] !== undefined ? String(row[indexMap['price']] || '0') : '0';
-        const price = parseFloat(priceStr.replace(/[^0-9.-]+/g,""));
+        const priceStr = String(row[headerIndexMap['ftp']] || '0');
+        const price = parseFloat(priceStr.replace(/[^0-9.]+/g, ''));
         
-        const sku = String(row[indexMap['id']] || '').trim();
-        if (!sku) return null;
-
         return {
           id: sku,
           name: name || 'Product details not available',
-          processor: indexMap['processor'] !== undefined ? String(row[indexMap['processor']] || '') : undefined,
-          memory: indexMap['memory'] !== undefined ? String(row[indexMap['memory']] || '') : undefined,
-          storage: indexMap['storage'] !== undefined ? String(row[indexMap['storage']] || '') : undefined,
-          gpu: indexMap['gpu'] !== undefined ? String(row[indexMap['gpu']] || '') : undefined,
-          os: indexMap['os'] !== undefined ? String(row[indexMap['os']] || '') : undefined,
-          warranty: indexMap['warranty'] !== undefined ? String(row[indexMap['warranty']] || '') : undefined,
+          processor: headerIndexMap['processor'] !== undefined ? String(row[headerIndexMap['processor']] || '') : undefined,
+          memory: headerIndexMap['memory'] !== undefined ? String(row[headerIndexMap['memory']] || '') : undefined,
+          storage: headerIndexMap['hdd'] !== undefined ? String(row[headerIndexMap['hdd']] || '') : undefined,
+          gpu: headerIndexMap['gfx'] !== undefined ? String(row[headerIndexMap['gfx']] || '') : undefined,
+          os: headerIndexMap['os'] !== undefined ? String(row[headerIndexMap['os']] || '') : undefined,
+          warranty: headerIndexMap['warranty'] !== undefined ? String(row[headerIndexMap['warranty']] || '') : undefined,
           price: isNaN(price) ? 0 : price,
           gstRate: 18, // Defaulting to 18% as it's not in the sheet
         };
-      }).filter((p): p is NonNullable<typeof p> => p !== null && p.price > 0);
+      }).filter((p): p is NonNullable<typeof p> => p !== null);
 
       const validationResult = GetProductDataOutputSchema.safeParse(parsedData);
       if (validationResult.success) {
         return validationResult.data;
       } else {
-        console.error("Zod validation error for products:", validationResult.error.flatten());
-        // Filter out invalid items before returning
-        return parsedData.filter((_, index) => 
-            !validationResult.error.issues.some(issue => issue.path.includes(index))
-        );
+        console.error("Zod validation error for products (invalid rows will be filtered out):", validationResult.error.flatten().fieldErrors);
+        const invalidIndexes = new Set(validationResult.error.issues.map(issue => issue.path[0]));
+        const validData = parsedData.filter((_, index) => !invalidIndexes.has(index));
+        return validData;
       }
 
     } catch (err: any) {
