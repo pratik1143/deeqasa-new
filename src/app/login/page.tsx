@@ -73,56 +73,59 @@ export default function LoginPage() {
         <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-primary-foreground/80 hover:text-primary transition-colors z-10">
             &larr; Back to Home
         </Link>
-        <div className="absolute top-8 right-8 z-10 text-right">
-            <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
-            <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
-        </div>
-      <Card className="w-full max-w-sm bg-card/80 border-border z-10">
-        <CardHeader className="text-center">
-            <div className="flex justify-center mb-2">
-                <ShieldCheck className="w-10 h-10 text-primary" />
+        
+        <div className="z-10 flex flex-col items-center gap-8">
+            <div className="text-center">
+                <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
+                <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
             </div>
-          <CardTitle className="text-2xl font-headline">Admin Portal Access</CardTitle>
-          <CardDescription>
-            Enter your credentials to access the dashboard.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-            <form onSubmit={handleLogin} className="space-y-6">
-                <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        placeholder="admin@deeqasa.tech"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={isLoading}
-                        required
-                        autoComplete="email"
-                    />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        disabled={isLoading}
-                        required
-                        autoComplete="current-password"
-                    />
-                </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Sign In
-              </Button>
-            </form>
-          {error && <p className="text-destructive text-center text-sm mt-4">{error}</p>}
-        </CardContent>
-      </Card>
+            <Card className="w-full max-w-sm bg-card/80 border-border">
+                <CardHeader className="text-center">
+                    <div className="flex justify-center mb-2">
+                        <ShieldCheck className="w-10 h-10 text-primary" />
+                    </div>
+                <CardTitle className="text-2xl font-headline">Admin Portal Access</CardTitle>
+                <CardDescription>
+                    Enter your credentials to access the dashboard.
+                </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="admin@deeqasa.tech"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={isLoading}
+                                required
+                                autoComplete="email"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                disabled={isLoading}
+                                required
+                                autoComplete="current-password"
+                            />
+                        </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Sign In
+                    </Button>
+                    </form>
+                {error && <p className="text-destructive text-center text-sm mt-4">{error}</p>}
+                </CardContent>
+            </Card>
+        </div>
     </div>
   );
 }
