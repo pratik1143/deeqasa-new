@@ -158,3 +158,11 @@
 .animate-draw {
   animation: draw 2s ease-out forwards;
 }
+
+@keyframes marquee-infinite {
+  from { transform: translateX(0%); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee-infinite {
+  animation: marquee-infinite 40s linear infinite;
+}

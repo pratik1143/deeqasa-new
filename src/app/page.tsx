@@ -1,6 +1,7 @@
 import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
 import { Hero } from '@/components/sections/hero';
-import { Problem } from '@/components/sections/problem';
+import { Clients } from '@/components/sections/clients';
 import { Services } from '@/components/sections/services';
 import { Proof } from '@/components/sections/proof';
 import { Sustainability } from '@/components/sections/sustainability';
@@ -15,11 +16,12 @@ export default function Home() {
         <Header />
         <main className="flex flex-col">
           <Hero />
-          <Problem />
+          <Clients />
           <Services />
           <Proof />
           <Sustainability />
         </main>
+        <Footer />
       </div>
       <QasaAssistant />
     </>

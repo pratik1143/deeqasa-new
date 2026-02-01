@@ -15,18 +15,25 @@ const HeroText = ({ text, className, delay, animationType }: { text: string, cla
 
 export function Hero() {
   const [show, setShow] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const position = useMousePosition();
-
-  const parallaxOffset = (factor: number) => {
-    if (!isMounted) return {};
-    const x = (position.x - window.innerWidth / 2) * factor;
-    const y = (position.y - window.innerHeight / 2) * factor;
-    return { transform: `translate(${x}px, ${y}px)` };
-  };
+  const [parallaxStyle1, setParallaxStyle1] = useState({});
+  const [parallaxStyle2, setParallaxStyle2] = useState({});
 
   useEffect(() => {
-    setIsMounted(true);
+    const parallaxOffset = (factor: number) => {
+      if (typeof window !== 'undefined') {
+        const x = (position.x - window.innerWidth / 2) * factor;
+        const y = (position.y - window.innerHeight / 2) * factor;
+        return { transform: `translate(${x}px, ${y}px)` };
+      }
+      return {};
+    };
+
+    setParallaxStyle1(parallaxOffset(0.01));
+    setParallaxStyle2(parallaxOffset(0.005));
+  }, [position]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setShow(true), 1500); // Wait for DEEQASA intro
     return () => clearTimeout(timer);
   }, []);
@@ -36,10 +43,10 @@ export function Hero() {
       <div className="absolute inset-0 z-0 bg-background" />
       
       {/* Parallax Background Layers */}
-      <div className="absolute inset-[-10vw] z-1" style={parallaxOffset(0.01)}>
+      <div className="absolute inset-[-10vw] z-1" style={parallaxStyle1}>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(10,20,41,0.5)_0%,_transparent_70%)]" />
       </div>
-      <div className="absolute inset-[-10vw] z-0" style={parallaxOffset(0.005)}>
+      <div className="absolute inset-[-10vw] z-0" style={parallaxStyle2}>
         <div className="absolute inset-0 opacity-20" style={{
             backgroundImage: `radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.1), transparent 30%),
                             radial-gradient(circle at 80% 70%, hsl(var(--accent) / 0.1), transparent 30%)`
