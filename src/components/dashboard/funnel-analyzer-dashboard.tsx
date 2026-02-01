@@ -69,11 +69,20 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const currencyFormatter = new Intl.NumberFormat("en-US", {
+const EXCHANGE_RATE_USD_TO_INR = 80;
+
+const usdCurrencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
+
+const inrCurrencyFormatter = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 0,
+});
+
 
 const SPREADSHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk";
 
@@ -216,6 +225,9 @@ export function FunnelAnalyzerDashboard() {
                 totalRevenue,
                 wonRevenue,
                 pipelineRevenue,
+                wonRevenueInr: wonRevenue * EXCHANGE_RATE_USD_TO_INR,
+                pipelineRevenueInr: pipelineRevenue * EXCHANGE_RATE_USD_TO_INR,
+                totalRevenueInr: totalRevenue * EXCHANGE_RATE_USD_TO_INR,
                 revenueByMonth,
                 funnelsByOwner,
                 funnelsBySegment,
@@ -326,13 +338,15 @@ export function FunnelAnalyzerDashboard() {
         <Card>
           <CardHeader>
             <CardDescription>Total Revenue (Won)</CardDescription>
-            <CardTitle className="text-primary">{currencyFormatter.format(wonRevenue)}</CardTitle>
+            <CardTitle className="text-primary">{usdCurrencyFormatter.format(wonRevenue)}</CardTitle>
+            <p className="text-sm text-muted-foreground">{inrCurrencyFormatter.format(wonRevenue * EXCHANGE_RATE_USD_TO_INR)}</p>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
             <CardDescription>Pipeline Value</CardDescription>
-            <CardTitle>{currencyFormatter.format(pipelineRevenue)}</CardTitle>
+            <CardTitle>{usdCurrencyFormatter.format(pipelineRevenue)}</CardTitle>
+            <p className="text-sm text-muted-foreground">{inrCurrencyFormatter.format(pipelineRevenue * EXCHANGE_RATE_USD_TO_INR)}</p>
           </CardHeader>
         </Card>
         <Card>
@@ -397,8 +411,8 @@ export function FunnelAnalyzerDashboard() {
                             <LineChart data={Object.entries(revenueByMonth).map(([name, value]) => ({ name, revenue: value }))}>
                                 <CartesianGrid vertical={false} />
                                 <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                                <YAxis tickFormatter={(value) => currencyFormatter.format(value as number).slice(0,-3)+'k'}/>
-                                <Tooltip content={<ChartTooltipContent />} />
+                                <YAxis tickFormatter={(value) => `$${(value as number / 1000).toFixed(0)}k`}/>
+                                <Tooltip content={<ChartTooltipContent formatter={(value) => usdCurrencyFormatter.format(value as number)} />} />
                                 <Legend />
                                 <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
                             </LineChart>
@@ -470,7 +484,7 @@ export function FunnelAnalyzerDashboard() {
                         <TableHead>Owner</TableHead>
                         <TableHead>Segment</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Revenue</TableHead>
+                        <TableHead className="text-right">Revenue (USD)</TableHead>
                     </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -486,7 +500,7 @@ export function FunnelAnalyzerDashboard() {
                                 'bg-blue-500/20 text-blue-400'
                             }`}>{item.status}</span>
                         </TableCell>
-                        <TableCell className="text-right">{currencyFormatter.format(item.revenue)}</TableCell>
+                        <TableCell className="text-right">{usdCurrencyFormatter.format(item.revenue)}</TableCell>
                         </TableRow>
                     )) : (
                         <TableRow>
