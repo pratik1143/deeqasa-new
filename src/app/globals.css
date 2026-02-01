@@ -257,9 +257,12 @@
     background-color: transparent !important;
   }
 
+  .hp-logo-print-size {
+    height: 30px !important;
+  }
+
   @page {
     size: A4;
     margin: 15mm;
   }
 }
-

@@ -6,6 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -172,6 +173,7 @@ export function QuotationBuilder() {
   }, [lineItems]);
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
+  const quotationNumber = useMemo(() => `DQT/HPC-001 / ${format(new Date(), 'dd-MM-yyyy')}`, []);
 
   return (
     <div className="h-full flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8">
@@ -244,7 +246,7 @@ export function QuotationBuilder() {
                                 </Popover>
                             </div>
                             <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>
-                                <Plus className="h-4 w-4" />
+                                <Plus className="h-4 w-4 mr-2" />
                                 Add Product
                             </Button>
                         </div>
@@ -291,14 +293,24 @@ export function QuotationBuilder() {
         <ScrollArea className="h-full bg-white rounded-lg shadow-lg">
             <div id="quotation-preview" className="p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
                 <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
-                    <div>
-                        <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
-                        <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
-                        <p>SAS Nagar, Mohali, Punjab</p>
-                        <p>Phone: 8595270950</p>
-                        <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <Image
+                            src="/hp-logo.png"
+                            alt="HP Partner"
+                            width={80}
+                            height={40}
+                            className="h-9 sm:h-10 w-auto hp-logo-print-size"
+                        />
+                        <div>
+                            <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
+                            <p className="text-sm font-bold">HP Authorized Business Partner</p>
+                            <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
+                            <p>SAS Nagar, Mohali, Punjab</p>
+                            <p>Phone: 8595270950</p>
+                            <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
+                        </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                         <h2 className="text-xl font-bold text-gray-700 tracking-wide">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
                     </div>
                 </header>
@@ -311,7 +323,7 @@ export function QuotationBuilder() {
                         <p>Kind Attn: {form.watch('customerName')}</p>
                     </div>
                     <div className="text-left border border-black p-2">
-                         <p><span className="font-bold inline-block w-32">Quotation No:</span> DQT/HPC-001 / {format(new Date(), 'dd-MM-yyyy')}</p>
+                         <p><span className="font-bold inline-block w-32">Quotation No:</span> {quotationNumber}</p>
                          <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MM-yyyy')}</p>
                     </div>
                 </section>
@@ -386,7 +398,7 @@ export function QuotationBuilder() {
                     </div>
                     <div className="mt-16 text-right">
                         <p className="font-bold">For M/s DeeQasa-Tech</p>
-                        <p className="font-bold">HPI Official Business Partner</p>
+                        <p className="font-bold">HP Authorized Business Partner</p>
                         <div className="h-16"></div>
                         <p>Authorized Signatory: Pratik Chaudhary</p>
                     </div>
