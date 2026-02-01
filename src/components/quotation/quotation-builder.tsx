@@ -206,8 +206,8 @@ export function QuotationBuilder() {
                 <div>
                     <h3 className="font-semibold text-lg mb-4 border-b pb-2">Products</h3>
                     <div className="space-y-4">
-                        <div className="flex items-end gap-2">
-                            <div className="flex-1">
+                        <div className="space-y-2">
+                            <div>
                                 <Label>Select Product</Label>
                                 <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                                     <PopoverTrigger asChild>
@@ -243,7 +243,10 @@ export function QuotationBuilder() {
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                            <Button type="button" size="icon" className="shrink-0" onClick={handleAddProduct} disabled={!selectedProduct}><Plus className="h-4 w-4" /></Button>
+                            <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>
+                                <Plus className="h-4 w-4" />
+                                Add Product
+                            </Button>
                         </div>
                         {form.formState.errors.lineItems && <p className="text-sm font-medium text-destructive">{form.formState.errors.lineItems.message}</p>}
                     </div>
