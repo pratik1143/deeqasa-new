@@ -1,0 +1,181 @@
+{
+  "entities": {
+    "AiAssistant": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AiAssistant",
+      "type": "object",
+      "description": "Represents the AI assistant QASA within the DeeQasa.Tech application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AI Assistant entity."
+        },
+        "state": {
+          "type": "string",
+          "description": "The current state of the AI assistant (e.g., idle, listening, thinking, speaking)."
+        },
+        "energySignature": {
+          "type": "string",
+          "description": "Visual representation of QASA's energy signature (e.g., a pulsing orb with data streams)."
+        },
+        "idleAnimation": {
+          "type": "string",
+          "description": "Animation played when the AI assistant is idle (e.g., slow orbit)."
+        },
+        "listeningAnimation": {
+          "type": "string",
+          "description": "Animation played when the AI assistant is listening (e.g., concentric pulses)."
+        },
+        "thinkingAnimation": {
+          "type": "string",
+          "description": "Animation played when the AI assistant is thinking (e.g., particle system converging)."
+        },
+        "speakingAnimation": {
+          "type": "string",
+          "description": "Animation played when the AI assistant is speaking (e.g., light patterns radiating outward)."
+        }
+      },
+      "required": [
+        "id",
+        "state",
+        "energySignature"
+      ]
+    },
+    "WebsiteVisit": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "WebsiteVisit",
+      "type": "object",
+      "description": "Represents a visit to the DeeQasa.Tech website.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the WebsiteVisit entity."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of when the visit occurred.",
+          "format": "date-time"
+        },
+        "ipAddress": {
+          "type": "string",
+          "description": "The IP address of the visitor."
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "The user agent string of the visitor's browser."
+        },
+        "scrollDepth": {
+          "type": "number",
+          "description": "Percentage of the page the visitor scrolled to."
+        },
+        "timeOnPage": {
+          "type": "number",
+          "description": "Time spent on the page in seconds."
+        }
+      },
+      "required": [
+        "id",
+        "timestamp"
+      ]
+    },
+    "CtoFeedback": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CtoFeedback",
+      "type": "object",
+      "description": "Represents feedback collected from CTOs during visual impact tests.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the CTOFeedback entity."
+        },
+        "visitId": {
+          "type": "string",
+          "description": "Reference to WebsiteVisit. (Relationship: WebsiteVisit 1:N CtoFeedback)"
+        },
+        "viewingTime": {
+          "type": "number",
+          "description": "The amount of time the CTO viewed the website (in seconds)."
+        },
+        "initialImpression": {
+          "type": "string",
+          "description": "The CTO's initial impression after a short viewing."
+        },
+        "detailedFeedback": {
+          "type": "string",
+          "description": "The CTO's detailed feedback about the website's design and content."
+        },
+        "emotionalResponse": {
+          "type": "string",
+          "description": "The emotional response evoked by the website (e.g., confident, futuristic, precise, trustworthy)."
+        }
+      },
+      "required": [
+        "id",
+        "visitId"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/website_visits/{visitId}",
+        "definition": {
+          "entityName": "WebsiteVisit",
+          "schema": {
+            "$ref": "#/backend/entities/WebsiteVisit"
+          },
+          "description": "Stores website visit data. Accessible anonymously, but subject to rate limiting rules. Includes timestamp for tracking and analysis.",
+          "params": [
+            {
+              "name": "visitId",
+              "description": "Unique identifier for the website visit."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/website_visits/{visitId}/cto_feedback/{feedbackId}",
+        "definition": {
+          "entityName": "CtoFeedback",
+          "schema": {
+            "$ref": "#/backend/entities/CtoFeedback"
+          },
+          "description": "Stores CTO feedback associated with a specific website visit. Denormalizes visitId for easy querying. Accessible anonymously, but subject to rate limiting and data validation rules.",
+          "params": [
+            {
+              "name": "visitId",
+              "description": "The ID of the website visit the feedback is associated with."
+            },
+            {
+              "name": "feedbackId",
+              "description": "Unique identifier for the CTO feedback."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/ai_assistant/{assistantId}",
+        "definition": {
+          "entityName": "AiAssistant",
+          "schema": {
+            "$ref": "#/backend/entities/AiAssistant"
+          },
+          "description": "Stores the state of the AI assistant, QASA. The data is intended to be publicly readable. Rate limiting rules might apply based on IP address.",
+          "params": [
+            {
+              "name": "assistantId",
+              "description": "Unique identifier for the ai assistant. There should only be one 'ai_assistant' document with assistantId='qasa'."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore data structure is designed to support the DeeQasa.Tech application, focusing on cinematic visual impact and sophisticated user experience. The structure prioritizes authorization independence, clarity, and scalability.\n\n1.  **Authorization Independence:** WebsiteVisit and CtoFeedback are kept separate and do not rely on hierarchical authorization. There's no direct user authentication for these, allowing them to be accessible (with proper security rules in place based on rate limiting, etc.). The AiAssistant data is globally accessible, with potential rate limiting implemented through security rules based on IP address or other non-user-specific factors.\n\n2.  **Structural Segregation:** WebsiteVisit and CtoFeedback collections are separate, aligning with their distinct purposes and security needs. This segregation simplifies security rules.\n\n3.  **Access Modeling:** WebsiteVisit and CtoFeedback collections are designed without user ownership. They capture anonymous website interactions and feedback, respectively. Security rules will focus on preventing abuse (rate limiting, etc.) rather than user-based access control. The AiAssistant's global accessibility aligns with its role as a publicly available resource.\n\n4.  **Data Clarity:** Timestamps are used consistently, and the schema for each entity is well-defined and predictable.\n\n5.  **QAPs (Rules are not Filters):** Segregation ensures that queries are efficient and secure. Listing WebsiteVisit or CtoFeedback does not require filtering based on user roles, as these collections are designed to be universally accessible (with appropriate security measures to prevent abuse).\n"
+  }
+}

@@ -1,0 +1,97 @@
+/**
+ * Core Philosophy: This ruleset is designed for a public-facing website that collects anonymous data. The primary security goal is to allow the public to read specific data (like the AI assistant's state) and submit new data anonymously (website visits, feedback), while strictly prohibiting any modification or deletion of existing data. There is no user-based ownership model; security is based on tightly controlling write operations.
+ *
+ * Data Structure: Data is organized into top-level collections.
+ * - /ai_assistant: Publicly readable state information for the application's AI.
+ * - /website_visits: A write-only collection for logging anonymous website traffic.
+ * - /website_visits/{visitId}/cto_feedback: A write-only subcollection for anonymous feedback, linked to a specific visit.
+ *
+ * Key Security Decisions:
+ * - Public Read-Only Data: The `/ai_assistant` collection is readable by anyone, including unauthenticated users, but cannot be modified by clients.
+ * - Anonymous Write-Once Collections: The `/website_visits` and its `cto_feedback` subcollection are designed to be "write-only" for anonymous clients. Anyone can create a document, but no one can read, update, or delete documents via the client SDKs. This protects user privacy and data integrity.
+ * - Default Deny: All operations that are not explicitly granted are denied. This is particularly true for all update and delete operations across the entire database, which must be handled by trusted backend services.
+ * - Relational Integrity: A new feedback document can only be created if its parent website visit document exists and the `visitId` field within the feedback document correctly points to its parent.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    //-------------------------------------------------------------------------
+    // Helper Functions
+    //-------------------------------------------------------------------------
+
+    /**
+     * Checks if a user is signed in.
+     * Note: This is not heavily used as the application allows anonymous access.
+     */
+    // function isSignedIn() {
+    //   return request.auth != null;
+    // }
+
+    /**
+     * Verifies that the parent website_visits document exists.
+     * This prevents orphaned feedback documents from being created.
+     */
+    function isParentVisitExists(visitId) {
+      return exists(/databases/$(database)/documents/website_visits/$(visitId));
+    }
+
+    /**
+     * Ensures that the feedback document contains a 'visitId' field
+     * that matches the parent document's ID in the path.
+     */
+    function feedbackLinksToParentVisit(visitId) {
+      return request.resource.data.visitId == visitId;
+    }
+
+
+    //-------------------------------------------------------------------------
+    // Collection Rules
+    //-------------------------------------------------------------------------
+
+    /**
+     * @description Controls access to the AI assistant's public state.
+     * @path /ai_assistant/{assistantId}
+     * @allow (get) Any user, signed-in or not, can read the AI's state.
+     * @deny (create, update, delete) No user can modify the AI's state from the client.
+     * @principle Makes application state data public while preventing client-side modification.
+     */
+    match /ai_assistant/{assistantId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Manages anonymous website visit data.
+     * @path /website_visits/{visitId}
+     * @allow (create) Any client can create a new website visit document.
+     * @deny (get, list, update, delete) No client can read, modify, or delete visit data to protect privacy and data integrity.
+     * @principle Implements a "write-only" log for anonymous data submission.
+     */
+    match /website_visits/{visitId} {
+      allow get: if false;
+      allow list: if false;
+      allow create: if true;
+      allow update: if false;
+      allow delete: if false;
+
+      /**
+       * @description Manages anonymous CTO feedback associated with a website visit.
+       * @path /website_visits/{visitId}/cto_feedback/{feedbackId}
+       * @allow (create) An anonymous user can submit feedback, but only if the parent visit exists and the feedback's internal visitId matches the path.
+       * @deny (get, list, update, delete) No client can read, modify, or delete submitted feedback.
+       * @principle Enforces relational integrity and a secure "write-only" model for subcollections.
+       */
+      match /cto_feedback/{feedbackId} {
+        allow get: if false;
+        allow list: if false;
+        allow create: if isParentVisitExists(visitId) && feedbackLinksToParentVisit(visitId);
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+  }
+}
