@@ -34,7 +34,7 @@ export function Proof() {
   };
 
   return (
-    <section ref={ref} className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden bg-background">
+    <section ref={ref} className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden">
       {/* Background Video */}
       <video
         autoPlay
