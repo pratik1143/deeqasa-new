@@ -87,6 +87,16 @@ function numberToWords(num: number): string {
     return result.charAt(0).toUpperCase() + result.slice(1) + ' only.';
 };
 
+const formatShortProductName = (product: Product): string => {
+    if (!product) return '';
+    const parts = [
+        product.id, // SKU
+        product.processor,
+        product.memory,
+    ];
+    return parts.filter(Boolean).join(' | ');
+};
+
 
 export function QuotationBuilder() {
   const { toast } = useToast();
@@ -201,8 +211,8 @@ export function QuotationBuilder() {
                                 <Label>Select Product</Label>
                                 <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                                     <PopoverTrigger asChild>
-                                        <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
-                                            {selectedProduct ? selectedProduct.name : "Select product..."}
+                                        <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal truncate">
+                                            {selectedProduct ? formatShortProductName(selectedProduct) : "Select product..."}
                                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
@@ -222,7 +232,9 @@ export function QuotationBuilder() {
                                                             setOpenCombobox(false);
                                                         }}>
                                                         <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
-                                                        {product.name}
+                                                        <span className="truncate" title={product.name}>
+                                                            {formatShortProductName(product)}
+                                                        </span>
                                                     </CommandItem>
                                                     ))}
                                                 </CommandGroup>
@@ -231,7 +243,7 @@ export function QuotationBuilder() {
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                            <Button type="button" onClick={handleAddProduct} disabled={!selectedProduct}><Plus className="h-4 w-4" /></Button>
+                            <Button type="button" size="icon" className="shrink-0" onClick={handleAddProduct} disabled={!selectedProduct}><Plus className="h-4 w-4" /></Button>
                         </div>
                         {form.formState.errors.lineItems && <p className="text-sm font-medium text-destructive">{form.formState.errors.lineItems.message}</p>}
                     </div>
@@ -382,5 +394,3 @@ export function QuotationBuilder() {
     </div>
   );
 }
-
-    
