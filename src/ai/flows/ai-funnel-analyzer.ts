@@ -10,7 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const FunnelAnalysisInputSchema = z.object({
+const FunnelAnalysisInputSchema = z.object({
   totalFunnels: z.number(),
   wonCount: z.number(),
   lostCount: z.number(),
@@ -26,7 +26,7 @@ export const FunnelAnalysisInputSchema = z.object({
 
 export type FunnelAnalysisInput = z.infer<typeof FunnelAnalysisInputSchema>;
 
-export const FunnelAnalysisOutputSchema = z.object({
+const FunnelAnalysisOutputSchema = z.object({
   performanceSummary: z.string().describe('A high-level summary of the overall funnel performance.'),
   stuckDealsInsight: z.string().describe('An insight into where deals are getting stuck or what is causing losses.'),
   topPerformerInsight: z.string().describe('An insight identifying the BDM with the strongest pipeline or best performance.'),
