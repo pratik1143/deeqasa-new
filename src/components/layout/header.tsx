@@ -13,7 +13,7 @@ const navLinks = [
   { name: "Solutions", href: "/#solutions" },
   { name: "Dashboard", href: "/dashboard"},
   { name: "Industries", href: "#industries" },
-  { name: "Sustainability", href: "#sustainability" },
+  { name: "Sustainability", href: "https://www.hp.com/in-en/sustainable-impact.html" },
   { name: "About", href: "#about" },
 ];
 
