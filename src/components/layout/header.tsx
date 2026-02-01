@@ -13,9 +13,7 @@ const navLinks = [
   { name: "Dashboard", href: "/dashboard"},
   { name: "Industries", href: "#industries" },
   { name: "Sustainability", href: "#sustainability" },
-  { name: "Insights", href: "#insights" },
   { name: "About", href: "#about" },
-  { name: "Partners", href: "#partners" },
 ];
 
 export function Header() {
