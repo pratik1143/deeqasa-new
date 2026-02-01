@@ -57,23 +57,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-screen h-screen bg-background">
-      {/* Layer -2: Background Video */}
+    <div className="relative w-screen h-screen overflow-hidden">
+      {/* Layer 1: Background Video */}
       <video
         autoPlay
         muted
         loop
         playsInline
-        className="fixed top-0 left-0 w-full h-full object-cover -z-20"
+        className="absolute top-0 left-0 w-full h-full object-cover"
       >
         <source src="/bg-video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {/* Layer -1: Dark Overlay */}
-      <div className="fixed inset-0 bg-black/55 -z-10" />
+      {/* Layer 2: Dark Overlay */}
+      <div className="absolute inset-0 bg-black/55" />
       
-      {/* Layer 10: Content */}
+      {/* Layer 3: Content */}
       <div className="relative z-10 h-full flex items-center justify-center p-4">
         <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors">
               &larr; Back to Home
