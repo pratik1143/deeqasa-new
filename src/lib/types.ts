@@ -1,5 +1,6 @@
 export type FunnelData = {
     id: number;
+    rowNumber: number;
     status: 'Won' | 'Lost' | 'Pipeline';
     revenue: number;
     closureMonth: string;
@@ -12,5 +13,6 @@ export type FunnelData = {
     state?: string;
     oppCloseMonth?: string;
     productLine?: string;
+    lastModified?: string;
   };
   

@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import type { FunnelData } from "@/lib/types";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Bar,
   BarChart,
@@ -20,6 +23,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -40,9 +44,10 @@ import {
 } from "@/components/ui/select";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "../ui/chart";
 import { Button } from "../ui/button";
-import { BrainCircuit, RefreshCw } from "lucide-react";
+import { BrainCircuit, Edit, RefreshCw } from "lucide-react";
 import { FunnelAnalysisOutput, analyzeFunnelData } from "@/ai/flows/ai-funnel-analyzer";
 import { getSheetData } from "@/ai/flows/get-sheet-data";
+import { updateSheetData } from "@/ai/flows/update-sheet-data";
 import { Skeleton } from "../ui/skeleton";
 import { ScrollArea } from "../ui/scroll-area";
 import { CenteredLoader } from "../ui/centered-loader";
@@ -52,10 +57,14 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { LineLoader } from "../ui/line-loader";
+import { useToast } from "@/hooks/use-toast";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Input } from "../ui/input";
 
 
 const chartConfig = {
@@ -94,6 +103,16 @@ const inrCurrencyFormatter = new Intl.NumberFormat("en-IN", {
 
 const SPREADSHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk";
 
+const funnelFormSchema = z.object({
+  status: z.enum(['Won', 'Lost', 'Pipeline']),
+  revenue: z.coerce.number().min(0, "Revenue must be positive."),
+  probability: z.coerce.number().min(0).max(100, "Probability must be between 0 and 100."),
+  owner: z.string().min(1, "Owner is required."),
+  segment: z.string().min(1, "Segment is required."),
+});
+
+type FunnelFormValues = z.infer<typeof funnelFormSchema>;
+
 export function FunnelAnalyzerDashboard() {
   const [data, setData] = useState<FunnelData[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -103,6 +122,58 @@ export function FunnelAnalyzerDashboard() {
   const [aiInsights, setAiInsights] = useState<FunnelAnalysisOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedItem, setSelectedItem] = useState<FunnelData | null>(null);
+  const [itemToEdit, setItemToEdit] = useState<FunnelData | null>(null);
+  const [isEditing, startEditTransition] = useTransition();
+  const { toast } = useToast();
+
+  const form = useForm<FunnelFormValues>({
+    resolver: zodResolver(funnelFormSchema),
+    defaultValues: {
+      status: 'Pipeline',
+      revenue: 0,
+      probability: 0,
+      owner: '',
+      segment: '',
+    },
+  });
+
+  useEffect(() => {
+    if (itemToEdit) {
+      form.reset({
+        status: itemToEdit.status,
+        revenue: itemToEdit.revenue,
+        probability: itemToEdit.probability * 100,
+        owner: itemToEdit.owner,
+        segment: itemToEdit.segment,
+      });
+    }
+  }, [itemToEdit, form]);
+
+  async function onFormSubmit(values: FunnelFormValues) {
+    if (!itemToEdit) return;
+
+    startEditTransition(async () => {
+        const payload: FunnelData = {
+            ...itemToEdit,
+            ...values,
+            revenue: values.revenue,
+            probability: values.probability / 100,
+        };
+        try {
+            const result = await updateSheetData(payload);
+            if (result.success) {
+                toast({ title: "Success", description: "Account updated successfully." });
+                setItemToEdit(null);
+                fetchData(); // Refresh data from source
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (e: any) {
+            console.error("Update failed", e);
+            toast({ variant: "destructive", title: "Update Failed", description: e.message });
+        }
+    });
+  }
 
 
   // Filter states
@@ -528,6 +599,7 @@ export function FunnelAnalyzerDashboard() {
         </CardContent>
       </Card>
       
+      {/* Details Dialog */}
       <Dialog open={!!selectedItem} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
         <DialogContent className="sm:max-w-md">
             {selectedItem && (
@@ -582,9 +654,121 @@ export function FunnelAnalyzerDashboard() {
                             <span className="text-muted-foreground">Closure Month</span>
                             <span className="font-semibold">{selectedItem.closureMonth}</span>
                         </div>
+                        {selectedItem.lastModified && (
+                          <div className="flex justify-between items-center border-t border-border pt-4 mt-2">
+                              <span className="text-muted-foreground">Last Updated</span>
+                              <span className="font-semibold text-right">{new Date(selectedItem.lastModified).toLocaleString()}</span>
+                          </div>
+                        )}
                     </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => {
+                            setItemToEdit(selectedItem);
+                            setSelectedItem(null);
+                        }}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Account
+                        </Button>
+                    </DialogFooter>
                 </>
             )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!itemToEdit} onOpenChange={(isOpen) => { if(!isOpen) setItemToEdit(null)}}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit: {itemToEdit?.accountName}</DialogTitle>
+            <DialogDescription>
+              Update the details for this funnel entry. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Pipeline">Pipeline</SelectItem>
+                        <SelectItem value="Won">Won</SelectItem>
+                        <SelectItem value="Lost">Lost</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="revenue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Revenue (USD)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="50000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="probability"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Probability (%)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="50" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="owner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Owner</FormLabel>
+                    <FormControl>
+                      <Input placeholder="John Doe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="segment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Segment</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enterprise" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setItemToEdit(null)}>Cancel</Button>
+                <Button type="submit" disabled={isEditing}>
+                  {isEditing && <LineLoader className="h-0.5 w-4 mr-2" />}
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>

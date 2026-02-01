@@ -13,8 +13,9 @@ import type { FunnelData } from '@/lib/types';
 import serviceAccount from '@/ai/service-account.json';
 
 // Define the Zod schema for validation, consistent with the FunnelData type
-const FunnelDataSchema = z.object({
+export const FunnelDataSchema = z.object({
   id: z.number(),
+  rowNumber: z.number(),
   status: z.enum(['Won', 'Lost', 'Pipeline']),
   revenue: z.number(),
   closureMonth: z.string(),
@@ -27,6 +28,7 @@ const FunnelDataSchema = z.object({
   state: z.string().optional(),
   oppCloseMonth: z.string().optional(),
   productLine: z.string().optional(),
+  lastModified: z.string().optional(),
 });
 
 const GetSheetDataInputSchema = z.object({
@@ -95,6 +97,7 @@ const getSheetDataFlow = ai.defineFlow(
         'pl (please select from drop down)': 'productLine',
         'hp model (product name)': 'product',
         'probability %': 'probability',
+        'last modified': 'lastModified',
       };
 
       const indexToKeyMap: { [index: number]: keyof FunnelData } = {};
@@ -106,7 +109,7 @@ const getSheetDataFlow = ai.defineFlow(
       });
 
       const parsedData = dataRows.map((row, index) => {
-        const item: any = { id: index + 1 };
+        const item: any = { id: index + 1, rowNumber: index + 2 };
         
         Object.entries(indexToKeyMap).forEach(([colIndexStr, key]) => {
             const colIndex = parseInt(colIndexStr, 10);
