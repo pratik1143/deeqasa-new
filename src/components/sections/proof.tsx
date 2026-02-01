@@ -86,8 +86,10 @@ export function Proof() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-12 flex gap-4">
-          <Button size="lg" className="font-headline font-bold text-lg bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground hover:shadow-[0_0_20px_5px_hsl(var(--primary)/0.5)] transition-shadow duration-300 rounded-full px-8 py-6">
-            Explore Poly Studio
+          <Button asChild size="lg" className="font-headline font-bold text-lg bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground hover:shadow-[0_0_20px_5px_hsl(var(--primary)/0.5)] transition-shadow duration-300 rounded-full px-8 py-6">
+            <a href="https://www.hp.com/in-en/poly.html" target="_blank" rel="noopener noreferrer">
+              Explore Poly Studio
+            </a>
           </Button>
           <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6">
             View Specifications
