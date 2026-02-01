@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/select";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "../ui/chart";
 import { Button } from "../ui/button";
-import { BrainCircuit, Edit, RefreshCw } from "lucide-react";
+import { BrainCircuit, Edit, RefreshCw, AlertTriangle, Lightbulb, TrendingUp, TrendingDown, Target, Award, UserX, DollarSign } from "lucide-react";
 import { FunnelAnalysisOutput, analyzeFunnelData } from "@/ai/flows/ai-funnel-analyzer";
 import { getSheetData } from "@/ai/flows/get-sheet-data";
 import { updateSheetData } from "@/ai/flows/update-sheet-data";
@@ -66,6 +66,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 
 const chartConfig = {
@@ -308,6 +309,7 @@ export function FunnelAnalyzerDashboard() {
 
   const handleAnalyze = () => {
     setIsAnalyzing(true);
+    setAiInsights(null);
     startRefreshTransition(async () => {
         try {
             const insights = await analyzeFunnelData({
@@ -325,12 +327,14 @@ export function FunnelAnalyzerDashboard() {
                 pipelineRevenueByMonth,
                 funnelsByOwner,
                 funnelsBySegment,
-                winRatioBySegment
+                winRatioBySegment,
+                fullFunnelData: filteredData,
             });
             setAiInsights(insights);
         } catch (error) {
             console.error("AI Analysis failed", error);
-            // Optionally, set an error state to show in the UI
+            toast({ variant: "destructive", title: "AI Analysis Failed", description: "Could not generate insights. Please try again." });
+
         } finally {
             setIsAnalyzing(false);
         }
@@ -534,51 +538,90 @@ export function FunnelAnalyzerDashboard() {
                         </div>
                     </div>
                 ) : aiInsights ? (
-                    <ScrollArea className="h-full -mr-4">
-                        <div className="text-sm space-y-6 pr-4">
-                            <div>
-                                <h4 className="font-semibold text-foreground">Executive Summary</h4>
+                    <ScrollArea className="h-full -mr-6">
+                        <div className="text-sm space-y-6 pr-6">
+                           <div>
+                                <h4 className="font-semibold text-foreground mb-2">Executive Summary</h4>
                                 <p className="text-muted-foreground">{aiInsights.executiveSummary}</p>
                             </div>
+                            
+                            <Card className="bg-secondary/50">
+                                <CardHeader className="p-4">
+                                    <CardTitle className="text-base flex items-center gap-2"><DollarSign /> Revenue Forecast</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <p className="text-muted-foreground">{aiInsights.revenueForecast.forecast}</p>
+                                    <p className="text-xs text-primary font-bold mt-2">CONFIDENCE: {aiInsights.revenueForecast.confidence}%</p>
+                                </CardContent>
+                            </Card>
+
                             <div>
-                                <h4 className="font-semibold text-foreground">Revenue Forecast</h4>
-                                <p className="text-muted-foreground">{aiInsights.revenueForecast}</p>
+                                <h4 className="font-semibold text-foreground mb-2">Smart Alerts</h4>
+                                <div className="space-y-2">
+                                    {aiInsights.smartAlerts.map((alert, i) => (
+                                        <Alert key={i} variant={alert.priority === 'High' ? 'destructive' : 'default'} className={cn(alert.priority === 'Medium' && 'border-amber-500/50 text-amber-400 [&>svg]:text-amber-400')}>
+                                            <AlertTriangle className="h-4 w-4" />
+                                            <AlertTitle className="font-bold">{alert.title}</AlertTitle>
+                                            <AlertDescription>{alert.description}</AlertDescription>
+                                        </Alert>
+                                    ))}
+                                </div>
                             </div>
-                            <div>
-                                <h4 className="font-semibold text-foreground">Key Risks</h4>
-                                <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
-                                    {aiInsights.keyRisks.map((risk, i) => <li key={i}>{risk}</li>)}
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold text-foreground">Key Opportunities</h4>
-                                <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
-                                    {aiInsights.keyOpportunities.map((opp, i) => <li key={i}>{opp}</li>)}
-                                </ul>
+                             <div>
+                                <h4 className="font-semibold text-foreground mb-2">Top Opportunities</h4>
+                                <div className="space-y-2">
+                                    {aiInsights.topOpportunities.map((opp, i) => (
+                                        <Card key={i} className="bg-secondary/50">
+                                          <CardHeader className="p-4">
+                                            <CardTitle className="text-base flex items-center gap-2"><Lightbulb size={16}/>{opp.title}</CardTitle>
+                                            <CardDescription>{opp.description}</CardDescription>
+                                          </CardHeader>
+                                          <CardFooter className="p-4 pt-0">
+                                              <p className="text-xs font-semibold text-primary">NEXT ACTION: {opp.nextAction}</p>
+                                          </CardFooter>
+                                        </Card>
+                                    ))}
+                                </div>
                             </div>
 
                             <Accordion type="single" collapsible className="w-full">
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger>Detailed Performance Summary</AccordionTrigger>
-                                    <AccordionContent>{aiInsights.performanceSummary}</AccordionContent>
+                                <AccordionItem value="leakage">
+                                    <AccordionTrigger className="font-semibold text-base"><Target size={16} className="mr-2"/>Funnel Leakage</AccordionTrigger>
+                                    <AccordionContent className="pt-2">
+                                        <h5 className="font-bold">{aiInsights.funnelLeakageAnalysis.primaryLeakagePoint}</h5>
+                                        <p className="text-muted-foreground">{aiInsights.funnelLeakageAnalysis.insight}</p>
+                                    </AccordionContent>
                                 </AccordionItem>
-                                <AccordionItem value="item-2">
-                                    <AccordionTrigger>Bottlenecks & Lost Deals</AccordionTrigger>
-                                    <AccordionContent>{aiInsights.stuckDealsInsight}</AccordionContent>
+                                <AccordionItem value="performance">
+                                    <AccordionTrigger className="font-semibold text-base"><TrendingUp size={16} className="mr-2"/>Owner Performance</AccordionTrigger>
+                                    <AccordionContent className="pt-2 space-y-4">
+                                      <div className="flex gap-4">
+                                        <Award className="text-green-400 mt-1"/>
+                                        <div>
+                                          <h5 className="font-bold text-green-400">Top Performer: {aiInsights.ownerPerformance.topPerformer.name}</h5>
+                                          <p className="text-muted-foreground">{aiInsights.ownerPerformance.topPerformer.reason}</p>
+                                        </div>
+                                      </div>
+                                      <div className="flex gap-4">
+                                        <UserX className="text-amber-400 mt-1"/>
+                                        <div>
+                                          <h5 className="font-bold text-amber-400">Needs Attention: {aiInsights.ownerPerformance.needsAttention.name}</h5>
+                                          <p className="text-muted-foreground">{aiInsights.ownerPerformance.needsAttention.reason}</p>
+                                        </div>
+                                      </div>
+                                    </AccordionContent>
                                 </AccordionItem>
-                                <AccordionItem value="item-3">
-                                    <AccordionTrigger>Top Performer Analysis</AccordionTrigger>
-                                    <AccordionContent>{aiInsights.topPerformerInsight}</AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-4">
-                                    <AccordionTrigger>Segment Deep Dive</AccordionTrigger>
-                                    <AccordionContent>{aiInsights.segmentInsight}</AccordionContent>
+                                <AccordionItem value="lost-deals">
+                                    <AccordionTrigger className="font-semibold text-base"><TrendingDown size={16} className="mr-2"/>Lost Deal Intelligence</AccordionTrigger>
+                                    <AccordionContent className="pt-2">
+                                        <p className="text-muted-foreground">{aiInsights.lostDealIntelligence}</p>
+                                    </AccordionContent>
                                 </AccordionItem>
                             </Accordion>
                         </div>
                     </ScrollArea>
                 ) : (
-                    <div className="m-auto text-center text-muted-foreground">
+                    <div className="m-auto text-center text-muted-foreground p-4">
                         <p>Click the button to generate AI-powered intelligence for the current data view.</p>
                     </div>
                 )}
