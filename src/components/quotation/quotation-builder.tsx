@@ -18,14 +18,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
 import { getProductData } from '@/ai/flows/get-product-data';
-import { Product as ProductSchema, LineItem as LineItemSchema } from '@/lib/quotation-schemas';
+import { ProductSchema, type Product } from '@/lib/quotation-schemas';
 import { Check, ChevronsUpDown, Plus, Trash2, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LineLoader } from '../ui/line-loader';
 import { useToast } from '@/hooks/use-toast';
-
-type Product = z.infer<typeof ProductSchema>;
-type LineItem = z.infer<typeof LineItemSchema>;
 
 const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
