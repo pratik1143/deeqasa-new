@@ -40,7 +40,7 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
-    } catch (err: any) {
+    } catch (err: any) => {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         setError('Invalid email or password.');
@@ -57,11 +57,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-        <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+    <div className="relative flex min-h-screen items-center justify-center p-4 overflow-hidden">
+        <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute top-1/2 left-1/2 w-full h-full min-w-full min-h-full object-cover -z-20 transform -translate-x-1/2 -translate-y-1/2"
+        >
+            <source src="/bg-video.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+        </video>
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm -z-10" />
+
+        <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-primary-foreground/80 hover:text-primary transition-colors z-10">
             &larr; Back to Home
         </Link>
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm bg-card/80 border-border z-10">
         <CardHeader className="text-center">
             <div className="flex justify-center mb-2">
                 <ShieldCheck className="w-10 h-10 text-primary" />
