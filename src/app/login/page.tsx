@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -69,7 +68,7 @@ export default function LoginPage() {
             <source src="/bg-video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
         </video>
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm -z-10" />
+        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm -z-10" />
 
         <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-primary-foreground/80 hover:text-primary transition-colors z-10">
             &larr; Back to Home
