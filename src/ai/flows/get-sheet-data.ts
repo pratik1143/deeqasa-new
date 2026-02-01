@@ -134,7 +134,16 @@ const getSheetDataFlow = ai.defineFlow(
       if (err.code === 403) {
           throw new Error('Permission denied. Ensure the service account has viewer access to the Google Sheet.');
       }
-      throw new Error('Failed to fetch data from Google Sheet. Check server logs for details.');
+      
+      let errorMessage = 'Failed to fetch data from Google Sheet. Check server logs for details.';
+      if (err.message) {
+        if (err.message.includes('Could not load the default credentials')) {
+            errorMessage = 'Authentication failed: Could not load default credentials. Please ensure the server is configured with Google Cloud service account credentials.';
+        } else {
+            errorMessage = `Failed to fetch data from Google Sheet: ${err.message}`;
+        }
+      }
+      throw new Error(errorMessage);
     }
   }
 );
