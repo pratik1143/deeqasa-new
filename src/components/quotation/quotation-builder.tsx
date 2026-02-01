@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,7 +23,6 @@ import type { Product } from '@/lib/quotation-schemas';
 import { ProductSchema } from '@/lib/quotation-schemas';
 import { Check, ChevronsUpDown, Plus, Trash2, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { LineLoader } from '../ui/line-loader';
 import { useToast } from '@/hooks/use-toast';
 
 const FormSchema = z.object({
@@ -47,8 +46,6 @@ export function QuotationBuilder() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const quotationRef = useRef(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -229,7 +226,7 @@ export function QuotationBuilder() {
             </Button>
         </div>
         <ScrollArea className="h-full bg-background rounded-lg shadow-lg">
-            <div ref={quotationRef} id="quotation-preview" className="p-8 md:p-12 text-sm">
+            <div id="quotation-preview" className="p-8 md:p-12 text-sm">
                 <header className="flex justify-between items-start mb-12 border-b pb-6 border-border">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground font-headline">DEEQASA TECH</h1>
@@ -274,7 +271,15 @@ export function QuotationBuilder() {
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>
                                         <p className="font-semibold">{item.product.name}</p>
-                                        <p className="text-muted-foreground text-xs">{item.product.model}</p>
+                                        <div className="text-muted-foreground text-xs space-y-0.5 mt-1">
+                                            {item.product.processor && <p>Processor: {item.product.processor}</p>}
+                                            {item.product.memory && <p>Memory: {item.product.memory}</p>}
+                                            {item.product.storage && <p>Storage: {item.product.storage}</p>}
+                                            {item.product.gpu && <p>GPU: {item.product.gpu}</p>}
+                                            {item.product.os && <p>OS: {item.product.os}</p>}
+                                            {item.product.warranty && <p>Warranty: {item.product.warranty}</p>}
+                                            {item.product.id && <p className="font-mono">SKU: {item.product.id}</p>}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="text-right">{item.quantity}</TableCell>
                                     <TableCell className="text-right">{CURRENCY_FORMATTER.format(item.product.price)}</TableCell>

@@ -1,11 +1,16 @@
 import { z } from 'zod';
 
 export const ProductSchema = z.object({
-  id: z.string(),
+  id: z.string(), // Corresponds to SKU
   name: z.string(),
-  model: z.string().optional(),
-  price: z.number(),
-  gstRate: z.number().min(0).max(100), // GST as a percentage, e.g., 18 for 18%
+  processor: z.string().optional(),
+  memory: z.string().optional(),
+  storage: z.string().optional(),
+  gpu: z.string().optional(),
+  os: z.string().optional(),
+  warranty: z.string().optional(),
+  price: z.number(), // Corresponds to FTP
+  gstRate: z.number().min(0).max(100),
 });
 
 export type Product = z.infer<typeof ProductSchema>;

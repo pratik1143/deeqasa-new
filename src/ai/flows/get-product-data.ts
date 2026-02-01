@@ -45,7 +45,7 @@ const getProductDataFlow = ai.defineFlow(
     try {
       // Assuming product data is on a sheet named 'Products'
       const sheetName = 'Products'; 
-      const range = `${sheetName}!A:E`; // Assuming columns A-E: ID, Name, Model, Price, GST_Percentage
+      const range = `${sheetName}!A:J`; // SKU, Name, Processor, Memory, Storage, GPU, OS, Warranty, FTP, GST
       
       const response = await sheets.spreadsheets.values.get({ spreadsheetId: PRODUCT_SHEET_ID, range });
 
@@ -54,25 +54,45 @@ const getProductDataFlow = ai.defineFlow(
 
       const headers = rows[0].map(h => h.trim().toLowerCase());
       const dataRows = rows.slice(1);
-
-      const idIndex = headers.indexOf('id');
-      const nameIndex = headers.indexOf('name');
-      const modelIndex = headers.indexOf('model');
-      const priceIndex = headers.indexOf('price');
-      const gstIndex = headers.indexOf('gst_percentage');
       
-      if (idIndex === -1 || nameIndex === -1 || priceIndex === -1 || gstIndex === -1) {
-          throw new Error("Missing required columns in Product sheet. Expected: 'ID', 'Name', 'Price', 'GST_Percentage'.");
+      const headerMap: { [key: string]: string } = {
+        'sku': 'id',
+        'product name': 'name',
+        'processor': 'processor',
+        'memory': 'memory',
+        'storage': 'storage',
+        'gpu': 'gpu',
+        'os': 'os',
+        'warranty': 'warranty',
+        'ftp': 'price',
+        'gst_percentage': 'gstRate'
+      };
+      
+      const indexMap: { [key: string]: number } = {};
+       for (const header in headerMap) {
+          const idx = headers.indexOf(header);
+          if (idx !== -1) {
+            indexMap[headerMap[header]] = idx;
+          }
+       }
+       
+      if (indexMap['id'] === undefined || indexMap['name'] === undefined || indexMap['price'] === undefined || indexMap['gstRate'] === undefined) {
+          throw new Error("Missing required columns in Product sheet. Expected at least: 'SKU', 'Product Name', 'FTP', 'GST_Percentage'.");
       }
-
+      
       const parsedData = dataRows.map((row) => {
-        const price = parseFloat(String(row[priceIndex]).replace(/[^0-9.-]+/g,""));
-        const gstRate = parseFloat(String(row[gstIndex]).replace(/[^0-9.-]+/g,""));
+        const price = parseFloat(String(row[indexMap['price']]).replace(/[^0-9.-]+/g,""));
+        const gstRate = parseFloat(String(row[indexMap['gstRate']]).replace(/[^0-9.-]+/g,""));
         
         return {
-          id: String(row[idIndex]),
-          name: String(row[nameIndex]),
-          model: modelIndex > -1 ? String(row[modelIndex]) : undefined,
+          id: String(row[indexMap['id']] || ''),
+          name: String(row[indexMap['name']] || ''),
+          processor: indexMap['processor'] !== undefined ? String(row[indexMap['processor']]) : undefined,
+          memory: indexMap['memory'] !== undefined ? String(row[indexMap['memory']]) : undefined,
+          storage: indexMap['storage'] !== undefined ? String(row[indexMap['storage']]) : undefined,
+          gpu: indexMap['gpu'] !== undefined ? String(row[indexMap['gpu']]) : undefined,
+          os: indexMap['os'] !== undefined ? String(row[indexMap['os']]) : undefined,
+          warranty: indexMap['warranty'] !== undefined ? String(row[indexMap['warranty']]) : undefined,
           price: isNaN(price) ? 0 : price,
           gstRate: isNaN(gstRate) ? 0 : gstRate,
         };
