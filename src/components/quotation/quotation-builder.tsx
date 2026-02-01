@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,18 +9,16 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 
 import { getProductData } from '@/ai/flows/get-product-data';
-import type { Product } from '@/lib/quotation-schemas';
-import { ProductSchema } from '@/lib/quotation-schemas';
+import { Product, ProductSchema } from '@/lib/quotation-schemas';
 import { Check, ChevronsUpDown, Plus, Trash2, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +36,56 @@ const FormSchema = z.object({
 });
 type FormValues = z.infer<typeof FormSchema>;
 
-const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+});
+
+// Simple number to words converter for INR
+function numberToWords(num: number): string {
+    const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
+    const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+    const inWords = (n: number): string => {
+        let str = '';
+        if (n > 99) {
+            str += a[Math.floor(n / 100)] + 'hundred ';
+            n %= 100;
+        }
+        if (n > 19) {
+            str += b[Math.floor(n / 10)] + ' ' + a[n % 10];
+        } else {
+            str += a[n];
+        }
+        return str;
+    };
+    
+    const numStr = num.toFixed(2);
+    const [rupees, paisa] = numStr.split('.').map(Number);
+
+    let rupeesInWords = '';
+    if (rupees > 0) {
+        let n = rupees;
+        rupeesInWords += n >= 10000000 ? inWords(Math.floor(n / 10000000)) + 'crore ' : '';
+        n %= 10000000;
+        rupeesInWords += n >= 100000 ? inWords(Math.floor(n / 100000)) + 'lakh ' : '';
+        n %= 100000;
+        rupeesInWords += n >= 1000 ? inWords(Math.floor(n / 1000)) + 'thousand ' : '';
+        n %= 1000;
+        rupeesInWords += inWords(n);
+    }
+    
+    let paisaInWords = '';
+    if (paisa > 0) {
+        paisaInWords = ' and ' + inWords(paisa) + 'paisa';
+    }
+
+    const result = (rupeesInWords ? rupeesInWords.trim() + ' rupees' : '') + (paisaInWords ? paisaInWords.trim() : '');
+    return result.charAt(0).toUpperCase() + result.slice(1) + ' only.';
+};
+
 
 export function QuotationBuilder() {
   const { toast } = useToast();
@@ -88,33 +135,41 @@ export function QuotationBuilder() {
   };
   
   const handlePrint = () => {
+    if(!form.formState.isValid) {
+        form.trigger();
+        toast({ variant: 'destructive', title: 'Form is invalid', description: 'Please fill all required fields and add at least one product.'});
+        return;
+    }
     window.print();
   };
 
   const totals = useMemo(() => {
     let subTotal = 0;
     let totalDiscount = 0;
-    const gstAmounts: { [rate: number]: number } = {};
+    const gstAmounts: { [rate: number]: { taxable: number, amount: number } } = {};
 
     lineItems.forEach(item => {
-        const itemTotal = item.product.price * item.quantity;
+        const itemSubTotal = item.product.price * item.quantity;
         const itemDiscount = (item.discount || 0) * item.quantity;
-        subTotal += itemTotal;
+        subTotal += itemSubTotal;
         totalDiscount += itemDiscount;
-        const taxableAmount = itemTotal - itemDiscount;
+        const taxableAmount = itemSubTotal - itemDiscount;
         const gstRate = item.product.gstRate;
         if (!gstAmounts[gstRate]) {
-            gstAmounts[gstRate] = 0;
+            gstAmounts[gstRate] = { taxable: 0, amount: 0 };
         }
-        gstAmounts[gstRate] += taxableAmount * (gstRate / 100);
+        gstAmounts[gstRate].taxable += taxableAmount;
+        gstAmounts[gstRate].amount += taxableAmount * (gstRate / 100);
     });
 
     const taxableValue = subTotal - totalDiscount;
-    const totalGst = Object.values(gstAmounts).reduce((acc, val) => acc + val, 0);
+    const totalGst = Object.values(gstAmounts).reduce((acc, val) => acc + val.amount, 0);
     const grandTotal = taxableValue + totalGst;
 
     return { subTotal, totalDiscount, taxableValue, gstAmounts, totalGst, grandTotal };
   }, [lineItems]);
+  
+  const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
   return (
     <div className="h-full flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8">
@@ -127,68 +182,69 @@ export function QuotationBuilder() {
               <CardDescription>Fill in the details to generate a new quotation.</CardDescription>
             </CardHeader>
             <Form {...form}>
-              <form className="space-y-8">
-                {/* Customer Details */}
-                <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Customer Details</h3>
-                    <FormField control={form.control} name="customerName" render={({ field }) => (
-                        <FormItem><FormLabel>Customer Name*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="companyName" render={({ field }) => (
-                        <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                    )} />
-                    <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea rows={3} {...field} /></FormControl></FormItem>
-                    )} />
-                    <FormField control={form.control} name="gstNumber" render={({ field }) => (
-                        <FormItem><FormLabel>GST Number</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
-                    )} />
-                </div>
-                <Separator />
-                {/* Product Selection */}
-                <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">Products</h3>
-                    <div className="flex items-end gap-2">
-                        <div className="flex-1">
-                            <Label>Select Product</Label>
-                             <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
-                                        {selectedProduct ? selectedProduct.name : "Select product..."}
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                    <Command>
-                                        <CommandInput placeholder="Search product..." />
-                                        <CommandList>
-                                            {isLoadingProducts && <div className="p-4 text-center text-sm">Loading...</div>}
-                                            <CommandEmpty>No product found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {products.map((product) => (
-                                                <CommandItem
-                                                    key={product.id}
-                                                    value={product.name}
-                                                    onSelect={() => {
-                                                        setSelectedProduct(product);
-                                                        setOpenCombobox(false);
-                                                    }}>
-                                                    <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
-                                                    {product.name}
-                                                </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <Button type="button" onClick={handleAddProduct} disabled={!selectedProduct}><Plus className="h-4 w-4" /></Button>
+              <form className="space-y-6">
+                <div>
+                    <h3 className="font-semibold text-lg mb-4 border-b pb-2">Customer Details</h3>
+                    <div className="space-y-4">
+                        <FormField control={form.control} name="customerName" render={({ field }) => (
+                            <FormItem><FormLabel>Customer Name*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="companyName" render={({ field }) => (
+                            <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                        )} />
+                        <FormField control={form.control} name="address" render={({ field }) => (
+                            <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea rows={3} {...field} /></FormControl></FormItem>
+                        )} />
+                        <FormField control={form.control} name="gstNumber" render={({ field }) => (
+                            <FormItem><FormLabel>GST Number</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                        )} />
                     </div>
-                     {form.formState.errors.lineItems && <p className="text-sm font-medium text-destructive">{form.formState.errors.lineItems.message}</p>}
+                </div>
+                
+                <div>
+                    <h3 className="font-semibold text-lg mb-4 border-b pb-2">Products</h3>
+                    <div className="space-y-4">
+                        <div className="flex items-end gap-2">
+                            <div className="flex-1">
+                                <Label>Select Product</Label>
+                                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
+                                            {selectedProduct ? selectedProduct.name : "Select product..."}
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput placeholder="Search product..." />
+                                            <CommandList>
+                                                {isLoadingProducts && <div className="p-4 text-center text-sm">Loading...</div>}
+                                                <CommandEmpty>No product found.</CommandEmpty>
+                                                <CommandGroup>
+                                                    {products.map((product) => (
+                                                    <CommandItem
+                                                        key={product.id}
+                                                        value={product.name}
+                                                        onSelect={() => {
+                                                            setSelectedProduct(product);
+                                                            setOpenCombobox(false);
+                                                        }}>
+                                                        <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
+                                                        {product.name}
+                                                    </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                            <Button type="button" onClick={handleAddProduct} disabled={!selectedProduct}><Plus className="h-4 w-4" /></Button>
+                        </div>
+                        {form.formState.errors.lineItems && <p className="text-sm font-medium text-destructive">{form.formState.errors.lineItems.message}</p>}
+                    </div>
                 </div>
 
-                {/* Line Items Table (in controls) */}
                 <div className="space-y-2">
                     {fields.map((field, index) => (
                         <Card key={field.id} className="p-3 bg-secondary/50">
@@ -201,7 +257,7 @@ export function QuotationBuilder() {
                                     <Trash2 className="h-4 w-4 text-destructive"/>
                                 </Button>
                             </div>
-                            <div className="flex gap-2 mt-2">
+                            <div className="grid grid-cols-2 gap-2 mt-2">
                                 <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
                                     <FormItem><FormLabel>Qty</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
                                 )} />
@@ -221,101 +277,125 @@ export function QuotationBuilder() {
       {/* ===== PREVIEW PANEL ===== */}
       <div className="flex-1 overflow-auto relative">
         <div className="absolute top-0 right-0 p-4 no-print z-10">
-            <Button onClick={handlePrint} disabled={!form.formState.isValid}>
+            <Button onClick={handlePrint}>
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
-        <ScrollArea className="h-full bg-background rounded-lg shadow-lg">
-            <div id="quotation-preview" className="p-8 md:p-12 text-sm">
-                <header className="flex justify-between items-start mb-12 border-b pb-6 border-border">
+        <ScrollArea className="h-full bg-white rounded-lg shadow-lg">
+            <div id="quotation-preview" className="p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
+                <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground font-headline">DEEQASA TECH</h1>
-                        <p className="text-muted-foreground">Plot No. 7, 3rd Floor, Local Shopping Center, Masjid Moth, Greater Kailash-II, New Delhi, Delhi 110048</p>
-                        <p className="text-muted-foreground">GSTIN: XXXXXXXXXXXXXXX</p>
-                    </div>
-                    <h2 className="text-4xl font-bold text-muted-foreground font-headline tracking-widest">QUOTATION</h2>
-                </header>
-
-                <section className="grid grid-cols-2 gap-8 mb-12">
-                    <div>
-                        <p className="text-muted-foreground font-bold mb-2">BILL TO:</p>
-                        <p className="font-semibold text-lg">{form.watch('companyName') || form.watch('customerName')}</p>
-                        <p>{form.watch('customerName')}</p>
-                        <p>{form.watch('address')}</p>
-                        {form.watch('gstNumber') && <p>GST: {form.watch('gstNumber')}</p>}
+                        <h1 className="text-3xl font-bold">DEEQASA TECH</h1>
+                        <p>Plot No. 7, 3rd Floor, Local Shopping Center, Masjid Moth,</p>
+                        <p>Greater Kailash-II, New Delhi, Delhi 110048</p>
+                        <p>Email: sales@deeqasa.tech</p>
+                        <p className="font-bold">GSTIN: XXXXXXXXXXXXXXX</p>
                     </div>
                     <div className="text-right">
-                        <div className="grid grid-cols-2">
-                            <span className="font-bold">Quotation #:</span><span>Q-{format(new Date(), 'yyMMdd')}-001</span>
-                            <span className="font-bold">Date:</span><span>{format(new Date(), 'PPP')}</span>
-                            <span className="font-bold">Valid Until:</span><span>{format(new Date(new Date().setDate(new Date().getDate() + 30)), 'PPP')}</span>
-                        </div>
+                        <h2 className="text-3xl font-bold text-gray-700 tracking-widest">QUOTATION</h2>
+                    </div>
+                </header>
+
+                <section className="grid grid-cols-2 gap-8 mb-4">
+                    <div className="border border-black p-2">
+                        <p className="font-bold">To,</p>
+                        <p className="font-bold">{form.watch('companyName') || form.watch('customerName')}</p>
+                        <p>{form.watch('address')}</p>
+                        <p>GSTIN: {form.watch('gstNumber')}</p>
+                        <p>Kind Attn: {form.watch('customerName')}</p>
+                    </div>
+                    <div className="text-left border border-black p-2">
+                         <p><span className="font-bold inline-block w-32">Quotation No:</span> Q-{format(new Date(), 'yyMMdd')}-001</p>
+                         <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MMM-yyyy')}</p>
+                         <p><span className="font-bold inline-block w-32">Validity:</span> 30 Days</p>
                     </div>
                 </section>
                 
                 <section>
-                    <Table>
+                    <Table className="border-collapse border border-black">
                         <TableHeader>
-                            <TableRow className="bg-muted/50">
-                                <TableHead className="w-12">#</TableHead>
-                                <TableHead>Item Description</TableHead>
-                                <TableHead className="text-right">Qty</TableHead>
-                                <TableHead className="text-right">Rate</TableHead>
-                                <TableHead className="text-right">Discount</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
+                            <TableRow className="bg-gray-200">
+                                <TableHead className="border border-black text-center w-12">Sr. No.</TableHead>
+                                <TableHead className="border border-black">Description of Goods</TableHead>
+                                <TableHead className="border border-black text-center">HSN Code</TableHead>
+                                <TableHead className="border border-black text-right">Qty</TableHead>
+                                <TableHead className="border border-black text-right">Rate</TableHead>
+                                <TableHead className="border border-black text-right">Amount</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {fields.map((item, index) => (
                                 <TableRow key={item.id}>
-                                    <TableCell>{index + 1}</TableCell>
-                                    <TableCell>
-                                        <p className="font-semibold">{item.product.name}</p>
-                                        <div className="text-muted-foreground text-xs space-y-0.5 mt-1">
+                                    <TableCell className="border border-black text-center">{index + 1}</TableCell>
+                                    <TableCell className="border border-black">
+                                        <p className="font-bold">{item.product.name}</p>
+                                        <div className="text-gray-700 text-xs space-y-0.5 mt-1">
                                             {item.product.processor && <p>Processor: {item.product.processor}</p>}
                                             {item.product.memory && <p>Memory: {item.product.memory}</p>}
                                             {item.product.storage && <p>Storage: {item.product.storage}</p>}
                                             {item.product.gpu && <p>GPU: {item.product.gpu}</p>}
                                             {item.product.os && <p>OS: {item.product.os}</p>}
                                             {item.product.warranty && <p>Warranty: {item.product.warranty}</p>}
-                                            {item.product.id && <p className="font-mono">SKU: {item.product.id}</p>}
+                                            {item.product.id && <p>SKU: {item.product.id}</p>}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="text-right">{item.quantity}</TableCell>
-                                    <TableCell className="text-right">{CURRENCY_FORMATTER.format(item.product.price)}</TableCell>
-                                    <TableCell className="text-right">{CURRENCY_FORMATTER.format(item.discount || 0)}</TableCell>
-                                    <TableCell className="text-right font-semibold">{CURRENCY_FORMATTER.format(item.product.price * item.quantity - (item.discount || 0) * item.quantity)}</TableCell>
+                                    <TableCell className="border border-black text-center">8471</TableCell>
+                                    <TableCell className="border border-black text-right">{item.quantity}</TableCell>
+                                    <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.product.price)}</TableCell>
+                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.product.price * item.quantity)}</TableCell>
                                 </TableRow>
                             ))}
                              {fields.length === 0 && (
-                                <TableRow><TableCell colSpan={6} className="text-center h-24">No items added.</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={6} className="text-center h-48 border border-black">No items added.</TableCell></TableRow>
                             )}
+                            <TableRow>
+                                <TableCell colSpan={5} className="border border-black text-right font-bold">Sub Total</TableCell>
+                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
+                            </TableRow>
+                            {totals.totalDiscount > 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="border border-black text-right font-bold">Discount</TableCell>
+                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.totalDiscount)}</TableCell>
+                                </TableRow>
+                            )}
+                            <TableRow>
+                                <TableCell colSpan={5} className="border border-black text-right font-bold">Taxable Value</TableCell>
+                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.taxableValue)}</TableCell>
+                            </TableRow>
+                            {Object.entries(totals.gstAmounts).map(([rate, {taxable, amount}]) => (
+                                <TableRow key={rate}>
+                                    <TableCell colSpan={5} className="border border-black text-right font-bold">Output GST @{rate}%</TableCell>
+                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(amount)}</TableCell>
+                                </TableRow>
+                            ))}
+                            <TableRow className="bg-gray-200">
+                                <TableCell colSpan={5} className="border border-black text-right font-bold">Grand Total</TableCell>
+                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </section>
                 
-                <section className="flex justify-end mt-8">
-                    <div className="w-full max-w-sm space-y-2">
-                        <div className="flex justify-between"><span>Subtotal</span><span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span></div>
-                        <div className="flex justify-between"><span>Discount</span><span>- {CURRENCY_FORMATTER.format(totals.totalDiscount)}</span></div>
-                        <Separator />
-                        <div className="flex justify-between font-semibold"><span>Taxable Value</span><span>{CURRENCY_FORMATTER.format(totals.taxableValue)}</span></div>
-                         {Object.entries(totals.gstAmounts).map(([rate, amount]) => (
-                            <div key={rate} className="flex justify-between"><span className="pl-4">GST @{rate}%</span><span>{CURRENCY_FORMATTER.format(amount)}</span></div>
-                         ))}
-                         <Separator />
-                         <div className="flex justify-between text-xl font-bold text-primary"><span>Grand Total</span><span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span></div>
-                    </div>
-                </section>
-
-                <footer className="mt-24 pt-8 border-t">
-                    <div>
-                        <h4 className="font-bold mb-2">Terms & Conditions</h4>
-                        <ul className="text-muted-foreground text-xs list-disc list-inside space-y-1">
-                            <li>50% advance payment, 50% on delivery.</li>
-                            <li>Delivery within 2 weeks of advance payment.</li>
-                            <li>Warranty: 1 year standard manufacturer warranty.</li>
-                        </ul>
+                <footer className="mt-8 text-xs">
+                    <p className="font-bold">Amount in Words: <span className="font-normal">{grandTotalInWords}</span></p>
+                    
+                    <div className="mt-4 border-t-2 border-black pt-4 grid grid-cols-2 gap-4">
+                        <div>
+                            <h4 className="font-bold underline mb-2">Terms & Conditions:</h4>
+                            <ul className="list-disc list-inside space-y-1">
+                                <li>50% advance payment, 50% on delivery.</li>
+                                <li>Delivery within 2 weeks of advance payment.</li>
+                                <li>Warranty: 1 year standard manufacturer warranty as per OEM.</li>
+                                <li>This is a computer generated quotation and does not require a signature.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold underline mb-2">Bank Details:</h4>
+                            <p>Bank Name: HDFC BANK</p>
+                            <p>Account Name: DEEQASA TECH</p>
+                            <p>Account No: XXXXXXXXXXXXX</p>
+                            <p>IFSC Code: HDFC0000XXX</p>
+                        </div>
                     </div>
                     <div className="mt-16 text-right">
                         <p className="font-bold">For Deeqasa Tech</p>

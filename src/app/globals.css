@@ -230,30 +230,36 @@
 /* Print styles */
 @media print {
   body {
-    background-color: #fff;
-    color: #000;
+    background-color: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact; /* Chrome, Safari */
+    color-adjust: exact; /* Firefox */
   }
   .no-print {
     display: none !important;
   }
   #quotation-preview {
-    visibility: visible;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    box-shadow: none;
-    border: none;
-    background: #fff;
+    visibility: visible !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
-   #quotation-preview * {
-    visibility: visible;
+  #quotation-preview * {
+    visibility: visible !important;
     color: #000 !important;
     background-color: transparent !important;
   }
+
   @page {
     size: A4;
     margin: 15mm;
   }
 }
+
