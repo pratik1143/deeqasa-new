@@ -12,6 +12,7 @@ import { Sustainability } from '@/components/sections/sustainability';
 import { QasaAssistant } from '@/components/qasa/qasa-assistant';
 import { CustomCursor } from '@/components/ui/custom-cursor';
 import { Preloader } from '@/components/layout/preloader';
+import { Printers } from '@/components/sections/printers';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +31,7 @@ export default function Home() {
           <Clients />
           <Services />
           <Proof />
+          <Printers />
           <Sustainability />
         </main>
         <Footer />
