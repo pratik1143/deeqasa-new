@@ -63,12 +63,12 @@ export default function LoginPage() {
             muted
             loop
             playsInline
-            className="absolute top-1/2 left-1/2 w-full h-full min-w-full min-h-full object-cover -z-20 transform -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 left-1/2 w-auto h-auto min-w-full min-h-full object-cover transform -translate-x-1/2 -translate-y-1/2"
         >
             <source src="/bg-video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
         </video>
-        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm -z-10" />
+        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm" />
 
         <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-primary-foreground/80 hover:text-primary transition-colors z-10">
             &larr; Back to Home
