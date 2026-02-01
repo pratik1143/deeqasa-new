@@ -16,9 +16,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 
 import { getProductData } from '@/ai/flows/get-product-data';
-import { ProductSchema, type Product } from '@/lib/quotation-schemas';
+import type { Product } from '@/lib/quotation-schemas';
+import { ProductSchema } from '@/lib/quotation-schemas';
 import { Check, ChevronsUpDown, Plus, Trash2, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LineLoader } from '../ui/line-loader';
