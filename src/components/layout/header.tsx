@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search } from "lucide-react";
+import { Search, LogIn, LogOut } from "lucide-react";
+import { useAuth, useUser, initiateAnonymousSignIn } from "@/firebase";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -19,6 +20,9 @@ const navLinks = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,6 +31,14 @@ export function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleSignOut = () => {
+    auth.signOut();
+  };
+
+  const handleSignIn = () => {
+    initiateAnonymousSignIn(auth);
+  };
 
   return (
     <header className={cn(
@@ -57,6 +69,21 @@ export function Header() {
         <div className="flex items-center gap-2">
             <Button variant="ghost" className="hidden md:inline-flex">Contact Sales</Button>
             <Button className="bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground font-bold hover:shadow-lg hover:shadow-primary/50 transition-shadow rounded-full">Client Portal</Button>
+            
+            {isUserLoading ? (
+              <Button variant="ghost" size="icon" disabled>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+              </Button>
+            ) : user ? (
+              <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign Out">
+                <LogOut />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon" onClick={handleSignIn} aria-label="Sign In">
+                <LogIn />
+              </Button>
+            )}
+
             <Button variant="ghost" size="icon">
                 <Search />
             </Button>
