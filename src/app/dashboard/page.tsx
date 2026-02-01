@@ -1,31 +1,49 @@
 'use client';
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUserWithRole } from "@/firebase";
 import { FunnelAnalyzerDashboard } from "@/components/dashboard/funnel-analyzer-dashboard";
 import { Header } from "@/components/layout/header";
-import { useUser } from "@/firebase";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { CenteredLoader } from "@/components/ui/centered-loader";
+import AccessDenied from "@/components/auth/access-denied";
 
 export default function DashboardPage() {
-    const { user, isUserLoading } = useUser();
+    const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
     const router = useRouter();
 
+    const isLoading = isUserLoading || isProfileLoading;
+
     useEffect(() => {
-        if (!isUserLoading && !user) {
+        if (!isLoading && !user) {
             router.push('/login');
         }
-    }, [user, isUserLoading, router]);
+    }, [user, isLoading, router]);
 
-    if (isUserLoading || !user) {
+    if (isLoading) {
         return (
             <div className="flex flex-col min-h-screen bg-background">
                 <Header />
                 <main className="flex-1 pt-16 flex items-center justify-center">
-                    <CenteredLoader text="Authenticating..." />
+                    <CenteredLoader text="Verifying permissions..." />
                 </main>
             </div>
         );
+    }
+    
+    if (!user) {
+         return (
+            <div className="flex flex-col min-h-screen bg-background">
+                <Header />
+                <main className="flex-1 pt-16 flex items-center justify-center">
+                    <CenteredLoader text="Redirecting to login..." />
+                </main>
+            </div>
+        );
+    }
+
+    if (!profile || profile.role !== 'admin') {
+        return <AccessDenied />;
     }
     
     return (

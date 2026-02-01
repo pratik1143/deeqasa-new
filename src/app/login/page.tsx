@@ -3,29 +3,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { CenteredLoader } from '@/components/ui/centered-loader';
-
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    confirmationResult?: ConfirmationResult;
-    grecaptcha?: any;
-  }
-}
+import { Label } from '@/components/ui/label';
 
 export default function LoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,61 +27,22 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  useEffect(() => {
-    if (!auth) return;
-    
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => {
-          // reCAPTCHA solved.
-        }
-      });
-    }
-  }, [auth]);
-
-  const handlePhoneNumberSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!phoneNumber || !window.recaptchaVerifier) {
-      setError("Please enter a phone number.");
+    if (!email || !password) {
+      setError("Please enter both email and password.");
       return;
     };
     
     setIsLoading(true);
 
     try {
-      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
-      window.confirmationResult = confirmationResult;
-      setIsOtpSent(true);
+      await signInWithEmailAndPassword(auth, email, password);
+      router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError('Failed to send OTP. Please check the phone number and try again (e.g., +1234567890).');
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.render().then((widgetId) => {
-            if (window.grecaptcha) {
-                window.grecaptcha.reset(widgetId);
-            }
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp || !window.confirmationResult) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await window.confirmationResult.confirm(otp);
-      router.push('/dashboard');
-    } catch (err) {
-      console.error(err);
-      setError('Invalid OTP. Please try again.');
+      setError('Failed to sign in. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -106,48 +59,47 @@ export default function LoginPage() {
         </Link>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Secure Access</CardTitle>
+            <div className="flex justify-center mb-2">
+                <ShieldCheck className="w-10 h-10 text-primary" />
+            </div>
+          <CardTitle className="text-2xl font-headline">Admin Portal Access</CardTitle>
           <CardDescription>
-            {isOtpSent ? 'Enter the OTP sent to your phone.' : 'Enter your phone number to continue.'}
+            Enter your credentials to access the dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div id="recaptcha-container"></div>
-          {!isOtpSent ? (
-            <form onSubmit={handlePhoneNumberSubmit} className="space-y-6">
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1 555 555 5555"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                disabled={isLoading}
-                required
-              />
+            <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        placeholder="admin@deeqasa.tech"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading}
+                        required
+                        autoComplete="email"
+                    />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={isLoading}
+                        required
+                        autoComplete="current-password"
+                    />
+                </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Send OTP
+                Sign In
               </Button>
             </form>
-          ) : (
-            <form onSubmit={handleOtpSubmit} className="space-y-6">
-              <Input
-                id="otp"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                placeholder="123456"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Verify & Continue
-              </Button>
-            </form>
-          )}
           {error && <p className="text-destructive text-center text-sm mt-4">{error}</p>}
         </CardContent>
       </Card>

@@ -1,16 +1,21 @@
 /**
- * Core Philosophy: This ruleset is designed for a public-facing website that collects anonymous data. The primary security goal is to allow the public to read specific data (like the AI assistant's state) and submit new data anonymously (website visits, feedback), while strictly prohibiting any modification or deletion of existing data. There is no user-based ownership model; security is based on tightly controlling write operations.
+ * Core Philosophy: This ruleset is designed for a public-facing website that collects anonymous data and a private admin dashboard. The security goals are:
+ * 1. Allow the public to read specific data (AI assistant state).
+ * 2. Allow anonymous write-only submission of data (visits, feedback).
+ * 3. Secure the admin dashboard by restricting access to authenticated users with an "admin" role.
+ * 4. Protect user profile data, allowing users only to read their own information.
  *
  * Data Structure: Data is organized into top-level collections.
- * - /ai_assistant: Publicly readable state information for the application's AI.
- * - /website_visits: A write-only collection for logging anonymous website traffic.
- * - /website_visits/{visitId}/cto_feedback: A write-only subcollection for anonymous feedback, linked to a specific visit.
+ * - /ai_assistant: Publicly readable state information.
+ * - /website_visits: Write-only collection for anonymous traffic.
+ * - /users: Stores user profiles and roles, critical for RBAC.
  *
  * Key Security Decisions:
- * - Public Read-Only Data: The `/ai_assistant` collection is readable by anyone, including unauthenticated users, but cannot be modified by clients.
- * - Anonymous Write-Once Collections: The `/website_visits` and its `cto_feedback` subcollection are designed to be "write-only" for anonymous clients. Anyone can create a document, but no one can read, update, or delete documents via the client SDKs. This protects user privacy and data integrity.
- * - Default Deny: All operations that are not explicitly granted are denied. This is particularly true for all update and delete operations across the entire database, which must be handled by trusted backend services.
- * - Relational Integrity: A new feedback document can only be created if its parent website visit document exists and the `visitId` field within the feedback document correctly points to its parent.
+ * - Role-Based Access Control (RBAC): The `/users/{userId}` collection contains a `role` field. This is the source of truth for authorization.
+ * - User Profile Security: Users can only read their own profile document (`/users/{userId}`). No client is allowed to write to the `users` collection to prevent privilege escalation. Roles must be assigned via the Firebase Console or a trusted backend.
+ * - Public Read-Only Data: The `/ai_assistant` collection is readable by anyone.
+ * - Anonymous Write-Once Collections: `/website_visits` and its subcollections are "write-only" for anonymous clients to protect privacy.
+ * - Default Deny: All operations that are not explicitly granted are denied.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -22,15 +27,13 @@ service cloud.firestore {
 
     /**
      * Checks if a user is signed in.
-     * Note: This is not heavily used as the application allows anonymous access.
      */
-    // function isSignedIn() {
-    //   return request.auth != null;
-    // }
+    function isSignedIn() {
+      return request.auth != null;
+    }
 
     /**
      * Verifies that the parent website_visits document exists.
-     * This prevents orphaned feedback documents from being created.
      */
     function isParentVisitExists(visitId) {
       return exists(/databases/$(database)/documents/website_visits/$(visitId));
@@ -50,9 +53,24 @@ service cloud.firestore {
     //-------------------------------------------------------------------------
 
     /**
+     * @description Controls access to user profile data, including roles.
+     * @path /users/{userId}
+     * @allow (read) A user can only read their own profile.
+     * @deny (list, create, update, delete) No client can list users or modify any user profile. This is a critical security measure to prevent users from changing their own roles.
+     * @principle Enforces strict data ownership and prevents privilege escalation.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow list: if false;
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+    
+    /**
      * @description Controls access to the AI assistant's public state.
      * @path /ai_assistant/{assistantId}
-     * @allow (get) Any user, signed-in or not, can read the AI's state.
+     * @allow (get, list) Any user, signed-in or not, can read the AI's state.
      * @deny (create, update, delete) No user can modify the AI's state from the client.
      * @principle Makes application state data public while preventing client-side modification.
      */

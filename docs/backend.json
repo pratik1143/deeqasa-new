@@ -1,5 +1,29 @@
 {
   "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user profile information, including their role.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role in the system.",
+          "enum": [
+            "admin",
+            "user"
+          ]
+        }
+      },
+      "required": [
+        "email",
+        "role"
+      ]
+    },
     "AiAssistant": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "AiAssistant",
@@ -117,11 +141,27 @@
   },
   "auth": {
     "providers": [
-      "phone"
+      "email"
     ]
   },
   "firestore": {
     "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile data, including role for role-based access control. Only the user can read their own profile.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The user's unique ID from Firebase Authentication."
+            }
+          ]
+        }
+      },
       {
         "path": "/website_visits/{visitId}",
         "definition": {
@@ -175,6 +215,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore data structure is designed to support the DeeQasa.Tech application, focusing on cinematic visual impact and sophisticated user experience. The structure prioritizes authorization independence, clarity, and scalability.\n\n1.  **Authorization Independence:** WebsiteVisit and CtoFeedback are kept separate and do not rely on hierarchical authorization. There's no direct user authentication for these, allowing them to be accessible (with proper security rules in place based on rate limiting, etc.). The AiAssistant data is globally accessible, with potential rate limiting implemented through security rules based on IP address or other non-user-specific factors.\n\n2.  **Structural Segregation:** WebsiteVisit and CtoFeedback collections are separate, aligning with their distinct purposes and security needs. This segregation simplifies security rules.\n\n3.  **Access Modeling:** WebsiteVisit and CtoFeedback collections are designed without user ownership. They capture anonymous website interactions and feedback, respectively. Security rules will focus on preventing abuse (rate limiting, etc.) rather than user-based access control. The AiAssistant's global accessibility aligns with its role as a publicly available resource.\n\n4.  **Data Clarity:** Timestamps are used consistently, and the schema for each entity is well-defined and predictable.\n\n5.  **QAPs (Rules are not Filters):** Segregation ensures that queries are efficient and secure. Listing WebsiteVisit or CtoFeedback does not require filtering based on user roles, as these collections are designed to be universally accessible (with appropriate security measures to prevent abuse).\n"
+    "reasoning": "This Firestore data structure is designed to support the DeeQasa.Tech application, focusing on cinematic visual impact and sophisticated user experience. The structure prioritizes authorization independence, clarity, and scalability.\n\n1.  **Authorization Independence:** WebsiteVisit and CtoFeedback are kept separate and do not rely on hierarchical authorization. There's no direct user authentication for these, allowing them to be accessible (with proper security rules in place based on rate limiting, etc.). The AiAssistant data is globally accessible, with potential rate limiting implemented through security rules based on IP address or other non-user-specific factors.\n\n2.  **Structural Segregation:** WebsiteVisit and CtoFeedback collections are separate, aligning with their distinct purposes and security needs. This segregation simplifies security rules.\n\n3.  **Access Modeling:** A `/users` collection is added to store user profiles, including roles for role-based access control. WebsiteVisit and CtoFeedback collections capture anonymous website interactions. Security rules will focus on preventing abuse (rate limiting, etc.) for anonymous collections and user-based access control for the `/users` collection.\n\n4.  **Data Clarity:** Timestamps are used consistently, and the schema for each entity is well-defined and predictable.\n\n5.  **QAPs (Rules are not Filters):** Segregation ensures that queries are efficient and secure. Listing WebsiteVisit or CtoFeedback does not require filtering based on user roles, as these collections are designed to be universally accessible (with appropriate security measures to prevent abuse).\n"
   }
 }
