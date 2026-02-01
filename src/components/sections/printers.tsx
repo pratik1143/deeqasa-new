@@ -34,7 +34,23 @@ export function Printers() {
   };
 
   return (
-    <section ref={ref} className="relative py-24 sm:py-32 w-full flex flex-col items-center justify-center overflow-hidden">
+    <section ref={ref} className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden">
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover -z-20"
+        poster="/printer-poster.jpg"
+      >
+        <source src="/printer.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/60 -z-10" />
+
       {/* Content */}
       <motion.div
         className="relative z-10 flex flex-col items-center text-center p-4 container mx-auto"
@@ -79,25 +95,6 @@ export function Printers() {
           <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6">
             View Specifications
           </Button>
-        </motion.div>
-
-        <motion.div 
-            variants={itemVariants}
-            className="mt-20 w-full max-w-5xl"
-        >
-            <div className="relative aspect-video w-full rounded-xl overflow-hidden shadow-2xl shadow-primary/10 border border-primary/20">
-                 <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute top-0 left-0 w-full h-full object-cover"
-                    poster="/printer-poster.jpg"
-                >
-                    <source src="/printer.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
-                </video>
-            </div>
         </motion.div>
       </motion.div>
     </section>
