@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { Search, LogIn, LogOut } from "lucide-react";
-import { useAuth, useUser, initiateAnonymousSignIn } from "@/firebase";
+import { useAuth, useUser } from "@/firebase";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
   { name: "Home", href: "/" },
@@ -20,6 +21,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -30,12 +32,13 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSignOut = () => {
-    auth.signOut();
+  const handleSignOut = async () => {
+    await auth.signOut();
+    router.push('/');
   };
 
   const handleSignIn = () => {
-    initiateAnonymousSignIn(auth);
+    router.push('/login');
   };
 
   return (
@@ -66,7 +69,7 @@ export function Header() {
         
         <div className="flex items-center gap-2">
             <Button variant="ghost" className="hidden md:inline-flex">Contact Sales</Button>
-            <Button className="bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground font-bold hover:shadow-lg hover:shadow-primary/50 transition-shadow rounded-full">Client Portal</Button>
+            <Button className="bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground font-bold hover:shadow-lg hover:shadow-primary/50 transition-shadow duration-300 rounded-full">Client Portal</Button>
             
             {isUserLoading ? (
               <Button variant="ghost" size="icon" disabled>
