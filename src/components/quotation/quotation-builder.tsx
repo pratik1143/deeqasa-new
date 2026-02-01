@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -18,7 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 
 import { getProductData } from '@/ai/flows/get-product-data';
-import { Product, ProductSchema } from '@/lib/quotation-schemas';
+import { type Product, ProductSchema } from '@/lib/quotation-schemas';
 import { Check, ChevronsUpDown, Plus, Trash2, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -27,11 +28,10 @@ const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
   companyName: z.string().optional(),
   address: z.string().optional(),
-  gstNumber: z.string().optional(),
   lineItems: z.array(z.object({
       product: ProductSchema,
       quantity: z.coerce.number().min(1),
-      discount: z.coerce.number().min(0).optional().default(0),
+      unitPrice: z.coerce.number().min(0),
   })).min(1, 'Please add at least one product.'),
 });
 type FormValues = z.infer<typeof FormSchema>;
@@ -100,7 +100,6 @@ export function QuotationBuilder() {
       customerName: '',
       companyName: '',
       address: '',
-      gstNumber: '',
       lineItems: [],
     },
   });
@@ -129,7 +128,7 @@ export function QuotationBuilder() {
 
   const handleAddProduct = () => {
     if (selectedProduct) {
-      append({ product: selectedProduct, quantity: 1, discount: 0 });
+      append({ product: selectedProduct, quantity: 1, unitPrice: selectedProduct.price });
       setSelectedProduct(null);
     }
   };
@@ -149,11 +148,15 @@ export function QuotationBuilder() {
     const gstAmounts: { [rate: number]: { taxable: number, amount: number } } = {};
 
     lineItems.forEach(item => {
-        const itemSubTotal = item.product.price * item.quantity;
-        const itemDiscount = (item.discount || 0) * item.quantity;
-        subTotal += itemSubTotal;
+        const originalItemSubTotal = item.product.price * item.quantity;
+        subTotal += originalItemSubTotal;
+
+        const overriddenItemSubTotal = item.unitPrice * item.quantity;
+        const itemDiscount = originalItemSubTotal - overriddenItemSubTotal;
         totalDiscount += itemDiscount;
-        const taxableAmount = itemSubTotal - itemDiscount;
+
+        const taxableAmount = overriddenItemSubTotal;
+
         const gstRate = item.product.gstRate;
         if (!gstAmounts[gstRate]) {
             gstAmounts[gstRate] = { taxable: 0, amount: 0 };
@@ -194,9 +197,6 @@ export function QuotationBuilder() {
                         )} />
                         <FormField control={form.control} name="address" render={({ field }) => (
                             <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea rows={3} {...field} /></FormControl></FormItem>
-                        )} />
-                        <FormField control={form.control} name="gstNumber" render={({ field }) => (
-                            <FormItem><FormLabel>GST Number</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
                         )} />
                     </div>
                 </div>
@@ -261,8 +261,8 @@ export function QuotationBuilder() {
                                 <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
                                     <FormItem><FormLabel>Qty</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
                                 )} />
-                                <FormField control={form.control} name={`lineItems.${index}.discount`} render={({ field }) => (
-                                    <FormItem><FormLabel>Discount/unit</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
+                                <FormField control={form.control} name={`lineItems.${index}.unitPrice`} render={({ field }) => (
+                                    <FormItem><FormLabel>Unit Price</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
                                 )} />
                             </div>
                         </Card>
@@ -301,7 +301,6 @@ export function QuotationBuilder() {
                         <p className="font-bold">To,</p>
                         <p className="font-bold">{form.watch('companyName') || form.watch('customerName')}</p>
                         <p>{form.watch('address')}</p>
-                        <p>GSTIN: {form.watch('gstNumber')}</p>
                         <p>Kind Attn: {form.watch('customerName')}</p>
                     </div>
                     <div className="text-left border border-black p-2">
@@ -341,8 +340,8 @@ export function QuotationBuilder() {
                                     </TableCell>
                                     <TableCell className="border border-black text-center">8471</TableCell>
                                     <TableCell className="border border-black text-right">{item.quantity}</TableCell>
-                                    <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.product.price)}</TableCell>
-                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.product.price * item.quantity)}</TableCell>
+                                    <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
+                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
                                 </TableRow>
                             ))}
                              {fields.length === 0 && (
@@ -409,3 +408,5 @@ export function QuotationBuilder() {
     </div>
   );
 }
+
+    
