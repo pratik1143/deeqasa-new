@@ -121,13 +121,23 @@ const getProductDataFlow = ai.defineFlow(
         };
       }).filter((p): p is NonNullable<typeof p> => p !== null);
 
-      const validationResult = GetProductDataOutputSchema.safeParse(parsedData);
+      // De-duplicate products based on the 'id' (SKU), keeping the first one found.
+      const uniqueData = Array.from(
+        parsedData.reduce((map, product) => {
+          if (!map.has(product.id)) {
+            map.set(product.id, product);
+          }
+          return map;
+        }, new Map<string, (typeof parsedData)[0]>()).values()
+      );
+
+      const validationResult = GetProductDataOutputSchema.safeParse(uniqueData);
       if (validationResult.success) {
         return validationResult.data;
       } else {
         console.error("[get-product-data] Zod validation error (invalid rows will be filtered out):", validationResult.error.flatten().fieldErrors);
         const invalidIndexes = new Set(validationResult.error.issues.map(issue => issue.path[0]));
-        const validData = parsedData.filter((_, index) => !invalidIndexes.has(index));
+        const validData = uniqueData.filter((_, index) => !invalidIndexes.has(index));
         return validData;
       }
 
