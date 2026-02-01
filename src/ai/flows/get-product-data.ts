@@ -41,11 +41,19 @@ const getProductDataFlow = ai.defineFlow(
     );
 
     const sheets = google.sheets({ version: 'v4', auth });
-    
     const sheetName = "Products";
-    const range = `${sheetName}!A1:M`; // Use the exact range as requested.
 
     try {
+      // First, get the spreadsheet metadata to verify sheet existence.
+      const spreadsheetMeta = await sheets.spreadsheets.get({ spreadsheetId: PRODUCT_SHEET_ID });
+      const sheetTitles = spreadsheetMeta.data.sheets?.map(s => s.properties?.title).filter(Boolean) as string[] || [];
+      console.log('[get-product-data] Found sheet titles:', sheetTitles);
+
+      if (!sheetTitles.includes(sheetName)) {
+        throw new Error(`Sheet '${sheetName}' not found. Available sheets: [${sheetTitles.join(', ')}]`);
+      }
+      
+      const range = `${sheetName}!A1:M`; // Use the exact range as requested.
       const response = await sheets.spreadsheets.values.get({ spreadsheetId: PRODUCT_SHEET_ID, range });
 
       const rows = response.data.values;
@@ -57,7 +65,7 @@ const getProductDataFlow = ai.defineFlow(
       const rawHeaders = rows[0];
       console.log("[get-product-data] Raw headers found in sheet:", rawHeaders);
       
-      const headers = rawHeaders.map(h => String(h || '').trim().toUpperCase());
+      const headers = rawHeaders.map(h => String(h || '').trim().toLowerCase());
       console.log("[get-product-data] Normalized headers:", headers);
 
       const dataRows = rows.slice(1);
@@ -67,27 +75,27 @@ const getProductDataFlow = ai.defineFlow(
         if(header) headerIndexMap[header] = index;
       });
        
-      if (headerIndexMap['SKU'] === undefined || headerIndexMap['FTP'] === undefined) {
+      if (headerIndexMap['sku'] === undefined || headerIndexMap['ftp'] === undefined) {
           throw new Error(`Missing required columns in "${sheetName}" sheet. The header must contain 'SKU' and 'FTP'. Detected headers: ${headers.join(', ')}`);
       }
       
       const parsedData = dataRows.map((row) => {
-        const sku = String(row[headerIndexMap['SKU']] || '').trim();
+        const sku = String(row[headerIndexMap['sku']] || '').trim();
         if (!sku) return null; // Skip rows without SKU
 
-        const priceStr = String(row[headerIndexMap['FTP']] || '');
+        const priceStr = String(row[headerIndexMap['ftp']] || '');
         if (!priceStr) return null; // Skip rows without FTP
         
         const price = parseFloat(priceStr.replace(/[^0-9.]+/g, ''));
         if (isNaN(price)) return null; // Skip rows with invalid FTP
 
-        const processor = row[headerIndexMap['PROCESSOR']] ? String(row[headerIndexMap['PROCESSOR']]) : undefined;
-        const memory = row[headerIndexMap['MEMORY']] ? String(row[headerIndexMap['MEMORY']]) : undefined;
-        const hdd1 = row[headerIndexMap['HDD']] ? String(row[headerIndexMap['HDD']]) : undefined;
-        const hdd2 = row[headerIndexMap['HDD 2']] ? String(row[headerIndexMap['HDD 2']]) : undefined;
-        const gpu = row[headerIndexMap['GFX']] ? String(row[headerIndexMap['GFX']]) : undefined;
-        const os = row[headerIndexMap['OS']] ? String(row[headerIndexMap['OS']]) : undefined;
-        const warranty = row[headerIndexMap['WARRANTY']] ? String(row[headerIndexMap['WARRANTY']]) : undefined;
+        const processor = row[headerIndexMap['processor']] ? String(row[headerIndexMap['processor']]) : undefined;
+        const memory = row[headerIndexMap['memory']] ? String(row[headerIndexMap['memory']]) : undefined;
+        const hdd1 = row[headerIndexMap['hdd']] ? String(row[headerIndexMap['hdd']]) : undefined;
+        const hdd2 = row[headerIndexMap['hdd 2']] ? String(row[headerIndexMap['hdd 2']]) : undefined;
+        const gpu = row[headerIndexMap['gfx']] ? String(row[headerIndexMap['gfx']]) : undefined;
+        const os = row[headerIndexMap['os']] ? String(row[headerIndexMap['os']]) : undefined;
+        const warranty = row[headerIndexMap['warranty']] ? String(row[headerIndexMap['warranty']]) : undefined;
 
         const storage = [hdd1, hdd2].filter(Boolean).join(' + ');
 
@@ -133,15 +141,9 @@ const getProductDataFlow = ai.defineFlow(
             friendlyMessage = `Permission Denied: The service account ('${serviceAccount.client_email}') does not have Viewer access to the Google Sheet with ID "${PRODUCT_SHEET_ID}". Please share the sheet with this email address.`;
         } else if (err.code === 404) {
             friendlyMessage = `Not Found: The Google Sheet with ID "${PRODUCT_SHEET_ID}" could not be found.`;
-        } else if (err.message && err.message.includes('Unable to parse range')) {
-            try {
-                // Fetch sheet names to provide more context.
-                const spreadsheetMeta = await sheets.spreadsheets.get({ spreadsheetId: PRODUCT_SHEET_ID });
-                const sheetTitles = spreadsheetMeta.data.sheets?.map(s => s.properties?.title).filter(Boolean) || [];
-                friendlyMessage = `Unable to parse range: "${range}". Please ensure the sheet name is correct. Available sheets in this document: [${sheetTitles.join(', ')}].`;
-            } catch (metaErr: any) {
-                 friendlyMessage = `Unable to parse range "${range}" and could not fetch sheet metadata. Please check the Spreadsheet ID and permissions. Original error: ${err.message}`;
-            }
+        } else if (err.message) {
+            // Capture custom errors thrown from the try block
+            friendlyMessage = err.message;
         }
         
         throw new Error(friendlyMessage);
