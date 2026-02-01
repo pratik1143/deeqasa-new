@@ -3,54 +3,69 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-export function CenteredLoader({ text, className }: { text?: string, className?: string }) {
+export function CenteredLoader({ text = "Initializing", className }: { text?: string, className?: string }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center gap-2", className)}>
-      <motion.div
-        className="relative w-8 h-8"
-        animate={{ rotate: 360 }}
-        transition={{
-          loop: Infinity,
-          ease: "linear",
-          duration: 1.2,
-        }}
-      >
-        <svg className="w-full h-full" viewBox="0 0 50 50">
-          <defs>
-            <linearGradient id="loader-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="hsl(var(--primary))" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="25"
-            cy="25"
-            r="22"
-            stroke="hsl(var(--primary) / 0.1)"
-            strokeWidth="2"
-            fill="transparent"
-          />
-          <motion.circle
-            cx="25"
-            cy="25"
-            r="22"
-            stroke="url(#loader-gradient)"
-            strokeWidth="2"
-            fill="transparent"
-            strokeLinecap="round"
-            strokeDasharray="40 100"
-            style={{ filter: 'drop-shadow(0 0 3px hsl(var(--primary) / 0.5))' }}
-            initial={{ strokeDashoffset: 0 }}
-            animate={{ strokeDashoffset: -140 }}
-            transition={{
-              loop: Infinity,
-              ease: 'linear',
-              duration: 1.2,
-            }}
-          />
-        </svg>
-      </motion.div>
-      {text && <p className="text-xs text-muted-foreground">{text}</p>}
+    <div className={cn("fixed inset-0 z-[9999] flex flex-col items-center justify-center pointer-events-none", className)}>
+        <div className="relative w-12 h-12">
+            {/* Outer Ring */}
+            <motion.div
+                className="absolute inset-0"
+                animate={{ rotate: 360 }}
+                transition={{
+                    duration: 3,
+                    ease: 'linear',
+                    repeat: Infinity,
+                }}
+            >
+                <motion.svg className="w-full h-full" viewBox="0 0 48 48">
+                    <motion.circle
+                        cx="24"
+                        cy="24"
+                        r="23.25"
+                        stroke="hsl(var(--primary) / 0.7)"
+                        strokeWidth="1.5"
+                        fill="transparent"
+                        animate={{ opacity: [0.7, 0.85, 0.7] }}
+                        transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            repeatDelay: 5.2,
+                            ease: 'easeInOut',
+                        }}
+                    />
+                </motion.svg>
+            </motion.div>
+
+            {/* Inner Ring */}
+            <motion.div
+                className="absolute inset-0"
+                animate={{ rotate: -360 }}
+                transition={{
+                    duration: 2,
+                    ease: 'linear',
+                    repeat: Infinity,
+                }}
+            >
+                <motion.svg className="w-full h-full" viewBox="0 0 48 48">
+                    <motion.circle
+                        cx="24"
+                        cy="24"
+                        r="16"
+                        stroke="hsl(var(--primary) / 0.3)"
+                        strokeWidth="1"
+                        fill="transparent"
+                        animate={{ opacity: [0.3, 0.5, 0.3] }}
+                        transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            repeatDelay: 5.2,
+                            ease: 'easeInOut',
+                        }}
+                    />
+                </motion.svg>
+            </motion.div>
+        </div>
+        {text && <p className="mt-3 font-code text-[11px] text-muted-foreground/60 tracking-[0.05em]">{text}</p>}
     </div>
   );
 }
