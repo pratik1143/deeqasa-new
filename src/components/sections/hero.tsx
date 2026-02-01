@@ -2,36 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { useMousePosition } from "@/hooks/use-mouse-position";
-
-const HeroText = ({ text, className, delay, animationType }: { text: string, className?: string, delay: number, animationType: string }) => (
-  <span
-    className={`inline-block opacity-0 ${className}`}
-    style={{ animation: `${animationType} 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`, animationDelay: `${delay}s` }}
-  >
-    {text.split('').map((char, i) => <span key={i} className="inline-block" style={{animation: `reveal-char 0.5s ease-out forwards`, animationDelay: `${delay + i * 0.03}s`}}>{char === ' ' ? '\u00A0' : char}</span>)}
-  </span>
-);
+import { HeroVideoBackground } from './hero-video-background';
 
 export function Hero() {
   const [show, setShow] = useState(false);
-  const position = useMousePosition();
-  const [parallaxStyle1, setParallaxStyle1] = useState({});
-  const [parallaxStyle2, setParallaxStyle2] = useState({});
-
-  useEffect(() => {
-    const parallaxOffset = (factor: number) => {
-      if (typeof window !== 'undefined') {
-        const x = (position.x - window.innerWidth / 2) * factor;
-        const y = (position.y - window.innerHeight / 2) * factor;
-        return { transform: `translate(${x}px, ${y}px)` };
-      }
-      return {};
-    };
-
-    setParallaxStyle1(parallaxOffset(0.01));
-    setParallaxStyle2(parallaxOffset(0.005));
-  }, [position]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShow(true), 1500); // Wait for DEEQASA intro
@@ -40,18 +14,7 @@ export function Hero() {
   
   return (
     <section className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 z-0 bg-background" />
-      
-      {/* Parallax Background Layers */}
-      <div className="absolute inset-[-10vw] z-1" style={parallaxStyle1}>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(10,20,41,0.5)_0%,_transparent_70%)]" />
-      </div>
-      <div className="absolute inset-[-10vw] z-0" style={parallaxStyle2}>
-        <div className="absolute inset-0 opacity-20" style={{
-            backgroundImage: `radial-gradient(circle at 20% 30%, hsl(var(--primary) / 0.1), transparent 30%),
-                            radial-gradient(circle at 80% 70%, hsl(var(--accent) / 0.1), transparent 30%)`
-        }}/>
-      </div>
+      <HeroVideoBackground />
       
       <div className="relative z-20 flex flex-col items-center justify-center text-center p-4">
         {/* Scene 1 */}

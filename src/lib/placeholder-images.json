@@ -11,6 +11,12 @@
       "description": "A modern data center for a health tech company.",
       "imageUrl": "https://images.unsplash.com/photo-1683322499436-f4383dd59f5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkYXRhJTIwY2VudGVyfGVufDB8fHx8MTc2OTg5NjA2NHww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "data center"
+    },
+    {
+      "id": "hero-poster",
+      "description": "A close-up of a high-performance laptop, representing modern technology.",
+      "imageUrl": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjB0ZWNoJTIwZGFya3xlbnwwfHx8fDE3Njk5NTI1ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop technology"
     }
   ]
 }
