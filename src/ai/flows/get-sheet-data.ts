@@ -52,11 +52,19 @@ const getSheetDataFlow = ai.defineFlow(
     outputSchema: GetSheetDataOutputSchema,
   },
   async ({ spreadsheetId, range }) => {
-    // This uses Application Default Credentials.
-    // Ensure your service account credentials are available in the environment.
-    const auth = new google.auth.GoogleAuth({
-      scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    });
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+    if (!serviceAccountEmail || !privateKey) {
+      throw new Error('Authentication Error: Google service account credentials (GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY) are not configured in the environment.');
+    }
+    
+    const auth = new google.auth.JWT(
+      serviceAccountEmail,
+      undefined,
+      privateKey.replace(/\\n/g, '\n'),
+      ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    );
 
     const sheets = google.sheets({ version: 'v4', auth });
 
@@ -105,9 +113,6 @@ const getSheetDataFlow = ai.defineFlow(
         
         const validStatus = ['Won', 'Lost', 'Pipeline'];
         if (!validStatus.includes(item.status)) {
-            // If status is invalid, we might default it or skip the row.
-            // For now, we'll let it pass and Zod validation will catch it if it's strict.
-            // A safer approach for production might be to filter it out.
         }
 
         return item;
@@ -126,24 +131,27 @@ const getSheetDataFlow = ai.defineFlow(
       }
 
     } catch (err: any) {
-      console.error('The API returned an error: ', err);
-      // Provide a more user-friendly error message
-      if (err.code === 404) {
-          throw new Error('Google Sheet not found. Please verify the Spreadsheet ID.');
-      }
-      if (err.code === 403) {
-          throw new Error('Permission denied. Ensure the service account has viewer access to the Google Sheet.');
-      }
-      
-      let errorMessage = 'Failed to fetch data from Google Sheet. Check server logs for details.';
-      if (err.message) {
-        if (err.message.includes('Could not load the default credentials')) {
-            errorMessage = 'Authentication failed: Could not load default credentials. Please ensure the server is configured with Google Cloud service account credentials.';
-        } else {
-            errorMessage = `Failed to fetch data from Google Sheet: ${err.message}`;
+        console.error('Google Sheets API returned an error: ', err.message);
+
+        let friendlyMessage = 'An unexpected error occurred while fetching data from Google Sheets.';
+
+        if (err.code) {
+            switch (err.code) {
+                case 400:
+                    friendlyMessage = `Invalid Request: The range "${range}" might be incorrect for the sheet. Please verify the sheet name and range.`;
+                    break;
+                case 403:
+                    friendlyMessage = `Permission Denied: The service account ('${serviceAccountEmail}') does not have Viewer access to the Google Sheet. Please share the sheet with this email address.`;
+                    break;
+                case 404:
+                    friendlyMessage = `Not Found: The Google Sheet with ID "${spreadsheetId}" could not be found. Please verify the Spreadsheet ID.`;
+                    break;
+            }
+        } else if (err.message?.includes('invalid_grant')) {
+            friendlyMessage = 'Authentication Failed: The service account credentials are not valid. Please check the private key and service account email.';
         }
-      }
-      throw new Error(errorMessage);
+
+        throw new Error(friendlyMessage);
     }
   }
 );
