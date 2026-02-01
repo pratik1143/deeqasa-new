@@ -10,6 +10,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { google } from 'googleapis';
 import type { FunnelData } from '@/lib/types';
+import serviceAccount from '@/ai/service-account.json';
 
 // Define the Zod schema for validation, consistent with the FunnelData type
 const FunnelDataSchema = z.object({
@@ -51,17 +52,11 @@ const getSheetDataFlow = ai.defineFlow(
     outputSchema: GetSheetDataOutputSchema,
   },
   async ({ spreadsheetId }) => {
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
-
-    if (!serviceAccountEmail || !privateKey) {
-      throw new Error('Authentication Error: Google service account credentials (GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY) are not configured in the environment.');
-    }
-    
+    // Explicitly use the imported service account JSON file for authentication.
     const auth = new google.auth.JWT(
-      serviceAccountEmail,
+      serviceAccount.client_email,
       undefined,
-      privateKey.replace(/\\n/g, '\n'),
+      serviceAccount.private_key,
       ['https://www.googleapis.com/auth/spreadsheets.readonly']
     );
 
@@ -148,21 +143,21 @@ const getSheetDataFlow = ai.defineFlow(
         console.error('Google Sheets API returned an error: ', err.message);
 
         let friendlyMessage = 'An unexpected error occurred while fetching data from Google Sheets.';
-
+        
         if (err.code) {
             switch (err.code) {
                 case 400:
                     friendlyMessage = `Invalid Request: There might be an issue with the spreadsheet structure. Please check the sheet and try again.`;
                     break;
                 case 403:
-                    friendlyMessage = `Permission Denied: The service account ('${serviceAccountEmail}') does not have Viewer access to the Google Sheet. Please share the sheet with this email address.`;
+                    friendlyMessage = `Permission Denied: The service account ('${serviceAccount.client_email}') does not have Viewer access to the Google Sheet. Please share the sheet with this email address.`;
                     break;
                 case 404:
                     friendlyMessage = `Not Found: The Google Sheet with ID "${spreadsheetId}" could not be found. Please verify the Spreadsheet ID.`;
                     break;
             }
         } else if (err.message?.includes('invalid_grant')) {
-            friendlyMessage = 'Authentication Failed: The service account credentials are not valid. Please check the private key and service account email in your environment variables.';
+            friendlyMessage = 'Authentication Failed: The service account credentials in service-account.json are not valid. Please check the file.';
         } else if (err.message) {
             friendlyMessage = err.message;
         }
