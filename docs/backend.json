@@ -117,8 +117,6 @@
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous",
       "phone"
     ]
   },
