@@ -60,7 +60,7 @@ const getProductDataFlow = ai.defineFlow(
         return [];
       };
 
-      const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+      const headers = rows[0].map(h => String(h || '').trim().toUpperCase());
       const dataRows = rows.slice(1);
       
       const headerIndexMap: { [key: string]: number } = {};
@@ -68,37 +68,40 @@ const getProductDataFlow = ai.defineFlow(
         if(header) headerIndexMap[header] = index;
       });
        
-      if (headerIndexMap['sku'] === undefined || headerIndexMap['ftp'] === undefined) {
+      if (headerIndexMap['SKU'] === undefined || headerIndexMap['FTP'] === undefined) {
           throw new Error("Missing required columns in Product sheet. The header must contain 'SKU' and 'FTP'.");
       }
       
       const parsedData = dataRows.map((row) => {
-        const sku = String(row[headerIndexMap['sku']] || '').trim();
+        const sku = String(row[headerIndexMap['SKU']] || '').trim();
         if (!sku) return null;
 
+        const priceStr = String(row[headerIndexMap['FTP']] || '');
+        if (!priceStr) return null;
+        
+        const price = parseFloat(priceStr.replace(/[^0-9.]+/g, ''));
+        if (isNaN(price)) return null;
+
         const descriptionParts = [
-            row[headerIndexMap['processor']],
-            row[headerIndexMap['memory']],
-            row[headerIndexMap['hdd']],
-            row[headerIndexMap['hdd 2']],
-            row[headerIndexMap['gfx']]
+            sku,
+            row[headerIndexMap['PROCESSOR']],
+            row[headerIndexMap['MEMORY']],
+            row[headerIndexMap['HDD']],
+            row[headerIndexMap['GFX']]
         ].filter(part => part && String(part).trim() !== '');
         
         const name = descriptionParts.join(' / ');
-
-        const priceStr = String(row[headerIndexMap['ftp']] || '0');
-        const price = parseFloat(priceStr.replace(/[^0-9.]+/g, ''));
         
         return {
           id: sku,
           name: name || 'Product details not available',
-          processor: headerIndexMap['processor'] !== undefined ? String(row[headerIndexMap['processor']] || '') : undefined,
-          memory: headerIndexMap['memory'] !== undefined ? String(row[headerIndexMap['memory']] || '') : undefined,
-          storage: headerIndexMap['hdd'] !== undefined ? String(row[headerIndexMap['hdd']] || '') : undefined,
-          gpu: headerIndexMap['gfx'] !== undefined ? String(row[headerIndexMap['gfx']] || '') : undefined,
-          os: headerIndexMap['os'] !== undefined ? String(row[headerIndexMap['os']] || '') : undefined,
-          warranty: headerIndexMap['warranty'] !== undefined ? String(row[headerIndexMap['warranty']] || '') : undefined,
-          price: isNaN(price) ? 0 : price,
+          processor: headerIndexMap['PROCESSOR'] !== undefined ? String(row[headerIndexMap['PROCESSOR']] || '') : undefined,
+          memory: headerIndexMap['MEMORY'] !== undefined ? String(row[headerIndexMap['MEMORY']] || '') : undefined,
+          storage: headerIndexMap['HDD'] !== undefined ? String(row[headerIndexMap['HDD']] || '') : undefined,
+          gpu: headerIndexMap['GFX'] !== undefined ? String(row[headerIndexMap['GFX']] || '') : undefined,
+          os: headerIndexMap['OS'] !== undefined ? String(row[headerIndexMap['OS']] || '') : undefined,
+          warranty: headerIndexMap['WARRANTY'] !== undefined ? String(row[headerIndexMap['WARRANTY']] || '') : undefined,
+          price: price,
           gstRate: 18, // Defaulting to 18% as it's not in the sheet
         };
       }).filter((p): p is NonNullable<typeof p> => p !== null);
