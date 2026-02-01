@@ -15,16 +15,18 @@ const HeroText = ({ text, className, delay, animationType }: { text: string, cla
 
 export function Hero() {
   const [show, setShow] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const position = useMousePosition();
 
   const parallaxOffset = (factor: number) => {
-    if (typeof window === 'undefined') return {};
+    if (!isMounted) return {};
     const x = (position.x - window.innerWidth / 2) * factor;
     const y = (position.y - window.innerHeight / 2) * factor;
     return { transform: `translate(${x}px, ${y}px)` };
   };
 
   useEffect(() => {
+    setIsMounted(true);
     const timer = setTimeout(() => setShow(true), 1500); // Wait for DEEQASA intro
     return () => clearTimeout(timer);
   }, []);
