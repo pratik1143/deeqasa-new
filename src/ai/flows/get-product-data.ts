@@ -43,61 +43,69 @@ const getProductDataFlow = ai.defineFlow(
     const sheets = google.sheets({ version: 'v4', auth });
 
     try {
-      const spreadsheetMeta = await sheets.spreadsheets.get({ spreadsheetId: PRODUCT_SHEET_ID });
-      const firstSheetName = spreadsheetMeta.data.sheets?.[0]?.properties?.title;
-
-      if (!firstSheetName) {
-        throw new Error("Could not find any sheets in the specified Product Google Sheet document.");
-      }
-      
-      const range = `${firstSheetName}!A:Z`;
+      // Per user request, hardcode range to 'Products!A:Z' to ensure correct sheet is targeted.
+      const range = 'Products!A:Z';
       
       const response = await sheets.spreadsheets.values.get({ spreadsheetId: PRODUCT_SHEET_ID, range });
 
       const rows = response.data.values;
+      // If there are no rows, or only a header row with no data, return empty.
       if (!rows || rows.length < 2) {
         console.warn("Product sheet is empty or has only a header row.");
         return [];
       };
 
+      // Normalize headers: trim whitespace and convert to uppercase for flexible matching.
       const headers = rows[0].map(h => String(h || '').trim().toUpperCase());
       const dataRows = rows.slice(1);
       
+      // Create a map of header names to their column index.
       const headerIndexMap: { [key: string]: number } = {};
       headers.forEach((header, index) => {
         if(header) headerIndexMap[header] = index;
       });
        
+      // Ensure mandatory columns 'SKU' and 'FTP' exist.
       if (headerIndexMap['SKU'] === undefined || headerIndexMap['FTP'] === undefined) {
           throw new Error("Missing required columns in Product sheet. The header must contain 'SKU' and 'FTP'.");
       }
       
       const parsedData = dataRows.map((row) => {
         const sku = String(row[headerIndexMap['SKU']] || '').trim();
+        // Skip row if SKU is missing.
         if (!sku) return null;
 
         const priceStr = String(row[headerIndexMap['FTP']] || '');
+        // Skip row if price (FTP) is missing or not a valid number.
         if (!priceStr) return null;
         
         const price = parseFloat(priceStr.replace(/[^0-9.]+/g, ''));
         if (isNaN(price)) return null;
 
+        // Concatenate description fields as requested.
         const descriptionParts = [
             sku,
             row[headerIndexMap['PROCESSOR']],
             row[headerIndexMap['MEMORY']],
             row[headerIndexMap['HDD']],
+            row[headerIndexMap['HDD 2']],
             row[headerIndexMap['GFX']]
         ].filter(part => part && String(part).trim() !== '');
         
         const name = descriptionParts.join(' / ');
         
+        // Combine HDD and HDD 2 for storage field.
+        const storage = [
+            row[headerIndexMap['HDD']],
+            row[headerIndexMap['HDD 2']],
+        ].filter(part => part && String(part).trim() !== '').join(' + ');
+
         return {
           id: sku,
           name: name || 'Product details not available',
           processor: headerIndexMap['PROCESSOR'] !== undefined ? String(row[headerIndexMap['PROCESSOR']] || '') : undefined,
           memory: headerIndexMap['MEMORY'] !== undefined ? String(row[headerIndexMap['MEMORY']] || '') : undefined,
-          storage: headerIndexMap['HDD'] !== undefined ? String(row[headerIndexMap['HDD']] || '') : undefined,
+          storage: storage || undefined,
           gpu: headerIndexMap['GFX'] !== undefined ? String(row[headerIndexMap['GFX']] || '') : undefined,
           os: headerIndexMap['OS'] !== undefined ? String(row[headerIndexMap['OS']] || '') : undefined,
           warranty: headerIndexMap['WARRANTY'] !== undefined ? String(row[headerIndexMap['WARRANTY']] || '') : undefined,
@@ -122,7 +130,7 @@ const getProductDataFlow = ai.defineFlow(
         if (err.code === 403) {
             friendlyMessage = `Permission Denied: The service account ('${serviceAccount.client_email}') does not have Viewer access to the Product Google Sheet. Please share the sheet with this email address.`;
         } else if (err.code === 404) {
-            friendlyMessage = `Not Found: The Google Sheet with ID "${PRODUCT_SHEET_ID}" could not be found.`;
+            friendlyMessage = `Not Found: The Google Sheet with ID "${PRODUCT_SHEET_ID}" or the sheet named "Products" could not be found.`;
         } else if (err.message) {
             friendlyMessage = err.message;
         }
