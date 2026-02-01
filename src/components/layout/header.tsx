@@ -69,7 +69,11 @@ export function Header() {
         
         <div className="flex items-center gap-2">
             <Button variant="ghost" className="hidden md:inline-flex">Contact Sales</Button>
-            <Button className="bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground font-bold hover:shadow-lg hover:shadow-primary/50 transition-shadow duration-300 rounded-full">Client Portal</Button>
+            <Button asChild className="bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground font-bold hover:shadow-lg hover:shadow-primary/50 transition-shadow duration-300 rounded-full">
+              <a href="https://www.hp.com/in-en/shop/laptops-tablets/business-laptops.html" target="_blank" rel="noopener noreferrer">
+                View Product
+              </a>
+            </Button>
             
             {isUserLoading ? (
               <Button variant="ghost" size="icon" disabled>
