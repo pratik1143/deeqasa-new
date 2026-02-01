@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -6,7 +5,6 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -293,22 +291,12 @@ export function QuotationBuilder() {
         <ScrollArea className="h-full bg-white rounded-lg shadow-lg">
             <div id="quotation-preview" className="p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
                 <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <Image
-                            src="/hp-logo.png"
-                            alt="HP Partner"
-                            width={80}
-                            height={40}
-                            className="h-9 sm:h-10 w-auto hp-logo-print-size"
-                        />
-                        <div>
-                            <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
-                            <p className="text-sm font-bold">HP Authorized Business Partner</p>
-                            <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
-                            <p>SAS Nagar, Mohali, Punjab</p>
-                            <p>Phone: 8595270950</p>
-                            <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
-                        </div>
+                    <div>
+                        <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
+                        <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
+                        <p>SAS Nagar, Mohali, Punjab</p>
+                        <p>Phone: 8595270950</p>
+                        <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
                     </div>
                     <div className="text-right flex-shrink-0">
                         <h2 className="text-xl font-bold text-gray-700 tracking-wide">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
@@ -398,7 +386,7 @@ export function QuotationBuilder() {
                     </div>
                     <div className="mt-16 text-right">
                         <p className="font-bold">For M/s DeeQasa-Tech</p>
-                        <p className="font-bold">HP Authorized Business Partner</p>
+                        <p className="font-bold">HPI Official Business Partner</p>
                         <div className="h-16"></div>
                         <p>Authorized Signatory: Pratik Chaudhary</p>
                     </div>
