@@ -14,7 +14,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 
 import { getProductData } from '@/ai/flows/get-product-data';
@@ -174,10 +173,9 @@ export function QuotationBuilder() {
   const quotationNumber = useMemo(() => `DQT/HPC-001 / ${format(new Date(), 'dd-MM-yyyy')}`, []);
 
   return (
-    <div className="h-full flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8">
       {/* ===== CONTROLS PANEL ===== */}
       <Card className="w-full md:max-w-md lg:max-w-lg flex-shrink-0 no-print">
-        <ScrollArea className="h-full">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
               <CardTitle>Quotation Builder</CardTitle>
@@ -278,121 +276,118 @@ export function QuotationBuilder() {
               </form>
             </Form>
           </div>
-        </ScrollArea>
       </Card>
 
       {/* ===== PREVIEW PANEL ===== */}
-      <div className="flex-1 overflow-auto relative">
+      <div className="flex-1 relative">
         <div className="absolute top-0 right-0 p-4 no-print z-10">
             <Button onClick={handlePrint}>
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
-        <ScrollArea className="h-full bg-white rounded-lg shadow-lg">
-            <div id="quotation-preview" className="p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
-                <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
+        <div id="quotation-preview" className="bg-white rounded-lg shadow-lg p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
+            <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
+                <div>
+                    <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
+                    <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
+                    <p>SAS Nagar, Mohali, Punjab</p>
+                    <p>Phone: 8595270950</p>
+                    <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                    <h2 className="text-xl font-bold text-gray-700 tracking-wide">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
+                </div>
+            </header>
+
+            <section className="grid grid-cols-2 gap-8 mb-4">
+                <div className="border border-black p-2">
+                    <p className="font-bold">To,</p>
+                    <p className="font-bold">{form.watch('companyName') || form.watch('customerName')}</p>
+                    <p>{form.watch('address')}</p>
+                    <p>Kind Attn: {form.watch('customerName')}</p>
+                </div>
+                <div className="text-left border border-black p-2">
+                     <p><span className="font-bold inline-block w-32">Quotation No:</span> {quotationNumber}</p>
+                     <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MM-yyyy')}</p>
+                </div>
+            </section>
+
+            <section className="mb-4">
+                <p><span className="font-bold">Subject:</span> {form.watch('subject') || 'Quotation for IT Hardware'}</p>
+            </section>
+            
+            <section>
+                <Table className="border-collapse border border-black">
+                    <TableHeader>
+                        <TableRow className="bg-gray-200">
+                            <TableHead className="border border-black text-center w-12">Sr. No.</TableHead>
+                            <TableHead className="border border-black">Description</TableHead>
+                            <TableHead className="border border-black text-center">Make/Model</TableHead>
+                            <TableHead className="border border-black text-right">Qty</TableHead>
+                            <TableHead className="border border-black text-right">Unit Price (₹)</TableHead>
+                            <TableHead className="border border-black text-right">Total (₹)</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {fields.map((item, index) => (
+                            <TableRow key={item.id}>
+                                <TableCell className="border border-black text-center">{index + 1}</TableCell>
+                                <TableCell className="border border-black">
+                                    <p className="font-bold">{item.product.name}</p>
+                                </TableCell>
+                                <TableCell className="border border-black text-center">{item.product.id}</TableCell>
+                                <TableCell className="border border-black text-right">{item.quantity}</TableCell>
+                                <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
+                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
+                            </TableRow>
+                        ))}
+                         {fields.length === 0 && (
+                            <TableRow><TableCell colSpan={6} className="text-center h-48 border border-black">No items added.</TableCell></TableRow>
+                        )}
+                        <TableRow>
+                            <TableCell colSpan={5} className="border border-black text-right font-bold">Sub Total</TableCell>
+                            <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell colSpan={5} className="border border-black text-right font-bold">GST @18%</TableCell>
+                            <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
+                        </TableRow>
+                        <TableRow className="bg-gray-200">
+                            <TableCell colSpan={5} className="border border-black text-right font-bold">Grand Total</TableCell>
+                            <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </section>
+            
+            <footer className="mt-8 text-xs">
+                <p className="font-bold">Amount in Words: <span className="font-normal">{grandTotalInWords}</span></p>
+                
+                <div className="mt-4 border-t-2 border-black pt-4 grid grid-cols-2 gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
-                        <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
-                        <p>SAS Nagar, Mohali, Punjab</p>
-                        <p>Phone: 8595270950</p>
-                        <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
+                        <h4 className="font-bold underline mb-2">Terms & Conditions:</h4>
+                        <ul className="list-disc list-inside space-y-1">
+                            <li>Delivery Period: Within 4–6 weeks after confirmation of order.</li>
+                            <li>Warranty: As per manufacturer’s standard warranty.</li>
+                        </ul>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                        <h2 className="text-xl font-bold text-gray-700 tracking-wide">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
+                    <div>
+                        <h4 className="font-bold underline mb-2">Bank Details:</h4>
+                        <p>Bank: ICICI Bank</p>
+                        <p>Account Number: 103205001866</p>
+                        <p>IFSC Code: ICIC0001032</p>
+                        <p>Account Type: Corporate Current</p>
+                        <p>Website: https://www.hpconnect.in</p>
                     </div>
-                </header>
-
-                <section className="grid grid-cols-2 gap-8 mb-4">
-                    <div className="border border-black p-2">
-                        <p className="font-bold">To,</p>
-                        <p className="font-bold">{form.watch('companyName') || form.watch('customerName')}</p>
-                        <p>{form.watch('address')}</p>
-                        <p>Kind Attn: {form.watch('customerName')}</p>
-                    </div>
-                    <div className="text-left border border-black p-2">
-                         <p><span className="font-bold inline-block w-32">Quotation No:</span> {quotationNumber}</p>
-                         <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MM-yyyy')}</p>
-                    </div>
-                </section>
-
-                <section className="mb-4">
-                    <p><span className="font-bold">Subject:</span> {form.watch('subject') || 'Quotation for IT Hardware'}</p>
-                </section>
-                
-                <section>
-                    <Table className="border-collapse border border-black">
-                        <TableHeader>
-                            <TableRow className="bg-gray-200">
-                                <TableHead className="border border-black text-center w-12">Sr. No.</TableHead>
-                                <TableHead className="border border-black">Description</TableHead>
-                                <TableHead className="border border-black text-center">Make/Model</TableHead>
-                                <TableHead className="border border-black text-right">Qty</TableHead>
-                                <TableHead className="border border-black text-right">Unit Price (₹)</TableHead>
-                                <TableHead className="border border-black text-right">Total (₹)</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {fields.map((item, index) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="border border-black text-center">{index + 1}</TableCell>
-                                    <TableCell className="border border-black">
-                                        <p className="font-bold">{item.product.name}</p>
-                                    </TableCell>
-                                    <TableCell className="border border-black text-center">{item.product.id}</TableCell>
-                                    <TableCell className="border border-black text-right">{item.quantity}</TableCell>
-                                    <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
-                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
-                                </TableRow>
-                            ))}
-                             {fields.length === 0 && (
-                                <TableRow><TableCell colSpan={6} className="text-center h-48 border border-black">No items added.</TableCell></TableRow>
-                            )}
-                            <TableRow>
-                                <TableCell colSpan={5} className="border border-black text-right font-bold">Sub Total</TableCell>
-                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell colSpan={5} className="border border-black text-right font-bold">GST @18%</TableCell>
-                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
-                            </TableRow>
-                            <TableRow className="bg-gray-200">
-                                <TableCell colSpan={5} className="border border-black text-right font-bold">Grand Total</TableCell>
-                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                </section>
-                
-                <footer className="mt-8 text-xs">
-                    <p className="font-bold">Amount in Words: <span className="font-normal">{grandTotalInWords}</span></p>
-                    
-                    <div className="mt-4 border-t-2 border-black pt-4 grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-bold underline mb-2">Terms & Conditions:</h4>
-                            <ul className="list-disc list-inside space-y-1">
-                                <li>Delivery Period: Within 4–6 weeks after confirmation of order.</li>
-                                <li>Warranty: As per manufacturer’s standard warranty.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-bold underline mb-2">Bank Details:</h4>
-                            <p>Bank: ICICI Bank</p>
-                            <p>Account Number: 103205001866</p>
-                            <p>IFSC Code: ICIC0001032</p>
-                            <p>Account Type: Corporate Current</p>
-                            <p>Website: https://www.hpconnect.in</p>
-                        </div>
-                    </div>
-                    <div className="mt-16 text-right">
-                        <p className="font-bold">For M/s DeeQasa-Tech</p>
-                        <p className="font-bold">HPI Official Business Partner</p>
-                        <div className="h-16"></div>
-                        <p>Authorized Signatory: Pratik Chaudhary</p>
-                    </div>
-                </footer>
-            </div>
-        </ScrollArea>
+                </div>
+                <div className="mt-16 text-right">
+                    <p className="font-bold">For M/s DeeQasa-Tech</p>
+                    <p className="font-bold">HPI Official Business Partner</p>
+                    <div className="h-16"></div>
+                    <p>Authorized Signatory: Pratik Chaudhary</p>
+                </div>
+            </footer>
+        </div>
       </div>
     </div>
   );

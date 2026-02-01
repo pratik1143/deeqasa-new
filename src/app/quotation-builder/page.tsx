@@ -47,8 +47,9 @@ export default function QuotationBuilderPage() {
     }
     
     return (
-        <div className="flex flex-col h-screen bg-secondary/40">
-            <main className="flex-1 overflow-hidden">
+        <div className="flex flex-col min-h-screen bg-background">
+            <Header />
+            <main className="flex-1 pt-16">
                 <QuotationBuilder />
             </main>
         </div>
