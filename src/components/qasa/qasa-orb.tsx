@@ -8,18 +8,18 @@ interface QasaOrbProps {
   onClick: () => void;
 }
 
-const ORB_SIZE = 64;
+const ORB_SIZE = 56;
 
 const OrbitalParticle = ({ i, numParticles }: { i: number; numParticles: number }) => {
   const angle = (i / numParticles) * 360;
   return (
     <motion.div
-      className="absolute top-1/2 left-1/2 w-1 h-1 bg-white rounded-full"
+      className="absolute top-1/2 left-1/2 w-0.5 h-0.5 bg-white rounded-full"
       style={{
-        boxShadow: '0 0 6px rgba(255, 255, 255, 0.8)',
+        boxShadow: '0 0 5px rgba(255, 255, 255, 0.7)',
       }}
       initial={{
-        transform: `rotate(${angle}deg) translateY(-${ORB_SIZE / 2 * 0.9}px) rotate(-${angle}deg)`,
+        transform: `rotate(${angle}deg) translateY(-${ORB_SIZE / 2 * 0.85}px) rotate(-${angle}deg)`,
       }}
     />
   );
@@ -29,7 +29,7 @@ export function QasaOrb({ onClick }: QasaOrbProps) {
   const orbRef = useRef<HTMLButtonElement>(null);
   const { x: mouseX, y: mouseY } = useMousePosition();
 
-  const springConfig = { damping: 20, stiffness: 300, mass: 0.5 };
+  const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
   const dx = useMotionValue(0);
   const dy = useMotionValue(0);
   const rotateX = useMotionValue(0);
@@ -48,14 +48,14 @@ export function QasaOrb({ onClick }: QasaOrbProps) {
       
       const distance = Math.sqrt((mouseX - orbCenterX)**2 + (mouseY - orbCenterY)**2);
       
-      if (distance < 200) {
-        const offsetX = (mouseX - orbCenterX) * 0.1;
-        const offsetY = (mouseY - orbCenterY) * 0.1;
+      if (distance < 150) {
+        const offsetX = (mouseX - orbCenterX) * 0.08;
+        const offsetY = (mouseY - orbCenterY) * 0.08;
         dx.set(offsetX);
         dy.set(offsetY);
 
-        const newRotateX = (mouseY - orbCenterY) * -0.05;
-        const newRotateY = (mouseX - orbCenterX) * 0.05;
+        const newRotateX = (mouseY - orbCenterY) * -0.04;
+        const newRotateY = (mouseX - orbCenterX) * 0.04;
         rotateX.set(newRotateX);
         rotateY.set(newRotateY);
       } else {
@@ -84,15 +84,15 @@ export function QasaOrb({ onClick }: QasaOrbProps) {
         rotateY: springRotateY,
         transformStyle: 'preserve-3d'
       }}
-      whileHover={{ scale: 1.25 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+      whileHover={{ scale: 1.15 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
     >
       {/* Outermost pulse */}
       <motion.div
-        className="absolute inset-0 rounded-full border border-[#00E0FF]"
+        className="absolute inset-0 rounded-full border border-primary/50"
         animate={{
-          scale: [1, 1.5, 1, 1.8],
-          opacity: [0, 0.5, 0.5, 0],
+          scale: [1, 1.4, 1, 1.6],
+          opacity: [0, 0.3, 0.3, 0],
         }}
         transition={{
           duration: 8,
@@ -103,26 +103,26 @@ export function QasaOrb({ onClick }: QasaOrbProps) {
       />
       
       {/* Soft shadow / outer glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[rgba(0,224,255,0.3)] via-transparent to-transparent rounded-full"
-           style={{ filter: 'blur(10px)' }}/>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent rounded-full"
+           style={{ filter: 'blur(8px)' }}/>
 
       {/* Main Orb Body */}
       <div className="relative w-full h-full rounded-full overflow-hidden" 
            style={{
-            background: 'radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.8), rgba(100, 255, 218, 0.4) 40%, rgba(0, 224, 255, 0.3) 80%)',
-            border: '1px solid rgba(0, 224, 255, 0.5)',
-            boxShadow: 'inset 0 0 10px rgba(0, 224, 255, 0.5)'
+            background: 'radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.6), rgba(100, 255, 218, 0.3) 40%, rgba(0, 224, 255, 0.2) 80%)',
+            border: '1px solid hsl(var(--primary) / 0.4)',
+            boxShadow: 'inset 0 0 8px hsl(var(--primary) / 0.3)'
            }}
       >
         {/* Breathing inner glow */}
         <motion.div
           className="absolute inset-0"
           style={{
-            background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.4) 0%, transparent 60%)',
+            background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%)',
           }}
           animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.8, 1, 0.8],
+            scale: [1, 1.05, 1],
+            opacity: [0.6, 0.8, 0.6],
           }}
           transition={{
             duration: 4,
@@ -136,7 +136,7 @@ export function QasaOrb({ onClick }: QasaOrbProps) {
           className="absolute inset-0"
           animate={{ rotate: 360 }}
           transition={{
-            duration: 10,
+            duration: 12,
             repeat: Infinity,
             ease: 'linear',
           }}
