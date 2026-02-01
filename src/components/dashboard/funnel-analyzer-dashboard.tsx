@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { FunnelData, mockFunnelData } from "@/lib/mock-funnel-data";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import type { FunnelData } from "@/lib/types";
 import {
   Bar,
   BarChart,
@@ -42,8 +42,13 @@ import { ChartConfig, ChartContainer, ChartTooltipContent } from "../ui/chart";
 import { Button } from "../ui/button";
 import { BrainCircuit, Loader2, RefreshCw } from "lucide-react";
 import { FunnelAnalysisOutput, analyzeFunnelData } from "@/ai/flows/ai-funnel-analyzer";
+import { getSheetData } from "@/ai/flows/get-sheet-data";
 import { Skeleton } from "../ui/skeleton";
 import { ScrollArea } from "../ui/scroll-area";
+import { CenteredLoader } from "../ui/centered-loader";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Terminal } from "lucide-react";
+
 
 const chartConfig = {
   revenue: {
@@ -70,9 +75,15 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const SPREADSHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk";
+const SHEET_RANGE = "Sheet1!A:I"; // Assumes headers in row 1, data starts in row 2
+
 export function FunnelAnalyzerDashboard() {
-  const [data, setData] = useState<FunnelData[]>(mockFunnelData);
-  const [isPending, startTransition] = useTransition();
+  const [data, setData] = useState<FunnelData[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isRefreshing, startRefreshTransition] = useTransition();
+
   const [aiInsights, setAiInsights] = useState<FunnelAnalysisOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -80,6 +91,30 @@ export function FunnelAnalyzerDashboard() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [ownerFilter, setOwnerFilter] = useState("all");
   const [segmentFilter, setSegmentFilter] = useState("all");
+
+  const fetchData = () => {
+    setError(null);
+    startRefreshTransition(async () => {
+      try {
+        const sheetData = await getSheetData({
+          spreadsheetId: SPREADSHEET_ID,
+          range: SHEET_RANGE,
+        });
+        setData(sheetData);
+      } catch (e: any) {
+        console.error("Failed to fetch sheet data", e);
+        setError(e.message || "An unknown error occurred while fetching data.");
+      } finally {
+        if (isInitialLoading) {
+          setIsInitialLoading(false);
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const {
     months,
@@ -141,8 +176,9 @@ export function FunnelAnalyzerDashboard() {
         return acc;
     }, {} as Record<string, number>);
     
-    const winRatioBySegment = segments.slice(1).reduce((acc, segment) => {
-        const totalInSegment = data.filter(d => d.segment === segment).length;
+    const allSegments = segments.filter(s => s !== 'all');
+    const winRatioBySegment = allSegments.reduce((acc, segment) => {
+        const totalInSegment = data.filter(d => d.segment === segment && (d.status === 'Won' || d.status === 'Lost')).length;
         const wonInSegment = data.filter(d => d.segment === segment && d.status === 'Won').length;
         acc[segment] = totalInSegment > 0 ? Math.round((wonInSegment / totalInSegment) * 100) : 0;
         return acc;
@@ -171,7 +207,7 @@ export function FunnelAnalyzerDashboard() {
 
   const handleAnalyze = () => {
     setIsAnalyzing(true);
-    startTransition(async () => {
+    startRefreshTransition(async () => {
         try {
             const insights = await analyzeFunnelData({
                 totalFunnels,
@@ -197,13 +233,36 @@ export function FunnelAnalyzerDashboard() {
   }
   
   const handleRefresh = () => {
-    // In a real app, this would re-fetch from the Google Sheet API
-    // Here we just reset to the full mock data
     setMonthFilter("all");
     setOwnerFilter("all");
     setSegmentFilter("all");
     setAiInsights(null);
+    fetchData();
   };
+  
+  if (isInitialLoading) {
+      return <CenteredLoader text="Connecting to Live Funnel Data..." />;
+  }
+  
+  if (error) {
+    return (
+        <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <Alert variant="destructive">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Error Fetching Data</AlertTitle>
+              <AlertDescription>
+                {error}
+                <br /><br />
+                Please ensure the service account has viewer permissions on the Google Sheet and try again.
+              </AlertDescription>
+            </Alert>
+            <Button onClick={handleRefresh} variant="outline" className="mt-4">
+                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                 Retry
+            </Button>
+        </div>
+    );
+  }
 
   const statusData = [
     { name: 'Won', value: wonCount, fill: 'hsl(var(--chart-2))' },
@@ -212,7 +271,6 @@ export function FunnelAnalyzerDashboard() {
   ];
 
   const ownerChartData = Object.entries(funnelsByOwner).map(([name, value]) => ({ name, funnels: value }));
-
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -225,8 +283,8 @@ export function FunnelAnalyzerDashboard() {
             Real-time insights from your sales funnel.
             </p>
         </div>
-        <Button onClick={handleRefresh} variant="outline" disabled={isPending}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${isPending ? 'animate-spin' : ''}`} />
+        <Button onClick={handleRefresh} variant="outline" disabled={isRefreshing}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           Refresh Data
         </Button>
       </div>
@@ -283,7 +341,7 @@ export function FunnelAnalyzerDashboard() {
         <Card>
           <CardHeader>
             <CardDescription>Win Rate</CardDescription>
-            <CardTitle>{totalFunnels > 0 ? `${Math.round((wonCount / (wonCount + lostCount)) * 100)}%` : 'N/A'}</CardTitle>
+            <CardTitle>{(wonCount + lostCount) > 0 ? `${Math.round((wonCount / (wonCount + lostCount)) * 100)}%` : 'N/A'}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -387,7 +445,7 @@ export function FunnelAnalyzerDashboard() {
                 )}
             </CardContent>
             <div className="p-6 pt-0 mt-auto">
-                <Button onClick={handleAnalyze} disabled={isAnalyzing} className="w-full">
+                <Button onClick={handleAnalyze} disabled={isAnalyzing || isRefreshing} className="w-full">
                     {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
                     {isAnalyzing ? "Analyzing..." : "Generate AI Insights"}
                 </Button>
@@ -413,7 +471,7 @@ export function FunnelAnalyzerDashboard() {
                     </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {filteredData.map((item) => (
+                    {filteredData.length > 0 ? filteredData.map((item) => (
                         <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.accountName}</TableCell>
                         <TableCell>{item.owner}</TableCell>
@@ -427,7 +485,13 @@ export function FunnelAnalyzerDashboard() {
                         </TableCell>
                         <TableCell className="text-right">{currencyFormatter.format(item.revenue)}</TableCell>
                         </TableRow>
-                    ))}
+                    )) : (
+                        <TableRow>
+                            <TableCell colSpan={5} className="h-24 text-center">
+                                No results found.
+                            </TableCell>
+                        </TableRow>
+                    )}
                     </TableBody>
                 </Table>
             </ScrollArea>
