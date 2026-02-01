@@ -48,6 +48,13 @@ import { ScrollArea } from "../ui/scroll-area";
 import { CenteredLoader } from "../ui/centered-loader";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Terminal } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 
 const chartConfig = {
@@ -94,6 +101,8 @@ export function FunnelAnalyzerDashboard() {
 
   const [aiInsights, setAiInsights] = useState<FunnelAnalysisOutput | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<FunnelData | null>(null);
+
 
   // Filter states
   const [monthFilter, setMonthFilter] = useState("all");
@@ -489,7 +498,7 @@ export function FunnelAnalyzerDashboard() {
                     </TableHeader>
                     <TableBody>
                     {filteredData.length > 0 ? filteredData.map((item) => (
-                        <TableRow key={item.id}>
+                        <TableRow key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer">
                         <TableCell className="font-medium">{item.accountName}</TableCell>
                         <TableCell>{item.owner}</TableCell>
                         <TableCell>{item.segment}</TableCell>
@@ -514,6 +523,66 @@ export function FunnelAnalyzerDashboard() {
             </ScrollArea>
         </CardContent>
       </Card>
+      
+      <Dialog open={!!selectedItem} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
+        <DialogContent className="sm:max-w-md">
+            {selectedItem && (
+                <>
+                    <DialogHeader>
+                        <DialogTitle>{selectedItem.accountName}</DialogTitle>
+                        <DialogDescription>
+                            Details for funnel entry #{selectedItem.id}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4 text-sm">
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Product</span>
+                            <span className="font-semibold text-right">{selectedItem.product}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Product Line</span>
+                            <span className="font-semibold text-right">{selectedItem.productLine || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between items-start">
+                            <span className="text-muted-foreground">Revenue</span>
+                            <div className="text-right">
+                                <p className="font-semibold">{usdCurrencyFormatter.format(selectedItem.revenue)}</p>
+                                <p className="text-xs text-muted-foreground">{inrCurrencyFormatter.format(selectedItem.revenue * EXCHANGE_RATE_USD_TO_INR)}</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Status</span>
+                            <span className={`font-semibold px-2 py-1 text-xs rounded-full ${
+                                selectedItem.status === 'Won' ? 'bg-green-500/20 text-green-400' :
+                                selectedItem.status === 'Lost' ? 'bg-red-500/20 text-red-400' :
+                                'bg-blue-500/20 text-blue-400'
+                            }`}>{selectedItem.status}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Probability</span>
+                            <span className="font-semibold">{Math.round(selectedItem.probability * 100)}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Owner (BDM)</span>
+                            <span className="font-semibold">{selectedItem.owner}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Segment</span>
+                            <span className="font-semibold">{selectedItem.segment}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Region</span>
+                            <span className="font-semibold">{selectedItem.region}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Closure Month</span>
+                            <span className="font-semibold">{selectedItem.closureMonth}</span>
+                        </div>
+                    </div>
+                </>
+            )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
