@@ -11,25 +11,7 @@ import { z } from 'zod';
 import { google } from 'googleapis';
 import type { FunnelData } from '@/lib/types';
 import serviceAccount from '@/ai/service-account.json';
-
-// Define the Zod schema for validation, consistent with the FunnelData type
-export const FunnelDataSchema = z.object({
-  id: z.number(),
-  rowNumber: z.number(),
-  status: z.enum(['Won', 'Lost', 'Pipeline']),
-  revenue: z.number(),
-  closureMonth: z.string(),
-  region: z.string(),
-  segment: z.string(),
-  product: z.string(),
-  accountName: z.string(),
-  owner: z.string(),
-  probability: z.number(),
-  state: z.string().optional(),
-  oppCloseMonth: z.string().optional(),
-  productLine: z.string().optional(),
-  lastModified: z.string().optional(),
-});
+import { FunnelDataSchema } from '@/lib/schemas';
 
 const GetSheetDataInputSchema = z.object({
   spreadsheetId: z.string().describe('The ID of the Google Sheet.'),

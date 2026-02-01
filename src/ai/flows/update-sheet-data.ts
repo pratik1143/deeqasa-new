@@ -9,7 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { google } from 'googleapis';
 import serviceAccount from '@/ai/service-account.json';
-import { FunnelDataSchema } from './get-sheet-data';
+import { FunnelDataSchema } from '@/lib/schemas';
 import type { FunnelData } from '@/lib/types';
 
 export type UpdateSheetDataInput = z.infer<typeof FunnelDataSchema>;
