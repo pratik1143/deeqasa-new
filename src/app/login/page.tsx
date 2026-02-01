@@ -57,31 +57,31 @@ export default function LoginPage() {
   }
 
   return (
-    <>
-      <div className="fixed top-0 left-0 w-screen h-screen -z-10 overflow-hidden">
-        <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-        >
-            <source src="/bg-video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-        </video>
-      </div>
+    <div className="w-screen h-screen relative">
+      {/* Background Video Layer */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover"
+      >
+        <source src="/bg-video.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
 
-      <div className="relative flex min-h-screen items-center justify-center p-4 bg-background/50 backdrop-blur-sm">
-          <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors z-10">
+      {/* Overlay and Content Layer */}
+      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center p-4 bg-black/65">
+          <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors">
               &larr; Back to Home
           </Link>
           
-          <div className="relative z-10 flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-8">
               <div className="text-center">
                   <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
                   <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
               </div>
-              <Card className="w-full max-w-sm bg-card/80 border-border">
+              <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm border-border">
                   <CardHeader className="text-center">
                       <div className="flex justify-center mb-2">
                           <ShieldCheck className="w-10 h-10 text-primary" />
@@ -129,6 +129,6 @@ export default function LoginPage() {
               </Card>
           </div>
         </div>
-    </>
+    </div>
   );
 }
