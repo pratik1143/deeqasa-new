@@ -11,8 +11,8 @@ import { google } from 'googleapis';
 import serviceAccount from '@/ai/service-account.json';
 import { ProductSchema } from '@/lib/quotation-schemas';
 
-// NOTE: Replace this with your actual Google Sheet ID containing product data
-const PRODUCT_SHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk"; // Example ID, replace
+// NOTE: This should match your actual Google Sheet ID containing product data
+const PRODUCT_SHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk"; 
 
 const GetProductDataOutputSchema = z.array(ProductSchema);
 
@@ -43,69 +43,58 @@ const getProductDataFlow = ai.defineFlow(
     const sheets = google.sheets({ version: 'v4', auth });
 
     try {
-      // Per user request, hardcode range to 'Products!A:Z' to ensure correct sheet is targeted.
-      const range = 'Products!A:Z';
+      const range = 'Products!A1:Z';
       
       const response = await sheets.spreadsheets.values.get({ spreadsheetId: PRODUCT_SHEET_ID, range });
 
       const rows = response.data.values;
-      // If there are no rows, or only a header row with no data, return empty.
       if (!rows || rows.length < 2) {
         console.warn("Product sheet is empty or has only a header row.");
         return [];
       };
 
-      // Normalize headers: trim whitespace and convert to uppercase for flexible matching.
       const headers = rows[0].map(h => String(h || '').trim().toUpperCase());
       const dataRows = rows.slice(1);
       
-      // Create a map of header names to their column index.
       const headerIndexMap: { [key: string]: number } = {};
       headers.forEach((header, index) => {
         if(header) headerIndexMap[header] = index;
       });
        
-      // Ensure mandatory columns 'SKU' and 'FTP' exist.
       if (headerIndexMap['SKU'] === undefined || headerIndexMap['FTP'] === undefined) {
-          throw new Error("Missing required columns in Product sheet. The header must contain 'SKU' and 'FTP'.");
+          console.error("Raw headers found in sheet:", rows[0]);
+          console.error("Normalized headers:", headers);
+          throw new Error(`Missing required columns in Product sheet. The header must contain 'SKU' and 'FTP'. Found headers: ${headers.join(', ')}`);
       }
       
       const parsedData = dataRows.map((row) => {
         const sku = String(row[headerIndexMap['SKU']] || '').trim();
-        // Skip row if SKU is missing.
         if (!sku) return null;
 
         const priceStr = String(row[headerIndexMap['FTP']] || '');
-        // Skip row if price (FTP) is missing or not a valid number.
         if (!priceStr) return null;
         
         const price = parseFloat(priceStr.replace(/[^0-9.]+/g, ''));
         if (isNaN(price)) return null;
 
-        // Concatenate description fields as requested.
         const descriptionParts = [
             sku,
             row[headerIndexMap['PROCESSOR']],
             row[headerIndexMap['MEMORY']],
             row[headerIndexMap['HDD']],
-            row[headerIndexMap['HDD 2']],
             row[headerIndexMap['GFX']]
         ].filter(part => part && String(part).trim() !== '');
         
         const name = descriptionParts.join(' / ');
         
-        // Combine HDD and HDD 2 for storage field.
-        const storage = [
-            row[headerIndexMap['HDD']],
-            row[headerIndexMap['HDD 2']],
-        ].filter(part => part && String(part).trim() !== '').join(' + ');
+        const storage = row[headerIndexMap['HDD']] ? String(row[headerIndexMap['HDD']]) : undefined;
 
         return {
           id: sku,
           name: name || 'Product details not available',
           processor: headerIndexMap['PROCESSOR'] !== undefined ? String(row[headerIndexMap['PROCESSOR']] || '') : undefined,
           memory: headerIndexMap['MEMORY'] !== undefined ? String(row[headerIndexMap['MEMORY']] || '') : undefined,
-          storage: storage || undefined,
+          storage: storage,
           gpu: headerIndexMap['GFX'] !== undefined ? String(row[headerIndexMap['GFX']] || '') : undefined,
           os: headerIndexMap['OS'] !== undefined ? String(row[headerIndexMap['OS']] || '') : undefined,
           warranty: headerIndexMap['WARRANTY'] !== undefined ? String(row[headerIndexMap['WARRANTY']] || '') : undefined,
