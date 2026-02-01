@@ -28,6 +28,7 @@ const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
   companyName: z.string().optional(),
   address: z.string().optional(),
+  subject: z.string().min(1, 'Subject is required.'),
   lineItems: z.array(z.object({
       product: ProductSchema,
       quantity: z.coerce.number().min(1),
@@ -100,6 +101,7 @@ export function QuotationBuilder() {
       customerName: '',
       companyName: '',
       address: '',
+      subject: '',
       lineItems: [],
     },
   });
@@ -116,7 +118,15 @@ export function QuotationBuilder() {
       try {
         setIsLoadingProducts(true);
         const productData = await getProductData();
-        setProducts(productData);
+        const uniqueData = Array.from(
+          productData.reduce((map, product) => {
+            if (!map.has(product.id)) {
+              map.set(product.id, product);
+            }
+            return map;
+          }, new Map<string, (typeof productData)[0]>()).values()
+        );
+        setProducts(uniqueData);
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Failed to load products', description: error.message });
       } finally {
@@ -143,33 +153,12 @@ export function QuotationBuilder() {
   };
 
   const totals = useMemo(() => {
-    let subTotal = 0;
-    let totalDiscount = 0;
-    const gstAmounts: { [rate: number]: { taxable: number, amount: number } } = {};
+    const subTotal = lineItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    const gstRate = 18; // 18%
+    const totalGst = subTotal * (gstRate / 100);
+    const grandTotal = subTotal + totalGst;
 
-    lineItems.forEach(item => {
-        const originalItemSubTotal = item.product.price * item.quantity;
-        subTotal += originalItemSubTotal;
-
-        const overriddenItemSubTotal = item.unitPrice * item.quantity;
-        const itemDiscount = originalItemSubTotal - overriddenItemSubTotal;
-        totalDiscount += itemDiscount;
-
-        const taxableAmount = overriddenItemSubTotal;
-
-        const gstRate = item.product.gstRate;
-        if (!gstAmounts[gstRate]) {
-            gstAmounts[gstRate] = { taxable: 0, amount: 0 };
-        }
-        gstAmounts[gstRate].taxable += taxableAmount;
-        gstAmounts[gstRate].amount += taxableAmount * (gstRate / 100);
-    });
-
-    const taxableValue = subTotal - totalDiscount;
-    const totalGst = Object.values(gstAmounts).reduce((acc, val) => acc + val.amount, 0);
-    const grandTotal = taxableValue + totalGst;
-
-    return { subTotal, totalDiscount, taxableValue, gstAmounts, totalGst, grandTotal };
+    return { subTotal, totalGst, grandTotal };
   }, [lineItems]);
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
@@ -190,13 +179,16 @@ export function QuotationBuilder() {
                     <h3 className="font-semibold text-lg mb-4 border-b pb-2">Customer Details</h3>
                     <div className="space-y-4">
                         <FormField control={form.control} name="customerName" render={({ field }) => (
-                            <FormItem><FormLabel>Customer Name*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} placeholder="e.g., Mr. John Doe" /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="companyName" render={({ field }) => (
-                            <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                            <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Acme Corporation" /></FormControl></FormItem>
                         )} />
                         <FormField control={form.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea rows={3} {...field} /></FormControl></FormItem>
+                            <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea rows={3} {...field} placeholder="Company Address" /></FormControl></FormItem>
+                        )} />
+                         <FormField control={form.control} name="subject" render={({ field }) => (
+                            <FormItem><FormLabel>Subject*</FormLabel><FormControl><Input {...field} placeholder="e.g., Quotation for HP Workstation & Display" /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                 </div>
@@ -285,14 +277,14 @@ export function QuotationBuilder() {
             <div id="quotation-preview" className="p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
                 <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
                     <div>
-                        <h1 className="text-3xl font-bold">DEEQASA TECH</h1>
-                        <p>Plot No. 7, 3rd Floor, Local Shopping Center, Masjid Moth,</p>
-                        <p>Greater Kailash-II, New Delhi, Delhi 110048</p>
-                        <p>Email: sales@deeqasa.tech</p>
-                        <p className="font-bold">GSTIN: XXXXXXXXXXXXXXX</p>
+                        <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
+                        <p>SCO 105-106, 1st Floor, Jubilee Walk, Sector 70,</p>
+                        <p>SAS Nagar, Mohali, Punjab</p>
+                        <p>Phone: 8595270950</p>
+                        <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
                     </div>
                     <div className="text-right">
-                        <h2 className="text-3xl font-bold text-gray-700 tracking-widest">QUOTATION</h2>
+                        <h2 className="text-xl font-bold text-gray-700 tracking-wide">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
                     </div>
                 </header>
 
@@ -304,10 +296,13 @@ export function QuotationBuilder() {
                         <p>Kind Attn: {form.watch('customerName')}</p>
                     </div>
                     <div className="text-left border border-black p-2">
-                         <p><span className="font-bold inline-block w-32">Quotation No:</span> Q-{format(new Date(), 'yyMMdd')}-001</p>
-                         <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MMM-yyyy')}</p>
-                         <p><span className="font-bold inline-block w-32">Validity:</span> 30 Days</p>
+                         <p><span className="font-bold inline-block w-32">Quotation No:</span> DQT/HPC-001 / {format(new Date(), 'dd-MM-yyyy')}</p>
+                         <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MM-yyyy')}</p>
                     </div>
+                </section>
+
+                <section className="mb-4">
+                    <p><span className="font-bold">Subject:</span> {form.watch('subject') || 'Quotation for IT Hardware'}</p>
                 </section>
                 
                 <section>
@@ -315,11 +310,11 @@ export function QuotationBuilder() {
                         <TableHeader>
                             <TableRow className="bg-gray-200">
                                 <TableHead className="border border-black text-center w-12">Sr. No.</TableHead>
-                                <TableHead className="border border-black">Description of Goods</TableHead>
-                                <TableHead className="border border-black text-center">HSN Code</TableHead>
+                                <TableHead className="border border-black">Description</TableHead>
+                                <TableHead className="border border-black text-center">Make/Model</TableHead>
                                 <TableHead className="border border-black text-right">Qty</TableHead>
-                                <TableHead className="border border-black text-right">Rate</TableHead>
-                                <TableHead className="border border-black text-right">Amount</TableHead>
+                                <TableHead className="border border-black text-right">Unit Price (₹)</TableHead>
+                                <TableHead className="border border-black text-right">Total (₹)</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -328,17 +323,8 @@ export function QuotationBuilder() {
                                     <TableCell className="border border-black text-center">{index + 1}</TableCell>
                                     <TableCell className="border border-black">
                                         <p className="font-bold">{item.product.name}</p>
-                                        <div className="text-gray-700 text-xs space-y-0.5 mt-1">
-                                            {item.product.processor && <p>Processor: {item.product.processor}</p>}
-                                            {item.product.memory && <p>Memory: {item.product.memory}</p>}
-                                            {item.product.storage && <p>Storage: {item.product.storage}</p>}
-                                            {item.product.gpu && <p>GPU: {item.product.gpu}</p>}
-                                            {item.product.os && <p>OS: {item.product.os}</p>}
-                                            {item.product.warranty && <p>Warranty: {item.product.warranty}</p>}
-                                            {item.product.id && <p>SKU: {item.product.id}</p>}
-                                        </div>
                                     </TableCell>
-                                    <TableCell className="border border-black text-center">8471</TableCell>
+                                    <TableCell className="border border-black text-center">{item.product.id}</TableCell>
                                     <TableCell className="border border-black text-right">{item.quantity}</TableCell>
                                     <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
                                     <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
@@ -351,22 +337,10 @@ export function QuotationBuilder() {
                                 <TableCell colSpan={5} className="border border-black text-right font-bold">Sub Total</TableCell>
                                 <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
                             </TableRow>
-                            {totals.totalDiscount > 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="border border-black text-right font-bold">Discount</TableCell>
-                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.totalDiscount)}</TableCell>
-                                </TableRow>
-                            )}
                             <TableRow>
-                                <TableCell colSpan={5} className="border border-black text-right font-bold">Taxable Value</TableCell>
-                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.taxableValue)}</TableCell>
+                                <TableCell colSpan={5} className="border border-black text-right font-bold">GST @18%</TableCell>
+                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
                             </TableRow>
-                            {Object.entries(totals.gstAmounts).map(([rate, {taxable, amount}]) => (
-                                <TableRow key={rate}>
-                                    <TableCell colSpan={5} className="border border-black text-right font-bold">Output GST @{rate}%</TableCell>
-                                    <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(amount)}</TableCell>
-                                </TableRow>
-                            ))}
                             <TableRow className="bg-gray-200">
                                 <TableCell colSpan={5} className="border border-black text-right font-bold">Grand Total</TableCell>
                                 <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
@@ -382,24 +356,24 @@ export function QuotationBuilder() {
                         <div>
                             <h4 className="font-bold underline mb-2">Terms & Conditions:</h4>
                             <ul className="list-disc list-inside space-y-1">
-                                <li>50% advance payment, 50% on delivery.</li>
-                                <li>Delivery within 2 weeks of advance payment.</li>
-                                <li>Warranty: 1 year standard manufacturer warranty as per OEM.</li>
-                                <li>This is a computer generated quotation and does not require a signature.</li>
+                                <li>Delivery Period: Within 4–6 weeks after confirmation of order.</li>
+                                <li>Warranty: As per manufacturer’s standard warranty.</li>
                             </ul>
                         </div>
                         <div>
                             <h4 className="font-bold underline mb-2">Bank Details:</h4>
-                            <p>Bank Name: HDFC BANK</p>
-                            <p>Account Name: DEEQASA TECH</p>
-                            <p>Account No: XXXXXXXXXXXXX</p>
-                            <p>IFSC Code: HDFC0000XXX</p>
+                            <p>Bank: ICICI Bank</p>
+                            <p>Account Number: 103205001866</p>
+                            <p>IFSC Code: ICIC0001032</p>
+                            <p>Account Type: Corporate Current</p>
+                            <p>Website: https://www.hpconnect.in</p>
                         </div>
                     </div>
                     <div className="mt-16 text-right">
-                        <p className="font-bold">For Deeqasa Tech</p>
+                        <p className="font-bold">For M/s DeeQasa-Tech</p>
+                        <p className="font-bold">HPI Official Business Partner</p>
                         <div className="h-16"></div>
-                        <p>Authorized Signatory</p>
+                        <p>Authorized Signatory: Pratik Chaudhary</p>
                     </div>
                 </footer>
             </div>
