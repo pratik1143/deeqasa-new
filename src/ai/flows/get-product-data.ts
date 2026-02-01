@@ -43,60 +43,77 @@ const getProductDataFlow = ai.defineFlow(
     const sheets = google.sheets({ version: 'v4', auth });
 
     try {
-      // Assuming product data is on a sheet named 'Products'
-      const sheetName = 'Products'; 
-      const range = `${sheetName}!A:J`; // SKU, Name, Processor, Memory, Storage, GPU, OS, Warranty, FTP, GST
+      const spreadsheetMeta = await sheets.spreadsheets.get({ spreadsheetId: PRODUCT_SHEET_ID });
+      const firstSheetName = spreadsheetMeta.data.sheets?.[0]?.properties?.title;
+
+      if (!firstSheetName) {
+        throw new Error("Could not find any sheets in the specified Product Google Sheet document.");
+      }
+      
+      const range = `${firstSheetName}!A:Z`;
       
       const response = await sheets.spreadsheets.values.get({ spreadsheetId: PRODUCT_SHEET_ID, range });
 
       const rows = response.data.values;
       if (!rows || rows.length < 2) return [];
 
-      const headers = rows[0].map(h => h.trim().toLowerCase());
+      const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
       const dataRows = rows.slice(1);
       
       const headerMap: { [key: string]: string } = {
         'sku': 'id',
-        'product name': 'name',
         'processor': 'processor',
         'memory': 'memory',
-        'storage': 'storage',
-        'gpu': 'gpu',
+        'hdd': 'storage',
+        'hdd 2': 'hdd2',
+        'gfx': 'gpu',
         'os': 'os',
         'warranty': 'warranty',
         'ftp': 'price',
-        'gst_percentage': 'gstRate'
       };
       
       const indexMap: { [key: string]: number } = {};
-       for (const header in headerMap) {
+      for (const header in headerMap) {
           const idx = headers.indexOf(header);
           if (idx !== -1) {
             indexMap[headerMap[header]] = idx;
           }
-       }
+      }
        
-      if (indexMap['id'] === undefined || indexMap['name'] === undefined || indexMap['price'] === undefined || indexMap['gstRate'] === undefined) {
-          throw new Error("Missing required columns in Product sheet. Expected at least: 'SKU', 'Product Name', 'FTP', 'GST_Percentage'.");
+      if (indexMap['id'] === undefined || indexMap['price'] === undefined) {
+          throw new Error("Missing required columns in Product sheet. Expected at least: 'SKU' and 'FTP'.");
       }
       
       const parsedData = dataRows.map((row) => {
-        const price = parseFloat(String(row[indexMap['price']]).replace(/[^0-9.-]+/g,""));
-        const gstRate = parseFloat(String(row[indexMap['gstRate']]).replace(/[^0-9.-]+/g,""));
+        const descriptionParts = [
+            row[indexMap['processor']],
+            row[indexMap['memory']],
+            row[indexMap['storage']], // Mapped from HDD
+            row[indexMap['hdd2']],    // Mapped from HDD 2
+            row[indexMap['gpu']]      // Mapped from GFX
+        ].filter(part => part && String(part).trim() !== '');
         
+        const name = descriptionParts.join(' / ');
+
+        const priceStr = indexMap['price'] !== undefined ? String(row[indexMap['price']] || '0') : '0';
+        const price = parseFloat(priceStr.replace(/[^0-9.-]+/g,""));
+        
+        const sku = String(row[indexMap['id']] || '').trim();
+        if (!sku) return null;
+
         return {
-          id: String(row[indexMap['id']] || ''),
-          name: String(row[indexMap['name']] || ''),
-          processor: indexMap['processor'] !== undefined ? String(row[indexMap['processor']]) : undefined,
-          memory: indexMap['memory'] !== undefined ? String(row[indexMap['memory']]) : undefined,
-          storage: indexMap['storage'] !== undefined ? String(row[indexMap['storage']]) : undefined,
-          gpu: indexMap['gpu'] !== undefined ? String(row[indexMap['gpu']]) : undefined,
-          os: indexMap['os'] !== undefined ? String(row[indexMap['os']]) : undefined,
-          warranty: indexMap['warranty'] !== undefined ? String(row[indexMap['warranty']]) : undefined,
+          id: sku,
+          name: name || 'Product details not available',
+          processor: indexMap['processor'] !== undefined ? String(row[indexMap['processor']] || '') : undefined,
+          memory: indexMap['memory'] !== undefined ? String(row[indexMap['memory']] || '') : undefined,
+          storage: indexMap['storage'] !== undefined ? String(row[indexMap['storage']] || '') : undefined,
+          gpu: indexMap['gpu'] !== undefined ? String(row[indexMap['gpu']] || '') : undefined,
+          os: indexMap['os'] !== undefined ? String(row[indexMap['os']] || '') : undefined,
+          warranty: indexMap['warranty'] !== undefined ? String(row[indexMap['warranty']] || '') : undefined,
           price: isNaN(price) ? 0 : price,
-          gstRate: isNaN(gstRate) ? 0 : gstRate,
+          gstRate: 18, // Defaulting to 18% as it's not in the sheet
         };
-      }).filter(p => p.name && p.price > 0); // Filter out items without a name or price
+      }).filter((p): p is NonNullable<typeof p> => p !== null && p.price > 0);
 
       const validationResult = GetProductDataOutputSchema.safeParse(parsedData);
       if (validationResult.success) {
