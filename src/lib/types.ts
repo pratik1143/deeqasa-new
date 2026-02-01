@@ -9,5 +9,8 @@ export type FunnelData = {
     accountName: string;
     owner: string;
     probability: number;
+    state?: string;
+    oppCloseMonth?: string;
+    productLine?: string;
   };
   
