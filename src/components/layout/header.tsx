@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Search } from "lucide-react";
 
 const navLinks = [
+  { name: "Home", href: "/" },
   { name: "Solutions", href: "#solutions" },
   { name: "Industries", href: "#industries" },
   { name: "Sustainability", href: "#sustainability" },
