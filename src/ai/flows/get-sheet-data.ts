@@ -27,7 +27,6 @@ const FunnelDataSchema = z.object({
 
 const GetSheetDataInputSchema = z.object({
   spreadsheetId: z.string().describe('The ID of the Google Sheet.'),
-  range: z.string().describe('The A1 notation of the range to retrieve.'),
 });
 
 const GetSheetDataOutputSchema = z.array(FunnelDataSchema);
@@ -38,7 +37,7 @@ export type GetSheetDataOutput = z.infer<typeof GetSheetDataOutputSchema>;
 /**
  * Fetches and parses sales funnel data from a specified Google Sheet.
  * This function should be called from the frontend to get live data.
- * @param input The spreadsheet ID and range.
+ * @param input The spreadsheet ID.
  * @returns A promise that resolves to an array of funnel data objects.
  */
 export async function getSheetData(input: GetSheetDataInput): Promise<GetSheetDataOutput> {
@@ -51,7 +50,7 @@ const getSheetDataFlow = ai.defineFlow(
     inputSchema: GetSheetDataInputSchema,
     outputSchema: GetSheetDataOutputSchema,
   },
-  async ({ spreadsheetId, range }) => {
+  async ({ spreadsheetId }) => {
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
@@ -69,6 +68,20 @@ const getSheetDataFlow = ai.defineFlow(
     const sheets = google.sheets({ version: 'v4', auth });
 
     try {
+      // Step 1: Get spreadsheet metadata to find the first sheet's name
+      const spreadsheetMeta = await sheets.spreadsheets.get({
+        spreadsheetId,
+      });
+
+      const firstSheetName = spreadsheetMeta.data.sheets?.[0]?.properties?.title;
+
+      if (!firstSheetName) {
+        throw new Error("Could not find any sheets in the specified Google Sheet document. Please ensure it's not empty.");
+      }
+      
+      // Step 2: Construct the range dynamically for columns A to I
+      const range = `${firstSheetName}!A:I`;
+
       const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
         range,
@@ -113,6 +126,7 @@ const getSheetDataFlow = ai.defineFlow(
         
         const validStatus = ['Won', 'Lost', 'Pipeline'];
         if (!validStatus.includes(item.status)) {
+           item.status = 'Pipeline'; // Default to pipeline if status is invalid
         }
 
         return item;
@@ -138,7 +152,7 @@ const getSheetDataFlow = ai.defineFlow(
         if (err.code) {
             switch (err.code) {
                 case 400:
-                    friendlyMessage = `Invalid Request: The range "${range}" might be incorrect for the sheet. Please verify the sheet name and range.`;
+                    friendlyMessage = `Invalid Request: There might be an issue with the spreadsheet structure. Please check the sheet and try again.`;
                     break;
                 case 403:
                     friendlyMessage = `Permission Denied: The service account ('${serviceAccountEmail}') does not have Viewer access to the Google Sheet. Please share the sheet with this email address.`;
@@ -148,7 +162,9 @@ const getSheetDataFlow = ai.defineFlow(
                     break;
             }
         } else if (err.message?.includes('invalid_grant')) {
-            friendlyMessage = 'Authentication Failed: The service account credentials are not valid. Please check the private key and service account email.';
+            friendlyMessage = 'Authentication Failed: The service account credentials are not valid. Please check the private key and service account email in your environment variables.';
+        } else if (err.message) {
+            friendlyMessage = err.message;
         }
 
         throw new Error(friendlyMessage);

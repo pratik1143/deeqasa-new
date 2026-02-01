@@ -76,7 +76,6 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
 });
 
 const SPREADSHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk";
-const SHEET_RANGE = "Sheet1!A:I"; // Assumes headers in row 1, data starts in row 2
 
 export function FunnelAnalyzerDashboard() {
   const [data, setData] = useState<FunnelData[]>([]);
@@ -98,7 +97,6 @@ export function FunnelAnalyzerDashboard() {
       try {
         const sheetData = await getSheetData({
           spreadsheetId: SPREADSHEET_ID,
-          range: SHEET_RANGE,
         });
         setData(sheetData);
       } catch (e: any) {
@@ -114,6 +112,7 @@ export function FunnelAnalyzerDashboard() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {
@@ -252,8 +251,6 @@ export function FunnelAnalyzerDashboard() {
               <AlertTitle>Error Fetching Data</AlertTitle>
               <AlertDescription>
                 {error}
-                <br /><br />
-                Please ensure the service account has viewer permissions on the Google Sheet and try again.
               </AlertDescription>
             </Alert>
             <Button onClick={handleRefresh} variant="outline" className="mt-4">
@@ -363,10 +360,12 @@ export function FunnelAnalyzerDashboard() {
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={{}} className="h-52 w-full">
-                        <PieChart>
-                            <Tooltip content={<ChartTooltipContent hideLabel />} />
-                            <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={70} />
-                        </PieChart>
+                        <ResponsiveContainer>
+                            <PieChart>
+                                <Tooltip content={<ChartTooltipContent hideLabel />} />
+                                <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={70} />
+                            </PieChart>
+                        </ResponsiveContainer>
                     </ChartContainer>
                 </CardContent>
                 </Card>
@@ -376,12 +375,14 @@ export function FunnelAnalyzerDashboard() {
                 </CardHeader>
                 <CardContent>
                     <ChartContainer config={chartConfig} className="h-52 w-full">
-                        <BarChart data={ownerChartData} layout="vertical" margin={{ left: 20 }}>
-                            <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" hide />
-                            <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
-                            <Bar dataKey="funnels" fill="hsl(var(--chart-1))" radius={4} />
-                        </BarChart>
+                       <ResponsiveContainer>
+                            <BarChart data={ownerChartData} layout="vertical" margin={{ left: 20 }}>
+                                <XAxis type="number" hide />
+                                <YAxis type="category" dataKey="name" hide />
+                                <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
+                                <Bar dataKey="funnels" fill="hsl(var(--chart-1))" radius={4} />
+                            </BarChart>
+                        </ResponsiveContainer>
                     </ChartContainer>
                 </CardContent>
                 </Card>
@@ -392,14 +393,16 @@ export function FunnelAnalyzerDashboard() {
                 </CardHeader>
                 <CardContent>
                 <ChartContainer config={chartConfig} className="h-72 w-full">
-                        <LineChart data={Object.entries(revenueByMonth).map(([name, value]) => ({ name, revenue: value }))}>
-                            <CartesianGrid vertical={false} />
-                            <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                            <YAxis tickFormatter={(value) => currencyFormatter.format(value as number).slice(0,-3)+'k'}/>
-                            <Tooltip content={<ChartTooltipContent />} />
-                            <Legend />
-                            <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
-                        </LineChart>
+                        <ResponsiveContainer>
+                            <LineChart data={Object.entries(revenueByMonth).map(([name, value]) => ({ name, revenue: value }))}>
+                                <CartesianGrid vertical={false} />
+                                <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                                <YAxis tickFormatter={(value) => currencyFormatter.format(value as number).slice(0,-3)+'k'}/>
+                                <Tooltip content={<ChartTooltipContent />} />
+                                <Legend />
+                                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </ChartContainer>
                 </CardContent>
             </Card>
