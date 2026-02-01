@@ -65,6 +65,7 @@ import { LineLoader } from "../ui/line-loader";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 const chartConfig = {
@@ -218,6 +219,7 @@ export function FunnelAnalyzerDashboard() {
     wonRevenue,
     pipelineRevenue,
     revenueByMonth,
+    pipelineRevenueByMonth,
     funnelsByOwner,
     funnelsBySegment,
     winRatioBySegment
@@ -249,6 +251,15 @@ export function FunnelAnalyzerDashboard() {
         if (d.status === 'Won') {
             if (!acc[d.closureMonth]) acc[d.closureMonth] = 0;
             acc[d.closureMonth] += d.revenue;
+        }
+        return acc;
+    }, {} as Record<string, number>);
+    
+    const pipelineRevenueByMonth = filteredData.reduce((acc, d) => {
+        if (d.status === 'Pipeline') {
+            const month = d.closureMonth || d.oppCloseMonth || 'Unknown';
+            if (!acc[month]) acc[month] = 0;
+            acc[month] += d.revenue * d.probability;
         }
         return acc;
     }, {} as Record<string, number>);
@@ -287,6 +298,7 @@ export function FunnelAnalyzerDashboard() {
       wonRevenue,
       pipelineRevenue,
       revenueByMonth,
+      pipelineRevenueByMonth,
       funnelsByOwner,
       funnelsBySegment,
       winRatioBySegment
@@ -310,6 +322,7 @@ export function FunnelAnalyzerDashboard() {
                 pipelineRevenueInr: pipelineRevenue * EXCHANGE_RATE_USD_TO_INR,
                 totalRevenueInr: totalRevenue * EXCHANGE_RATE_USD_TO_INR,
                 revenueByMonth,
+                pipelineRevenueByMonth,
                 funnelsByOwner,
                 funnelsBySegment,
                 winRatioBySegment
@@ -506,10 +519,10 @@ export function FunnelAnalyzerDashboard() {
         {/* AI Analysis Card */}
         <Card className="flex flex-col">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><BrainCircuit size={20} className="text-primary"/> AI Insights</CardTitle>
+                <CardTitle className="flex items-center gap-2"><BrainCircuit size={20} className="text-primary"/> AI Funnel Intelligence</CardTitle>
                 <CardDescription>Automatic analysis of your current funnel.</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
+            <CardContent className="flex-1 flex flex-col overflow-hidden">
                 {isAnalyzing ? (
                     <div className="space-y-4 m-auto w-full p-4">
                         <p className="text-sm text-center text-muted-foreground">Analyzing data...</p>
@@ -521,34 +534,59 @@ export function FunnelAnalyzerDashboard() {
                         </div>
                     </div>
                 ) : aiInsights ? (
-                    <div className="text-sm space-y-4">
-                        <div>
-                            <h4 className="font-semibold text-foreground">Performance Summary</h4>
-                            <p className="text-muted-foreground">{aiInsights.performanceSummary}</p>
+                    <ScrollArea className="h-full -mr-4">
+                        <div className="text-sm space-y-6 pr-4">
+                            <div>
+                                <h4 className="font-semibold text-foreground">Executive Summary</h4>
+                                <p className="text-muted-foreground">{aiInsights.executiveSummary}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-foreground">Revenue Forecast</h4>
+                                <p className="text-muted-foreground">{aiInsights.revenueForecast}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-foreground">Key Risks</h4>
+                                <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
+                                    {aiInsights.keyRisks.map((risk, i) => <li key={i}>{risk}</li>)}
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-foreground">Key Opportunities</h4>
+                                <ul className="list-disc list-inside text-muted-foreground space-y-1 mt-1">
+                                    {aiInsights.keyOpportunities.map((opp, i) => <li key={i}>{opp}</li>)}
+                                </ul>
+                            </div>
+
+                            <Accordion type="single" collapsible className="w-full">
+                                <AccordionItem value="item-1">
+                                    <AccordionTrigger>Detailed Performance Summary</AccordionTrigger>
+                                    <AccordionContent>{aiInsights.performanceSummary}</AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-2">
+                                    <AccordionTrigger>Bottlenecks & Lost Deals</AccordionTrigger>
+                                    <AccordionContent>{aiInsights.stuckDealsInsight}</AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-3">
+                                    <AccordionTrigger>Top Performer Analysis</AccordionTrigger>
+                                    <AccordionContent>{aiInsights.topPerformerInsight}</AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="item-4">
+                                    <AccordionTrigger>Segment Deep Dive</AccordionTrigger>
+                                    <AccordionContent>{aiInsights.segmentInsight}</AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
                         </div>
-                         <div>
-                            <h4 className="font-semibold text-foreground">Bottlenecks</h4>
-                            <p className="text-muted-foreground">{aiInsights.stuckDealsInsight}</p>
-                        </div>
-                         <div>
-                            <h4 className="font-semibold text-foreground">Top Performers</h4>
-                            <p className="text-muted-foreground">{aiInsights.topPerformerInsight}</p>
-                        </div>
-                         <div>
-                            <h4 className="font-semibold text-foreground">Segment Focus</h4>
-                            <p className="text-muted-foreground">{aiInsights.segmentInsight}</p>
-                        </div>
-                    </div>
+                    </ScrollArea>
                 ) : (
                     <div className="m-auto text-center text-muted-foreground">
-                        <p>Click the button to generate AI-powered insights for the current data view.</p>
+                        <p>Click the button to generate AI-powered intelligence for the current data view.</p>
                     </div>
                 )}
             </CardContent>
             <div className="p-6 pt-0 mt-auto">
                 <Button onClick={handleAnalyze} disabled={isAnalyzing || isRefreshing} className="w-full">
                     {isAnalyzing ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : <BrainCircuit className="mr-2 h-4 w-4" />}
-                    {isAnalyzing ? "Analyzing..." : "Generate AI Insights"}
+                    {isAnalyzing ? "Analyzing..." : "Generate AI Intelligence"}
                 </Button>
             </div>
         </Card>
