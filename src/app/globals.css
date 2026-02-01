@@ -81,6 +81,14 @@
   .text-violet {
     color: hsl(var(--accent));
   }
+
+  @keyframes line-loader {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .animate-line-loader {
+    animation: line-loader 2s linear infinite;
+  }
 }
 
 /* Animations */

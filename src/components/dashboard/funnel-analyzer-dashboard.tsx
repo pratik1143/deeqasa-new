@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/select";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "../ui/chart";
 import { Button } from "../ui/button";
-import { BrainCircuit, Loader2, RefreshCw } from "lucide-react";
+import { BrainCircuit, RefreshCw } from "lucide-react";
 import { FunnelAnalysisOutput, analyzeFunnelData } from "@/ai/flows/ai-funnel-analyzer";
 import { getSheetData } from "@/ai/flows/get-sheet-data";
 import { Skeleton } from "../ui/skeleton";
@@ -55,6 +55,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { LineLoader } from "../ui/line-loader";
 
 
 const chartConfig = {
@@ -275,7 +276,7 @@ export function FunnelAnalyzerDashboard() {
               </AlertDescription>
             </Alert>
             <Button onClick={handleRefresh} variant="outline" className="mt-4">
-                <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : <RefreshCw className="mr-2 h-4 w-4" />}
                  Retry
             </Button>
         </div>
@@ -302,7 +303,7 @@ export function FunnelAnalyzerDashboard() {
             </p>
         </div>
         <Button onClick={handleRefresh} variant="outline" disabled={isRefreshing}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : <RefreshCw className="mr-2 h-4 w-4" />}
           Refresh Data
         </Button>
       </div>
@@ -439,11 +440,14 @@ export function FunnelAnalyzerDashboard() {
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
                 {isAnalyzing ? (
-                    <div className="space-y-4 m-auto">
-                        <Skeleton className="h-8 w-64" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-4/5" />
-                        <Skeleton className="h-4 w-full" />
+                    <div className="space-y-4 m-auto w-full p-4">
+                        <p className="text-sm text-center text-muted-foreground">Analyzing data...</p>
+                        <LineLoader />
+                        <div className="space-y-4 mt-4">
+                            <Skeleton className="h-8 w-3/4" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-5/6" />
+                        </div>
                     </div>
                 ) : aiInsights ? (
                     <div className="text-sm space-y-4">
@@ -472,7 +476,7 @@ export function FunnelAnalyzerDashboard() {
             </CardContent>
             <div className="p-6 pt-0 mt-auto">
                 <Button onClick={handleAnalyze} disabled={isAnalyzing || isRefreshing} className="w-full">
-                    {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
+                    {isAnalyzing ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : <BrainCircuit className="mr-2 h-4 w-4" />}
                     {isAnalyzing ? "Analyzing..." : "Generate AI Insights"}
                 </Button>
             </div>

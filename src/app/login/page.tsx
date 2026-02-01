@@ -7,10 +7,11 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
+import { LineLoader } from '@/components/ui/line-loader';
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -122,7 +123,7 @@ export default function LoginPage() {
                             />
                         </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        {isLoading ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : null}
                         Sign In
                     </Button>
                     </form>

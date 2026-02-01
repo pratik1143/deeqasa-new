@@ -4,13 +4,14 @@ import { useState, useTransition, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { X, Bot, User, Loader2, Wand2, FileText } from "lucide-react";
+import { X, Bot, User, Wand2, FileText } from "lucide-react";
 import { generateSolutions } from "@/ai/flows/ai-qasa-content-generation";
 import { summarizeDocument } from "@/ai/flows/ai-qasa-summarization";
 import { ScrollArea } from "../ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { cn } from "@/lib/utils";
+import { LineLoader } from "../ui/line-loader";
 
 type Message = {
   role: "user" | "assistant";
@@ -92,8 +93,10 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
               {isPending && (
                 <div className="flex items-start gap-3">
                   <Bot className="text-primary mt-1" />
-                  <div className="rounded-lg px-4 py-2 bg-secondary flex items-center">
-                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  <div className="rounded-lg px-4 py-2 bg-secondary flex items-center gap-2">
+                    <div className="w-4 h-4 flex items-center">
+                      <LineLoader className="h-0.5" />
+                    </div>
                     Thinking...
                   </div>
                 </div>
@@ -128,8 +131,8 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
                     }}
                     disabled={isPending}
                 />
-                <Button type="submit" disabled={isPending || !input.trim()}>
-                    {isPending ? <Loader2 className="animate-spin h-4 w-4" /> : 'Send'}
+                <Button type="submit" disabled={isPending || !input.trim()} className="w-20">
+                    {isPending ? <div className="w-full"><LineLoader className="h-0.5" /></div> : 'Send'}
                 </Button>
             </form>
         </CardFooter>
