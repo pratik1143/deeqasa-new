@@ -73,6 +73,10 @@ export default function LoginPage() {
         <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-primary-foreground/80 hover:text-primary transition-colors z-10">
             &larr; Back to Home
         </Link>
+        <div className="absolute top-8 right-8 z-10 text-right">
+            <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
+            <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
+        </div>
       <Card className="w-full max-w-sm bg-card/80 border-border z-10">
         <CardHeader className="text-center">
             <div className="flex justify-center mb-2">
