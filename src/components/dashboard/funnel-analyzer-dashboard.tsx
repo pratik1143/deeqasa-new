@@ -461,67 +461,63 @@ export function FunnelAnalyzerDashboard() {
         </Card>
       </div>
 
-       {/* Charts & AI Insights */}
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-            {/* Charts Grid */}
-            <div className="grid gap-8 md:grid-cols-2">
-                <Card>
-                <CardHeader>
-                    <CardTitle>Funnel Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={{}} className="h-52 w-full">
-                        <ResponsiveContainer>
-                            <PieChart>
-                                <Tooltip content={<ChartTooltipContent hideLabel />} />
-                                <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={70} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                </CardContent>
-                </Card>
-                <Card>
-                <CardHeader>
-                    <CardTitle>Funnels by Owner</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig} className="h-52 w-full">
-                       <ResponsiveContainer>
-                            <BarChart data={ownerChartData} layout="vertical" margin={{ left: 20 }}>
-                                <XAxis type="number" hide />
-                                <YAxis type="category" dataKey="name" hide />
-                                <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
-                                <Bar dataKey="funnels" fill="hsl(var(--chart-1))" radius={4} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                </CardContent>
-                </Card>
-            </div>
+      <div className="space-y-8">
+        <div className="grid gap-8 md:grid-cols-2">
             <Card>
-                <CardHeader>
-                    <CardTitle>Won Revenue by Month</CardTitle>
-                </CardHeader>
-                <CardContent>
-                <ChartContainer config={chartConfig} className="h-72 w-full">
-                        <ResponsiveContainer>
-                            <LineChart data={Object.entries(revenueByMonth).map(([name, value]) => ({ name, revenue: value }))}>
-                                <CartesianGrid vertical={false} />
-                                <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                                <YAxis tickFormatter={(value) => `$${(value as number / 1000).toFixed(0)}k`}/>
-                                <Tooltip content={<ChartTooltipContent formatter={(value) => usdCurrencyFormatter.format(value as number)} />} />
-                                <Legend />
-                                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                </CardContent>
+            <CardHeader>
+                <CardTitle>Funnel Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer config={{}} className="h-52 w-full">
+                    <ResponsiveContainer>
+                        <PieChart>
+                            <Tooltip content={<ChartTooltipContent hideLabel />} />
+                            <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={70} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+            </CardContent>
+            </Card>
+            <Card>
+            <CardHeader>
+                <CardTitle>Funnels by Owner</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer config={chartConfig} className="h-52 w-full">
+                   <ResponsiveContainer>
+                        <BarChart data={ownerChartData} layout="vertical" margin={{ left: 20 }}>
+                            <XAxis type="number" hide />
+                            <YAxis type="category" dataKey="name" hide />
+                            <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
+                            <Bar dataKey="funnels" fill="hsl(var(--chart-1))" radius={4} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+            </CardContent>
             </Card>
         </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Won Revenue by Month</CardTitle>
+            </CardHeader>
+            <CardContent>
+            <ChartContainer config={chartConfig} className="h-72 w-full">
+                    <ResponsiveContainer>
+                        <LineChart data={Object.entries(revenueByMonth).map(([name, value]) => ({ name, revenue: value }))}>
+                            <CartesianGrid vertical={false} />
+                            <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                            <YAxis tickFormatter={(value) => `$${(value as number / 1000).toFixed(0)}k`}/>
+                            <Tooltip content={<ChartTooltipContent formatter={(value) => usdCurrencyFormatter.format(value as number)} />} />
+                            <Legend />
+                            <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+            </CardContent>
+        </Card>
 
         {/* AI Analysis Card */}
-        <Card className="flex flex-col">
+        <Card className="flex flex-col mt-8">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><BrainCircuit size={20} className="text-primary"/> AI Funnel Intelligence</CardTitle>
                 <CardDescription>Automatic analysis of your current funnel.</CardDescription>
