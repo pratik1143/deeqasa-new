@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemoFirebase, useUser, useFirestore, useDoc } from '@/firebase';
+import { useMemoFirebase, useUser, useFirestore } from '@/firebase/provider';
+import { useDoc } from '@/firebase/firestore/use-doc';
 import { doc } from 'firebase/firestore';
 
 export interface UserProfile {
