@@ -294,19 +294,19 @@ export function QuotationBuilder() {
 
       {/* ===== PREVIEW PANEL (WYSIWYG) ===== */}
       <div className="flex-1 relative w-full overflow-x-auto min-h-screen">
-        <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
+        <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end buttons-wrapper">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
         
-        {/* Force pixel-perfect landscape width for WYSIWYG screen preview (A4 Landscape at 96 DPI) */}
-        <div className="quotation-print bg-white text-black mx-auto p-12 shadow-2xl" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '793px', width: '1122px' }}>
+        {/* Force pixel-perfect landscape width for WYSIWYG screen preview (A4 Landscape at 96 DPI: 1123px) */}
+        <div className="quotation-print bg-white text-black mx-auto p-12 shadow-2xl" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '794px', width: '1123px' }}>
             
             {/* HEADER SECTION */}
             <header className="mb-8 flex justify-between items-center">
                 <div className="flex items-center gap-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="w-[140px] h-auto object-contain" />
+                    <img src="/hp-logo.png" alt="HP Logo" className="w-auto h-[70px] object-contain" />
                     <div className="company-details">
                         <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
                         <div className="text-[10pt] leading-snug text-gray-800">
@@ -317,7 +317,7 @@ export function QuotationBuilder() {
                         </div>
                     </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right max-w-[40%]">
                     <h1 className="text-[14pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION (THESE PRICES ARE VALID TILL 7 DAYS)</h1>
                 </div>
             </header>
@@ -358,7 +358,7 @@ export function QuotationBuilder() {
             
             {/* PRODUCT TABLE SECTION */}
             <section className="mb-8">
-                <Table className="border-collapse border border-black w-full text-[10.5pt]">
+                <Table className="border-collapse border border-black w-full text-[10.5pt]" style={{ tableLayout: 'fixed' }}>
                     <TableHeader>
                         <TableRow className="bg-gray-100 hover:bg-gray-100 border-none">
                             <TableHead className="border border-black text-center w-12 text-black font-bold h-10 py-2">Sr.</TableHead>
@@ -373,9 +373,9 @@ export function QuotationBuilder() {
                         {lineItems.map((item, index) => (
                             <TableRow key={index} className="hover:bg-transparent border-none">
                                 <TableCell className="border border-black text-center py-4">{index + 1}</TableCell>
-                                <TableCell className="border border-black py-4 px-3">
+                                <TableCell className="border border-black py-4 px-3 overflow-hidden">
                                     <p className="font-bold mb-1 text-[11pt]">{item.product.model}</p>
-                                    <p className="leading-snug text-gray-700 text-[10pt]">{getLongDescription(item.product)}</p>
+                                    <p className="leading-snug text-gray-700 text-[10pt] whitespace-pre-wrap">{getLongDescription(item.product)}</p>
                                 </TableCell>
                                 <TableCell className="border border-black text-center py-4 font-bold">{item.product.model}</TableCell>
                                 <TableCell className="border border-black text-right py-4">{item.quantity}</TableCell>
