@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -8,14 +9,17 @@ import { Search, LogIn, LogOut } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 
-const navLinks = [
+const baseNavLinks = [
   { name: "Home", href: "/" },
   { name: "Solutions", href: "/#solutions" },
-  { name: "Dashboard", href: "/dashboard"},
-  { name: "Quotation Builder", href: "/quotation-builder" },
   { name: "Industries", href: "#industries" },
   { name: "Sustainability", href: "https://www.hp.com/in-en/sustainable-impact.html" },
   { name: "About", href: "#about" },
+];
+
+const protectedLinks = [
+  { name: "Dashboard", href: "/dashboard" },
+  { name: "Quotation Builder", href: "/quotation-builder" },
 ];
 
 export function Header() {
@@ -23,7 +27,6 @@ export function Header() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,6 +44,11 @@ export function Header() {
   const handleSignIn = () => {
     router.push('/login');
   };
+
+  // Combine links based on authentication status
+  const navLinks = user 
+    ? [...baseNavLinks.slice(0, 2), ...protectedLinks, ...baseNavLinks.slice(2)]
+    : baseNavLinks;
 
   return (
     <header className={cn(
@@ -81,19 +89,20 @@ export function Header() {
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               </Button>
             ) : user ? (
-              <Button variant="ghost" size="icon" onClick={handleSignOut} aria-label="Sign Out">
-                <LogOut />
+              <Button variant="ghost" className="flex items-center gap-2" onClick={handleSignOut} aria-label="Sign Out">
+                <span className="hidden sm:inline">Sign Out</span>
+                <LogOut className="h-4 w-4" />
               </Button>
             ) : (
-              <Button variant="ghost" size="icon" onClick={handleSignIn} aria-label="Sign In">
-                <LogIn />
+              <Button variant="ghost" className="flex items-center gap-2" onClick={handleSignIn} aria-label="Sign In">
+                <span className="hidden sm:inline">Admin Login</span>
+                <LogIn className="h-4 w-4" />
               </Button>
             )}
 
             <Button variant="ghost" size="icon">
                 <Search />
             </Button>
-            {/* Hamburger menu for mobile would go here */}
         </div>
       </div>
     </header>
