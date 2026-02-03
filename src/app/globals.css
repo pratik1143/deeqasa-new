@@ -42,27 +42,32 @@
   }
 }
 
-/* QUOTATION PREVIEW - WEBSITE VIEW */
+/* QUOTATION PREVIEW & PRINT FIXES */
 .quotation-page {
-  width: 1123px;           /* A4 landscape width at 96dpi */
-  min-height: 794px;      /* A4 landscape height at 96dpi */
+  width: 1123px;           /* Standard A4 landscape width at 96dpi */
+  min-height: 794px;      /* Standard A4 landscape height at 96dpi */
   margin: 40px auto;
   background: #fff;
   color: #000;
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif;
   position: relative;
   overflow: visible;
 }
 
-/* PRINT CSS */
+/* Force elements to stay together */
+.no-break {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
 @media print {
-  /* PAGE CONFIG */
+  /* ORIENTATION */
   @page {
     size: A4 landscape;
-    margin: 12mm;
+    margin: 10mm;
   }
 
   /* RESET DEFAULTS */
@@ -73,43 +78,50 @@
     padding: 0 !important;
     background: #fff !important;
     overflow: visible !important;
+    color: #000 !important;
   }
 
-  /* HIDE EVERYTHING EXCEPT THE PRINT AREA */
-  body > * {
+  /* ISOLATION - Hide EVERYTHING except the page */
+  body > *:not(div) {
     display: none !important;
   }
 
-  body > #quotation-print-area {
+  /* Hide UI elements specifically */
+  nav, header, footer, aside, .no-print, button, form, .quotation-form, .sticky, [role="status"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Make sure the main layout doesn't interfere */
+  main, div, section {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* TARGET THE PAGE */
+  .quotation-page {
     display: block !important;
+    visibility: visible !important;
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-    width: 100% !important;
+    width: 1123px !important;
     margin: 0 !important;
     padding: 0 !important;
-  }
-
-  /* Ensure the printed container matches landscape width */
-  #quotation-print-area {
-    width: 1123px !important;
-    max-width: 1123px !important;
     background: #fff !important;
     box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    border: none !important;
+    transform: none !important;
   }
 
-  /* PREVENT BREAKS */
-  .no-break {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
+  /* TABLE PRINT OPTIMIZATION */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    page-break-inside: auto;
+    page-break-inside: auto !important;
   }
 
   tr {
@@ -118,10 +130,10 @@
   }
 
   thead {
-    display: table-header-group;
+    display: table-header-group !important;
   }
 
-  /* REMOVE BROWSER DEFAULTS */
+  /* REMOVE BROWSER METADATA */
   body::after,
   body::before {
     display: none !important;
