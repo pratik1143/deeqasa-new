@@ -31,27 +31,6 @@
     --chart-4: 48 100% 50%;
     --chart-5: 300 100% 50%;
   }
-  .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 188 100% 50%;
-    --primary-foreground: 0 0% 5%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 276 73% 53%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 188 100% 50%;
-  }
 }
 
 @layer base {
@@ -63,136 +42,113 @@
   }
 }
 
-@layer utilities {
-  .perspective-1000 { perspective: 1000px; }
-  .transform-style-preserve-3d { transform-style: preserve-3d; }
-  .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-  .rotate-y-180 { transform: rotateY(180deg); }
-
-  .bg-glass {
-    @apply bg-secondary/80 backdrop-blur-sm;
-  }
-
-  .text-emerald {
-    color: hsl(var(--emerald-hsl));
-  }
-  .text-violet {
-    color: hsl(var(--accent));
-  }
-
-  @keyframes line-loader {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  .animate-line-loader {
-    animation: line-loader 2s linear infinite;
-  }
-
-  @keyframes snake-light-spin {
-    to { transform: rotate(1turn); }
-  }
-
-  .animated-snake-wrapper {
-    position: relative;
-    padding: 1.5px;
-    transition: filter 0.3s;
-  }
-  .animated-snake-wrapper::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: conic-gradient(from 180deg at 50% 50%, hsl(var(--primary)), hsl(var(--emerald-hsl)), hsl(var(--accent)), hsl(var(--emerald-hsl)), hsl(var(--primary)));
-      animation: snake-light-spin 4s linear infinite;
-      z-index: -1;
-      transition: animation-duration 0.3s;
-  }
-  .animated-snake-wrapper:hover::before {
-      animation-duration: 2s;
-  }
-  .animated-snake-wrapper:hover {
-      filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.5));
-  }
-  .animated-snake-wrapper.is-thinking::before {
-    animation-duration: 1.5s;
-  }
-  .animated-snake-wrapper.is-thinking {
-      filter: drop-shadow(0 0 8px hsl(var(--primary)));
-  }
+/* QUOTATION PREVIEW - WEBSITE VIEW */
+.quotation-page {
+  width: 1123px;           /* A4 landscape usable width */
+  min-height: 794px;
+  margin: 24px auto;
+  background: #fff;
+  color: #000;
+  padding: 24px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.25);
+  box-sizing: border-box;
+  font-family: 'Times New Roman', Times, serif;
 }
 
+/* PRINT CSS */
 @media print {
+  /* PAGE CONFIG */
   @page {
     size: A4 landscape;
     margin: 10mm;
   }
 
   html, body {
-    width: 297mm !important;
-    height: auto !important;
-    background: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
     overflow: visible !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 
-  /* Reset all elements to hidden */
+  /* HIDE ALL UI ELEMENTS */
+  header,
+  nav,
+  aside,
+  .sidebar,
+  .quotation-form,
+  .no-print,
+  button,
+  input,
+  textarea,
+  [role="dialog"] {
+    display: none !important;
+  }
+
+  /* RESET VISIBILITY FOR PRINT */
   body * {
     visibility: hidden;
   }
 
-  /* Isolate only the quotation container */
-  .quotation-print,
-  .quotation-print * {
-    visibility: visible !important;
+  .quotation-page,
+  .quotation-page * {
+    visibility: visible;
   }
 
-  .quotation-print {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 297mm !important;
-    max-width: 297mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    color: black !important;
-    transform: none !important;
-    box-shadow: none !important;
-    border: none !important;
-    display: block !important;
+  /* POSITION QUOTATION FOR PRINT */
+  .quotation-page {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1123px;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    page-break-after: auto;
+    background: white;
   }
 
-  /* Explicitly remove UI components from layout */
-  nav, header, footer, aside, button, 
-  .no-print, .navbar, .sidebar, 
-  [role="dialog"], [role="status"], .toaster, .buttons-wrapper {
-    display: none !important;
-    visibility: hidden !important;
-  }
-
-  /* Table Pagination Fixes */
+  /* TABLE BREAKS */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    page-break-after: auto;
-    table-layout: fixed;
+    page-break-inside: auto;
   }
 
   tr {
     page-break-inside: avoid !important;
-    page-break-after: auto;
+    break-inside: avoid !important;
   }
 
   thead {
     display: table-header-group;
   }
 
+  tfoot {
+    display: table-footer-group;
+  }
+
   .totals-section,
   .amount-words,
   .terms-bank-section {
     page-break-inside: avoid !important;
+  }
+
+  /* REMOVE BROWSER HEADERS/FOOTERS */
+  body::after,
+  body::before {
+    display: none !important;
+    content: none !important;
+  }
+}
+
+@layer utilities {
+  .animate-line-loader {
+    animation: line-loader 2s linear infinite;
+  }
+  @keyframes line-loader {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 }
