@@ -44,8 +44,8 @@
 
 /* QUOTATION PREVIEW - WEBSITE VIEW */
 .quotation-page {
-  width: 1123px;           /* A4 landscape width */
-  min-height: 794px;      /* A4 landscape height */
+  width: 1123px;           /* A4 landscape width at 96dpi */
+  min-height: 794px;      /* A4 landscape height at 96dpi */
   margin: 40px auto;
   background: #fff;
   color: #000;
@@ -54,7 +54,7 @@
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* PRINT CSS */
@@ -126,6 +126,11 @@
   body::before {
     display: none !important;
     content: none !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
