@@ -98,7 +98,7 @@ const getLongDescription = (product: Product): string => {
 };
 
 const getShortLabel = (product: Product): string => {
-  return `${product.model} | ${product.processor} | ${product.memory} | ${product.hdd !== '-' ? product.hdd : ''} | ${product.gfx !== '-' ? product.gfx : ''} | ₹${product.price.toLocaleString('en-IN')}`;
+  return `${product.id} | ${product.processor} | ${product.memory}`;
 };
 
 export function QuotationBuilder() {
@@ -186,7 +186,7 @@ export function QuotationBuilder() {
   return (
     <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-[1400px] mx-auto items-start">
       {/* ===== CONTROLS PANEL ===== */}
-      <Card className="w-full md:max-w-md lg:max-w-lg flex-shrink-0 no-print sticky top-24">
+      <Card className="w-full md:max-w-md lg:max-w-lg flex-shrink-0 no-print">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
               <CardTitle>Quotation Builder</CardTitle>
@@ -215,52 +215,54 @@ export function QuotationBuilder() {
                 <div>
                     <h3 className="font-semibold text-lg mb-4 border-b pb-2">Products</h3>
                     <div className="space-y-4">
-                        <div className="space-y-3">
-                            <Label>Select Product</Label>
-                            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
-                                        <span className="truncate">
-                                            {selectedProduct ? `${selectedProduct.model} | ${selectedProduct.processor}` : "Search products..."}
-                                        </span>
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                                    <Command shouldFilter={false}>
-                                        <CommandInput 
-                                          placeholder="Type model, SKU, or specs..." 
-                                          value={searchQuery}
-                                          onValueChange={setSearchQuery}
-                                        />
-                                        <CommandList>
-                                            {isLoadingProducts && <div className="p-4 text-center text-sm">Loading Product Master...</div>}
-                                            <CommandEmpty>No products found for "{searchQuery}"</CommandEmpty>
-                                            <CommandGroup>
-                                                {filteredProducts.slice(0, 50).map((product) => (
-                                                <CommandItem
-                                                    key={product.id}
-                                                    value={product.name}
-                                                    onSelect={() => {
-                                                        setSelectedProduct(product);
-                                                        setOpenCombobox(false);
-                                                    }}>
-                                                    <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
-                                                    <span className="truncate" title={getShortLabel(product)}>
-                                                        {getShortLabel(product)}
-                                                    </span>
-                                                </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                            <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add to Quotation
-                            </Button>
+                        <div className="flex gap-2 items-end">
+                            <div className="flex-1 space-y-3">
+                                <Label>Select Product</Label>
+                                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
+                                            <span className="truncate">
+                                                {selectedProduct ? getShortLabel(selectedProduct) : "Search products..."}
+                                            </span>
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                        <Command shouldFilter={false}>
+                                            <CommandInput 
+                                              placeholder="Type model, SKU, or specs..." 
+                                              value={searchQuery}
+                                              onValueChange={setSearchQuery}
+                                            />
+                                            <CommandList>
+                                                {isLoadingProducts && <div className="p-4 text-center text-sm">Loading Product Master...</div>}
+                                                <CommandEmpty>No products found for "{searchQuery}"</CommandEmpty>
+                                                <CommandGroup>
+                                                    {filteredProducts.slice(0, 50).map((product) => (
+                                                    <CommandItem
+                                                        key={product.id}
+                                                        value={product.name}
+                                                        onSelect={() => {
+                                                            setSelectedProduct(product);
+                                                            setOpenCombobox(false);
+                                                        }}>
+                                                        <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
+                                                        <span className="truncate text-xs" title={getShortLabel(product)}>
+                                                            {getShortLabel(product)}
+                                                        </span>
+                                                    </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
                         </div>
+                        <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add to Quotation
+                        </Button>
                     </div>
                 </div>
 
@@ -299,7 +301,7 @@ export function QuotationBuilder() {
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
-        <div id="quotation-preview" className="bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '794px', width: '1123px' }}>
+        <div id="quotation-preview" className="quotation-preview bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '794px', width: '1123px' }}>
             
             {/* HEADER SECTION */}
             <header className="mb-6">
