@@ -288,7 +288,7 @@ export function QuotationBuilder() {
                     ))}
                 </div>
               </form>
-            </form>
+            </Form>
           </div>
       </Card>
 
@@ -300,8 +300,8 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        {/* THE QUOTATION DOCUMENT AREA */}
-        <div id="quotation-print-area" className="quotation-page mx-auto">
+        {/* THE QUOTATION DOCUMENT AREA (1123px = A4 Landscape at 96dpi) */}
+        <div id="quotation-print-area" className="quotation-page mx-auto shadow-2xl">
             
             {/* HEADER SECTION (NO-BREAK) */}
             <header className="flex justify-between items-start mb-10 no-break">
