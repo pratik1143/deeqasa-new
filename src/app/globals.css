@@ -44,15 +44,17 @@
 
 /* QUOTATION PREVIEW - WEBSITE VIEW */
 .quotation-page {
-  width: 1123px;           /* A4 landscape usable width */
-  min-height: 794px;
-  margin: 24px auto;
+  width: 1123px;           /* A4 landscape width */
+  min-height: 794px;      /* A4 landscape height */
+  margin: 40px auto;
   background: #fff;
   color: #000;
-  padding: 24px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.25);
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif;
+  position: relative;
+  overflow: hidden;
 }
 
 /* PRINT CSS */
@@ -60,56 +62,50 @@
   /* PAGE CONFIG */
   @page {
     size: A4 landscape;
-    margin: 10mm;
+    margin: 12mm;
   }
 
+  /* RESET DEFAULTS */
   html, body {
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 0;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
     overflow: visible !important;
   }
 
-  /* HIDE ALL UI ELEMENTS */
-  header,
-  nav,
-  aside,
-  .sidebar,
-  .quotation-form,
-  .no-print,
-  button,
-  input,
-  textarea,
-  [role="dialog"] {
+  /* HIDE EVERYTHING EXCEPT THE PRINT AREA */
+  body > * {
     display: none !important;
   }
 
-  /* RESET VISIBILITY FOR PRINT */
-  body * {
-    visibility: hidden;
+  body > #quotation-print-area {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  .quotation-page,
-  .quotation-page * {
-    visibility: visible;
+  /* Ensure the printed container matches landscape width */
+  #quotation-print-area {
+    width: 1123px !important;
+    max-width: 1123px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* POSITION QUOTATION FOR PRINT */
-  .quotation-page {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 1123px;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    page-break-after: auto;
-    background: white;
+  /* PREVENT BREAKS */
+  .no-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
-  /* TABLE BREAKS */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -125,17 +121,7 @@
     display: table-header-group;
   }
 
-  tfoot {
-    display: table-footer-group;
-  }
-
-  .totals-section,
-  .amount-words,
-  .terms-bank-section {
-    page-break-inside: avoid !important;
-  }
-
-  /* REMOVE BROWSER HEADERS/FOOTERS */
+  /* REMOVE BROWSER DEFAULTS */
   body::after,
   body::before {
     display: none !important;

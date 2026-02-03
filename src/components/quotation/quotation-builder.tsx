@@ -184,9 +184,9 @@ export function QuotationBuilder() {
   const quotationNumber = useMemo(() => `DQT/HPC-001 / ${format(new Date(), 'dd-MM-yyyy')}`, []);
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-[1600px] mx-auto items-start">
+    <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-[1800px] mx-auto items-start">
       {/* ===== CONTROLS PANEL ===== */}
-      <Card className="w-full md:max-w-md lg:max-w-lg flex-shrink-0 no-print">
+      <Card className="w-full xl:max-w-md flex-shrink-0 no-print">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
               <CardTitle>Quotation Builder</CardTitle>
@@ -292,7 +292,7 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL (WYSIWYG) ===== */}
+      {/* ===== PREVIEW PANEL (WYSIWYG 1123px) ===== */}
       <div className="flex-1 relative w-full overflow-x-auto min-h-screen">
         <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -300,15 +300,15 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        {/* THE QUOTATION PAGE (WYSIWYG 1123px) */}
-        <div className="quotation-page">
+        {/* THE QUOTATION PAGE */}
+        <div id="quotation-print-area" className="quotation-page">
             
             {/* HEADER SECTION */}
-            <header className="mb-8 flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                    <img src="/hp-logo.png" alt="HP Logo" className="h-[70px] w-auto object-contain" />
+            <header className="flex justify-between items-start mb-8 no-break">
+                <div className="flex items-center gap-6">
+                    <img src="/hp-logo.png" alt="HP Logo" className="w-[120px] h-auto object-contain" />
                     <div className="company-details">
-                        <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
+                        <h2 className="text-[18pt] font-bold mb-1 leading-tight">M/s DeeQasa-Tech</h2>
                         <div className="text-[10pt] leading-snug text-gray-800">
                             <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70</p>
                             <p>SAS Nagar, Mohali, Punjab</p>
@@ -320,10 +320,11 @@ export function QuotationBuilder() {
                     <h1 className="text-[13pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION (THESE PRICES ARE VALID TILL 7 DAYS)</h1>
                 </div>
             </header>
-            <div className="border-b-[1.5px] border-black mb-8" />
+            
+            <div className="border-b-[1.5px] border-black mb-8 no-break" />
 
             {/* INFO BOXES SECTION */}
-            <section className="grid grid-cols-2 gap-0 mb-6 border-t border-l border-black">
+            <section className="grid grid-cols-2 gap-0 mb-6 border-t border-l border-black no-break">
                 <div className="border-r border-b border-black p-4 flex flex-col min-h-[140px]">
                     <p className="font-bold text-[10pt] uppercase mb-2 text-gray-600">To,</p>
                     <p className="font-bold text-[12pt] mb-1 leading-tight">{form.watch('companyName') || form.watch('customerName') || 'Client Name'}</p>
@@ -351,7 +352,7 @@ export function QuotationBuilder() {
             </section>
 
             {/* SUBJECT SECTION */}
-            <section className="mb-6 py-1">
+            <section className="mb-6 py-1 no-break">
                 <p className="text-[11.5pt] leading-tight"><span className="font-bold">Subject:</span> {form.watch('subject') || 'Quotation for IT Hardware'}</p>
             </section>
             
@@ -362,10 +363,10 @@ export function QuotationBuilder() {
                         <TableRow className="bg-gray-100 hover:bg-gray-100 border-none">
                             <TableHead className="border border-black text-center w-12 text-black font-bold h-10">Sr.</TableHead>
                             <TableHead className="border border-black text-black font-bold h-10">Description</TableHead>
-                            <TableHead className="border border-black text-center text-black font-bold w-40 h-10">Make/Model</TableHead>
-                            <TableHead className="border border-black text-right text-black font-bold w-12 h-10">Qty</TableHead>
-                            <TableHead className="border border-black text-right text-black font-bold w-36 h-10">Unit Price (₹)</TableHead>
-                            <TableHead className="border border-black text-right text-black font-bold w-36 h-10">Total (₹)</TableHead>
+                            <TableHead className="border border-black text-center text-black font-bold w-44 h-10">Make/Model</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-14 h-10">Qty</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-40 h-10">Unit Price (₹)</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-40 h-10">Total (₹)</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -387,15 +388,15 @@ export function QuotationBuilder() {
                                 <TableCell colSpan={6} className="text-center h-48 border border-black italic text-gray-400">Please add products to generate preview.</TableCell>
                             </TableRow>
                         )}
-                        <TableRow className="hover:bg-transparent border-none">
+                        <TableRow className="hover:bg-transparent border-none no-break">
                             <TableCell colSpan={5} className="border border-black text-right font-bold py-2 px-3">Sub Total</TableCell>
                             <TableCell className="border border-black text-right font-bold py-2 px-3">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
                         </TableRow>
-                        <TableRow className="hover:bg-transparent border-none">
+                        <TableRow className="hover:bg-transparent border-none no-break">
                             <TableCell colSpan={5} className="border border-black text-right font-bold py-2 px-3">GST @18%</TableCell>
                             <TableCell className="border border-black text-right font-bold py-2 px-3">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
                         </TableRow>
-                        <TableRow className="bg-gray-100 hover:bg-gray-100 border-none">
+                        <TableRow className="bg-gray-100 hover:bg-gray-100 border-none no-break">
                             <TableCell colSpan={5} className="border border-black text-right font-bold py-3 px-3 text-[12pt] uppercase tracking-wide">Grand Total</TableCell>
                             <TableCell className="border border-black text-right font-bold py-3 px-3 text-[12pt]">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
                         </TableRow>
@@ -404,7 +405,7 @@ export function QuotationBuilder() {
             </section>
 
             {/* TOTALS & FOOTER WRAPPER */}
-            <div className="totals-section">
+            <div className="totals-section no-break">
                 <div className="mb-8 p-4 border border-black amount-words bg-gray-50/10">
                     <p className="font-bold text-[11pt]">Amount in Words: <span className="font-normal italic ml-2 text-gray-800">{grandTotalInWords}</span></p>
                 </div>
