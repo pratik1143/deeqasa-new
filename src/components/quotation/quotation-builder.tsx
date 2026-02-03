@@ -292,20 +292,21 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL ===== */}
-      <div className="flex-1 relative quotation-wrapper w-full">
+      {/* ===== PREVIEW PANEL (THE PRINT AREA) ===== */}
+      <div className="flex-1 relative w-full overflow-x-auto">
         <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
         
-        <div className="quotation-container bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '800px', width: '100%', maxWidth: '1123px' }}>
+        {/* Force pixel-perfect landscape width for WYSIWYG screen preview */}
+        <div className="print-area quotation-container bg-white text-black mx-auto p-12" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '800px', width: '1120px', minWidth: '1120px' }}>
             
             {/* HEADER SECTION */}
             <header className="mb-8 header flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                    <img src="/hp-logo.png" alt="HP Logo" className="print-logo w-[120px] h-auto object-contain" />
+                    <img src="/hp-logo.png" alt="HP Logo" className="print-logo h-[65px] w-auto object-contain" />
                     <div className="company-details">
                         <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
                         <div className="text-[10pt] leading-snug text-gray-800">
