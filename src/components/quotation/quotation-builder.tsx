@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Printer } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Printer, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -42,7 +42,6 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 2
 });
 
-// Simple number to words converter for INR
 function numberToWords(num: number): string {
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
@@ -85,16 +84,19 @@ function numberToWords(num: number): string {
     return result.charAt(0).toUpperCase() + result.slice(1) + ' only.';
 };
 
-const formatShortProductName = (product: Product): string => {
-    if (!product) return '';
-    const parts = [
-        product.id, // SKU
-        product.processor,
-        product.memory,
-    ];
-    return parts.filter(Boolean).join(' | ');
+const getLongDescription = (product: Product): string => {
+  const parts = [
+    product.model,
+    product.processor,
+    product.memory,
+    product.hdd !== '-' ? product.hdd : null,
+    product.hdd2 !== '-' ? product.hdd2 : null,
+    product.gfx !== '-' ? product.gfx : null,
+    product.os !== '-' ? product.os : null,
+    product.warranty !== '-' ? product.warranty : null,
+  ];
+  return parts.filter(Boolean).join(' | ');
 };
-
 
 export function QuotationBuilder() {
   const { toast } = useToast();
@@ -102,6 +104,7 @@ export function QuotationBuilder() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -126,15 +129,7 @@ export function QuotationBuilder() {
       try {
         setIsLoadingProducts(true);
         const productData = await getProductData();
-        const uniqueData = Array.from(
-          productData.reduce((map, product) => {
-            if (!map.has(product.id)) {
-              map.set(product.id, product);
-            }
-            return map;
-          }, new Map<string, (typeof productData)[0]>()).values()
-        );
-        setProducts(uniqueData);
+        setProducts(productData);
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Failed to load products', description: error.message });
       } finally {
@@ -144,10 +139,24 @@ export function QuotationBuilder() {
     fetchProducts();
   }, [toast]);
 
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery) return products;
+    const q = searchQuery.toLowerCase();
+    return products.filter(p => 
+      p.id.toLowerCase().includes(q) ||
+      p.model.toLowerCase().includes(q) ||
+      p.processor.toLowerCase().includes(q) ||
+      p.memory.toLowerCase().includes(q) ||
+      p.gfx.toLowerCase().includes(q) ||
+      p.os.toLowerCase().includes(q)
+    );
+  }, [products, searchQuery]);
+
   const handleAddProduct = () => {
     if (selectedProduct) {
       append({ product: selectedProduct, quantity: 1, unitPrice: selectedProduct.price });
       setSelectedProduct(null);
+      setSearchQuery('');
     }
   };
   
@@ -162,8 +171,7 @@ export function QuotationBuilder() {
 
   const totals = useMemo(() => {
     const subTotal = lineItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-    const gstRate = 18; // 18%
-    const totalGst = subTotal * (gstRate / 100);
+    const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
 
     return { subTotal, totalGst, grandTotal };
@@ -173,13 +181,13 @@ export function QuotationBuilder() {
   const quotationNumber = useMemo(() => `DQT/HPC-001 / ${format(new Date(), 'dd-MM-yyyy')}`, []);
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8">
+    <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
       {/* ===== CONTROLS PANEL ===== */}
       <Card className="w-full md:max-w-md lg:max-w-lg flex-shrink-0 no-print">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
               <CardTitle>Quotation Builder</CardTitle>
-              <CardDescription>Fill in the details to generate a new quotation.</CardDescription>
+              <CardDescription>Configure your quotation using the live Product Master.</CardDescription>
             </CardHeader>
             <Form {...form}>
               <form className="space-y-6">
@@ -204,70 +212,71 @@ export function QuotationBuilder() {
                 <div>
                     <h3 className="font-semibold text-lg mb-4 border-b pb-2">Products</h3>
                     <div className="space-y-4">
-                        <div className="space-y-2">
-                            <div>
-                                <Label>Select Product</Label>
-                                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal truncate">
-                                            {selectedProduct ? formatShortProductName(selectedProduct) : "Select product..."}
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                        <Command>
-                                            <CommandInput placeholder="Search product..." />
-                                            <CommandList>
-                                                {isLoadingProducts && <div className="p-4 text-center text-sm">Loading...</div>}
-                                                <CommandEmpty>No product found.</CommandEmpty>
-                                                <CommandGroup>
-                                                    {products.map((product) => (
-                                                    <CommandItem
-                                                        key={product.id}
-                                                        value={product.name}
-                                                        onSelect={() => {
-                                                            setSelectedProduct(product);
-                                                            setOpenCombobox(false);
-                                                        }}>
-                                                        <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
-                                                        <span className="truncate" title={product.name}>
-                                                            {formatShortProductName(product)}
-                                                        </span>
-                                                    </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
+                        <div className="space-y-3">
+                            <Label>Select Product</Label>
+                            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal truncate">
+                                        {selectedProduct ? selectedProduct.name : "Search products..."}
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                    <Command shouldFilter={false}>
+                                        <CommandInput 
+                                          placeholder="Type model, SKU, or specs..." 
+                                          value={searchQuery}
+                                          onValueChange={setSearchQuery}
+                                        />
+                                        <CommandList>
+                                            {isLoadingProducts && <div className="p-4 text-center text-sm">Loading Product Master...</div>}
+                                            <CommandEmpty>No products found for "{searchQuery}"</CommandEmpty>
+                                            <CommandGroup>
+                                                {filteredProducts.slice(0, 50).map((product) => (
+                                                <CommandItem
+                                                    key={product.id}
+                                                    value={product.name}
+                                                    onSelect={() => {
+                                                        setSelectedProduct(product);
+                                                        setOpenCombobox(false);
+                                                    }}>
+                                                    <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
+                                                    <span className="truncate" title={product.name}>
+                                                        {product.name}
+                                                    </span>
+                                                </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
                             <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Add Product
+                                Add to Quotation
                             </Button>
                         </div>
-                        {form.formState.errors.lineItems && <p className="text-sm font-medium text-destructive">{form.formState.errors.lineItems.message}</p>}
                     </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {fields.map((field, index) => (
-                        <Card key={field.id} className="p-3 bg-secondary/50">
+                        <Card key={field.id} className="p-3 bg-secondary/50 border-primary/20">
                              <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="font-semibold">{field.product.name}</p>
-                                    <p className="text-xs text-muted-foreground">{CURRENCY_FORMATTER.format(field.product.price)} @ {field.product.gstRate}% GST</p>
+                                <div className="flex-1 min-w-0 pr-4">
+                                    <p className="font-semibold text-sm truncate">{field.product.model}</p>
+                                    <p className="text-[10px] text-muted-foreground line-clamp-2">{getLongDescription(field.product)}</p>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => remove(index)}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => remove(index)}>
                                     <Trash2 className="h-4 w-4 text-destructive"/>
                                 </Button>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="grid grid-cols-2 gap-4 mt-3">
                                 <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
-                                    <FormItem><FormLabel>Qty</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel className="text-xs">Qty</FormLabel><FormControl><Input type="number" {...field} className="h-8" /></FormControl></FormItem>
                                 )} />
                                 <FormField control={form.control} name={`lineItems.${index}.unitPrice`} render={({ field }) => (
-                                    <FormItem><FormLabel>Unit Price</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
+                                    <FormItem><FormLabel className="text-xs">Unit Price (₹)</FormLabel><FormControl><Input type="number" {...field} className="h-8" /></FormControl></FormItem>
                                 )} />
                             </div>
                         </Card>
@@ -280,12 +289,12 @@ export function QuotationBuilder() {
 
       {/* ===== PREVIEW PANEL ===== */}
       <div className="flex-1 relative">
-        <div className="absolute top-0 right-0 p-4 no-print z-10">
-            <Button onClick={handlePrint}>
+        <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
+            <Button onClick={handlePrint} size="lg" className="shadow-lg">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
-        <div id="quotation-preview" className="bg-white rounded-lg shadow-lg p-8 text-black" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '12pt'}}>
+        <div id="quotation-preview" className="bg-white rounded-lg shadow-xl p-10 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '1123px', width: '800px' }}>
             <header className="flex justify-between items-start mb-8 border-b-2 border-black pb-4">
                 <div>
                     <h1 className="text-2xl font-bold">M/s DeeQasa-Tech</h1>
@@ -294,97 +303,109 @@ export function QuotationBuilder() {
                     <p>Phone: 8595270950</p>
                     <p className="font-bold">GST No: 03EPIPK0093E1Z7</p>
                 </div>
-                <div className="text-right flex-shrink-0">
-                    <h2 className="text-xl font-bold text-gray-700 tracking-wide">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
+                <div className="text-right flex-shrink-0 max-w-[280px]">
+                    <h2 className="text-sm font-bold text-gray-800 leading-tight">QUOTATION ( THESE PRICES ARE VALID TILL 7 DAYS )</h2>
                 </div>
             </header>
 
-            <section className="grid grid-cols-2 gap-8 mb-4">
-                <div className="border border-black p-2">
-                    <p className="font-bold">To,</p>
-                    <p className="font-bold">{form.watch('companyName') || form.watch('customerName')}</p>
-                    <p>{form.watch('address')}</p>
-                    <p>Kind Attn: {form.watch('customerName')}</p>
+            <section className="grid grid-cols-2 gap-0 mb-6">
+                <div className="border border-black p-3">
+                    <p className="font-bold mb-1">To,</p>
+                    <p className="font-bold text-lg">{form.watch('companyName') || form.watch('customerName') || 'Client Name'}</p>
+                    <p className="whitespace-pre-line">{form.watch('address') || 'Client Address'}</p>
+                    <p className="mt-2 font-bold">Kind Attn: {form.watch('customerName') || 'N/A'}</p>
                 </div>
-                <div className="text-left border border-black p-2">
-                     <p><span className="font-bold inline-block w-32">Quotation No:</span> {quotationNumber}</p>
-                     <p><span className="font-bold inline-block w-32">Date:</span> {format(new Date(), 'dd-MM-yyyy')}</p>
+                <div className="border border-black border-l-0 p-3">
+                     <p className="flex justify-between"><span className="font-bold">Quotation No:</span> <span>{quotationNumber}</span></p>
+                     <p className="flex justify-between mt-2"><span className="font-bold">Date:</span> <span>{format(new Date(), 'dd-MM-yyyy')}</span></p>
                 </div>
             </section>
 
-            <section className="mb-4">
-                <p><span className="font-bold">Subject:</span> {form.watch('subject') || 'Quotation for IT Hardware'}</p>
+            <section className="mb-6">
+                <p className="border-l-4 border-black pl-3 py-1"><span className="font-bold">Subject:</span> {form.watch('subject') || 'Quotation for IT Hardware'}</p>
             </section>
             
             <section>
-                <Table className="border-collapse border border-black">
+                <Table className="border-collapse border border-black w-full">
                     <TableHeader>
-                        <TableRow className="bg-gray-200">
-                            <TableHead className="border border-black text-center w-12">Sr. No.</TableHead>
-                            <TableHead className="border border-black">Description</TableHead>
-                            <TableHead className="border border-black text-center">Make/Model</TableHead>
-                            <TableHead className="border border-black text-right">Qty</TableHead>
-                            <TableHead className="border border-black text-right">Unit Price (₹)</TableHead>
-                            <TableHead className="border border-black text-right">Total (₹)</TableHead>
+                        <TableRow className="bg-gray-100 hover:bg-gray-100">
+                            <TableHead className="border border-black text-center w-12 text-black font-bold">Sr. No.</TableHead>
+                            <TableHead className="border border-black text-black font-bold">Description</TableHead>
+                            <TableHead className="border border-black text-center text-black font-bold w-32">Make/Model</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-16">Qty</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-32">Unit Price (₹)</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-32">Total (₹)</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {fields.map((item, index) => (
-                            <TableRow key={item.id}>
-                                <TableCell className="border border-black text-center">{index + 1}</TableCell>
-                                <TableCell className="border border-black">
-                                    <p className="font-bold">{item.product.name}</p>
+                        {lineItems.map((item, index) => (
+                            <TableRow key={index} className="hover:bg-transparent">
+                                <TableCell className="border border-black text-center py-2">{index + 1}</TableCell>
+                                <TableCell className="border border-black py-2">
+                                    <p className="font-bold leading-tight">{item.product.model}</p>
+                                    <p className="text-[9pt] mt-1 leading-snug">{getLongDescription(item.product)}</p>
                                 </TableCell>
-                                <TableCell className="border border-black text-center">{item.product.id}</TableCell>
-                                <TableCell className="border border-black text-right">{item.quantity}</TableCell>
-                                <TableCell className="border border-black text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
-                                <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
+                                <TableCell className="border border-black text-center py-2">{item.product.id}</TableCell>
+                                <TableCell className="border border-black text-right py-2">{item.quantity}</TableCell>
+                                <TableCell className="border border-black text-right py-2">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
+                                <TableCell className="border border-black text-right py-2 font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
                             </TableRow>
                         ))}
-                         {fields.length === 0 && (
-                            <TableRow><TableCell colSpan={6} className="text-center h-48 border border-black">No items added.</TableCell></TableRow>
+                         {lineItems.length === 0 && (
+                            <TableRow><TableCell colSpan={6} className="text-center h-48 border border-black italic text-gray-400">Please add products to generate preview.</TableCell></TableRow>
                         )}
-                        <TableRow>
-                            <TableCell colSpan={5} className="border border-black text-right font-bold">Sub Total</TableCell>
-                            <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
+                        <TableRow className="hover:bg-transparent">
+                            <TableCell colSpan={5} className="border border-black text-right font-bold py-2">Sub Total</TableCell>
+                            <TableCell className="border border-black text-right font-bold py-2">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
                         </TableRow>
-                        <TableRow>
-                            <TableCell colSpan={5} className="border border-black text-right font-bold">GST @18%</TableCell>
-                            <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
+                        <TableRow className="hover:bg-transparent">
+                            <TableCell colSpan={5} className="border border-black text-right font-bold py-2">GST @18%</TableCell>
+                            <TableCell className="border border-black text-right font-bold py-2">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
                         </TableRow>
-                        <TableRow className="bg-gray-200">
-                            <TableCell colSpan={5} className="border border-black text-right font-bold">Grand Total</TableCell>
-                            <TableCell className="border border-black text-right font-bold">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
+                        <TableRow className="bg-gray-100 hover:bg-gray-100">
+                            <TableCell colSpan={5} className="border border-black text-right font-bold py-2">Grand Total</TableCell>
+                            <TableCell className="border border-black text-right font-bold py-2">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
             </section>
             
             <footer className="mt-8 text-xs">
-                <p className="font-bold">Amount in Words: <span className="font-normal">{grandTotalInWords}</span></p>
+                <p className="font-bold text-sm bg-gray-50 p-2 border border-gray-200">Amount in Words: <span className="font-normal italic">{grandTotalInWords}</span></p>
                 
-                <div className="mt-4 border-t-2 border-black pt-4 grid grid-cols-2 gap-4">
+                <div className="mt-8 grid grid-cols-2 gap-10">
                     <div>
-                        <h4 className="font-bold underline mb-2">Terms & Conditions:</h4>
+                        <h4 className="font-bold underline mb-3">Terms & Conditions:</h4>
                         <ul className="list-disc list-inside space-y-1">
                             <li>Delivery Period: Within 4–6 weeks after confirmation of order.</li>
                             <li>Warranty: As per manufacturer’s standard warranty.</li>
+                            <li>Prices are valid for 7 days from the date of quotation.</li>
                         </ul>
                     </div>
-                    <div>
-                        <h4 className="font-bold underline mb-2">Bank Details:</h4>
-                        <p>Bank: ICICI Bank</p>
-                        <p>Account Number: 103205001866</p>
-                        <p>IFSC Code: ICIC0001032</p>
-                        <p>Account Type: Corporate Current</p>
-                        <p>Website: https://www.hpconnect.in</p>
+                    <div className="bg-gray-50 p-4 border border-black rounded-sm">
+                        <h4 className="font-bold underline mb-3 text-center">Our Bank Details:</h4>
+                        <div className="space-y-1 text-[10pt]">
+                          <p><span className="font-bold w-24 inline-block">Bank:</span> ICICI Bank</p>
+                          <p><span className="font-bold w-24 inline-block">Account No:</span> 103205001866</p>
+                          <p><span className="font-bold w-24 inline-block">IFSC Code:</span> ICIC0001032</p>
+                          <p><span className="font-bold w-24 inline-block">Acc Type:</span> Corporate Current</p>
+                          <p><span className="font-bold w-24 inline-block">Website:</span> www.hpconnect.in</p>
+                        </div>
                     </div>
                 </div>
-                <div className="mt-16 text-right">
-                    <p className="font-bold">For M/s DeeQasa-Tech</p>
-                    <p className="font-bold">HPI Official Business Partner</p>
-                    <div className="h-16"></div>
-                    <p>Authorized Signatory: Pratik Chaudhary</p>
+                
+                <div className="mt-16 flex justify-between items-end">
+                  <div className="text-[8pt] text-gray-500 italic">
+                    This is a computer-generated quotation.
+                  </div>
+                  <div className="text-right">
+                      <p className="font-bold text-lg">For M/s DeeQasa-Tech</p>
+                      <p className="font-bold text-muted-foreground">HPI Official Business Partner</p>
+                      <div className="h-20 flex items-center justify-end px-4">
+                        <span className="text-gray-300 italic border border-dashed border-gray-200 px-4 py-1">Seal & Signature</span>
+                      </div>
+                      <p className="font-bold text-sm">Authorized Signatory: Pratik Chaudhary</p>
+                  </div>
                 </div>
             </footer>
         </div>
