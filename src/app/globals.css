@@ -229,107 +229,101 @@
 
 /* Print Rules */
 @media print {
-  body {
-    margin: 0;
-    padding: 0;
+  html, body {
+    width: 100%;
+    height: auto;
     background: white !important;
-    color: black !important;
-    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  /* Hide UI elements */
-  header, 
-  footer, 
-  nav, 
-  .no-print, 
-  .sidebar, 
-  .navbar, 
-  .app-header,
-  button,
-  .toaster,
-  [role="status"],
-  .buttons {
-    display: none !important;
-  }
-
+  /* Hide everything by default */
   body * {
     visibility: hidden;
   }
 
-  /* Show only quotation content */
-  .quotation-wrapper,
-  .quotation-wrapper * {
+  /* Specifically hide common UI elements that might still linger */
+  nav, 
+  header, 
+  footer, 
+  .navbar, 
+  .sidebar, 
+  .no-print, 
+  button, 
+  .toaster, 
+  [role="status"],
+  .buttons {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Show only the quotation container */
+  .quotation-container,
+  .quotation-container * {
     visibility: visible;
   }
 
-  .quotation-wrapper {
+  /* Position quotation container for print */
+  .quotation-container {
     position: absolute;
     left: 0;
     top: 0;
     width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
     background: white !important;
+    color: black !important;
+    transform: none !important;
+    height: auto !important;
+    min-height: unset !important;
+  }
+
+  /* Reset layout constraints for print */
+  .flex, .grid {
     display: block !important;
   }
 
-  /* Remove fixed height and shadowing */
-  .quotation-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: unset !important;
-    overflow: visible !important;
-    box-shadow: none !important;
-    border: none !important;
-    margin: 0 !important;
-    padding: 10mm !important;
-    background: white !important;
-    color: black !important;
-  }
-
-  /* Prevent blank pages and control breaks */
-  .quotation-container,
-  table,
-  tr,
-  td,
-  header,
-  section {
-    page-break-inside: avoid;
-  }
-
-  .totals-section {
-    page-break-inside: avoid;
-  }
-
+  /* Table rules */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
     page-break-after: auto;
   }
 
-  .print-logo {
-    width: 120px !important;
-    height: auto !important;
-    display: block !important;
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto;
   }
 
-  /* Force color for print */
+  thead {
+    display: table-header-group;
+  }
+
+  /* Group totals and sections to prevent splitting */
+  .totals-section,
+  .amount-words,
+  .terms-bank-section {
+    page-break-inside: avoid !important;
+  }
+
+  /* Force background colors for print */
   .bg-gray-100 {
     background-color: #f3f4f6 !important;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
   }
   
   .bg-gray-50\/50 {
     background-color: #f9fafb !important;
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
   }
 
-  /* A4 Landscape Size */
+  /* Orientation: Landscape A4 */
   @page {
     size: A4 landscape;
-    margin: 12mm;
+    margin: 14mm;
   }
 }

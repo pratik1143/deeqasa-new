@@ -406,12 +406,12 @@ export function QuotationBuilder() {
             {/* TOTALS & FOOTER WRAPPER */}
             <div className="totals-section">
                 {/* AMOUNT IN WORDS SECTION */}
-                <div className="mb-8 p-4 border border-black bg-gray-50/50">
+                <div className="mb-8 p-4 border border-black amount-words bg-gray-50/50">
                     <p className="font-bold text-[11pt]">Amount in Words: <span className="font-normal italic ml-2 text-gray-800">{grandTotalInWords}</span></p>
                 </div>
                 
                 {/* FOOTER SECTION (TERMS & BANK) */}
-                <footer className="text-[10.5pt]">
+                <footer className="text-[10.5pt] terms-bank-section">
                     <div className="grid grid-cols-2 gap-8 mb-12">
                         <div>
                             <h4 className="font-bold underline mb-3 text-[11pt]">Terms & Conditions:</h4>
