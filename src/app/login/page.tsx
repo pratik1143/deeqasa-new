@@ -82,7 +82,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-8">
             <div className="text-center">
                 <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
-                <p className="text-lg text-muted-foreground">(Deepinder kaur)</p>
+                <p className="text-lg text-muted-foreground">(depinder kour)</p>
             </div>
             <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm border-border">
                 <CardHeader className="text-center">
