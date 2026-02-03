@@ -215,54 +215,52 @@ export function QuotationBuilder() {
                 <div>
                     <h3 className="font-semibold text-lg mb-4 border-b pb-2">Products</h3>
                     <div className="space-y-4">
-                        <div className="flex gap-2 items-end">
-                            <div className="flex-1 space-y-3">
-                                <Label>Select Product</Label>
-                                <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
-                                            <span className="truncate">
-                                                {selectedProduct ? getShortLabel(selectedProduct) : "Search products..."}
-                                            </span>
-                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                                        <Command shouldFilter={false}>
-                                            <CommandInput 
-                                              placeholder="Type model, SKU, or specs..." 
-                                              value={searchQuery}
-                                              onValueChange={setSearchQuery}
-                                            />
-                                            <CommandList>
-                                                {isLoadingProducts && <div className="p-4 text-center text-sm">Loading Product Master...</div>}
-                                                <CommandEmpty>No products found for "{searchQuery}"</CommandEmpty>
-                                                <CommandGroup>
-                                                    {filteredProducts.slice(0, 50).map((product) => (
-                                                    <CommandItem
-                                                        key={product.id}
-                                                        value={product.name}
-                                                        onSelect={() => {
-                                                            setSelectedProduct(product);
-                                                            setOpenCombobox(false);
-                                                        }}>
-                                                        <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
-                                                        <span className="truncate text-xs" title={getShortLabel(product)}>
-                                                            {getShortLabel(product)}
-                                                        </span>
-                                                    </CommandItem>
-                                                    ))}
-                                                </CommandGroup>
-                                            </CommandList>
-                                        </Command>
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
+                        <div className="flex flex-col gap-3">
+                            <Label>Select Product</Label>
+                            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
+                                        <span className="truncate">
+                                            {selectedProduct ? getShortLabel(selectedProduct) : "Search products..."}
+                                        </span>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                                    <Command shouldFilter={false}>
+                                        <CommandInput 
+                                          placeholder="Type model, SKU, or specs..." 
+                                          value={searchQuery}
+                                          onValueChange={setSearchQuery}
+                                        />
+                                        <CommandList>
+                                            {isLoadingProducts && <div className="p-4 text-center text-sm">Loading Product Master...</div>}
+                                            <CommandEmpty>No products found for "{searchQuery}"</CommandEmpty>
+                                            <CommandGroup>
+                                                {filteredProducts.slice(0, 50).map((product) => (
+                                                <CommandItem
+                                                    key={product.id}
+                                                    value={product.name}
+                                                    onSelect={() => {
+                                                        setSelectedProduct(product);
+                                                        setOpenCombobox(false);
+                                                    }}>
+                                                    <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
+                                                    <span className="truncate text-xs" title={getShortLabel(product)}>
+                                                        {getShortLabel(product)}
+                                                    </span>
+                                                </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            <Button type="button" className="w-full mt-2" onClick={handleAddProduct} disabled={!selectedProduct}>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add to Quotation
+                            </Button>
                         </div>
-                        <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add to Quotation
-                        </Button>
                     </div>
                 </div>
 
@@ -304,33 +302,27 @@ export function QuotationBuilder() {
         <div id="quotation-preview" className="quotation-preview bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '794px', width: '1123px' }}>
             
             {/* HEADER SECTION */}
-            <header className="mb-6">
-                <div className="flex justify-between items-center mb-4">
-                    <div className="h-[55px] w-auto">
-                        <img src="/hp-logo.png" alt="HP Partner Logo" className="h-full w-auto object-contain" />
+            <header className="mb-8">
+                <div className="flex justify-between items-start mb-6">
+                    <div className="flex items-center gap-[12px]">
+                        <img src="/hp-logo.png" alt="HP Logo" className="h-[70px] w-auto object-contain print:h-[65px]" />
+                        <div className="company-details">
+                            <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
+                            <div className="text-[10pt] leading-snug text-gray-800">
+                                <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70</p>
+                                <p>SAS Nagar, Mohali, Punjab</p>
+                                <p>Phone: 8595270950 | <span className="font-bold">GST No: 03EPIPK0093E1Z7</span></p>
+                                <p className="italic text-gray-500 text-[9pt]">HP Authorized Business Partner</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="text-right flex-1 ml-4">
-                        <h1 className="text-[14pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION (THESE PRICES ARE VALID TILL 7 DAYS)</h1>
+                    <div className="text-right">
+                        <h1 className="text-[14pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION</h1>
+                        <p className="text-[9pt] font-medium text-gray-500 uppercase">(THESE PRICES ARE VALID TILL 7 DAYS)</p>
                     </div>
                 </div>
                 <div className="border-b-[1.5px] border-black" />
             </header>
-
-            {/* COMPANY DETAILS SECTION */}
-            <section className="mb-8 flex justify-between items-start">
-                <div className="max-w-[60%]">
-                    <h2 className="text-[16pt] font-bold mb-1 leading-tight">M/s DeeQasa-Tech</h2>
-                    <div className="text-[10pt] leading-snug text-gray-800">
-                        <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70</p>
-                        <p>SAS Nagar, Mohali, Punjab</p>
-                        <p>Phone: 8595270950</p>
-                        <p className="font-bold mt-1">GST No: 03EPIPK0093E1Z7</p>
-                    </div>
-                </div>
-                <div className="text-right text-[10pt] text-gray-500 italic">
-                    HP Authorized Business Partner
-                </div>
-            </section>
 
             {/* INFO BOXES SECTION */}
             <section className="grid grid-cols-2 gap-0 mb-6 border-t border-l border-black">
