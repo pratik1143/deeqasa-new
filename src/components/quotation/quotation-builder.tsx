@@ -292,19 +292,20 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL (A4 Landscape Sized) ===== */}
-      <div className="flex-1 relative">
+      {/* ===== PREVIEW PANEL ===== */}
+      <div className="flex-1 relative quotation-wrapper">
         <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
-        <div id="quotation-preview" className="quotation-preview bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '794px', width: '1123px' }}>
+        
+        <div className="quotation-container bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '1000px', maxWidth: '850px' }}>
             
             {/* HEADER SECTION */}
             <header className="mb-8">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-[12px]">
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-[15px]">
                         <img src="/hp-logo.png" alt="HP Logo" className="h-[70px] w-auto object-contain print:h-[65px]" />
                         <div className="company-details">
                             <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
@@ -318,7 +319,7 @@ export function QuotationBuilder() {
                     </div>
                     <div className="text-right">
                         <h1 className="text-[14pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION</h1>
-                        <p className="text-[9pt] font-medium text-gray-500 uppercase">(THESE PRICES ARE VALID TILL 7 DAYS)</p>
+                        <p className="text-[9pt] font-medium text-gray-500 uppercase">(VALID TILL 7 DAYS)</p>
                     </div>
                 </div>
                 <div className="border-b-[1.5px] border-black" />
@@ -362,12 +363,12 @@ export function QuotationBuilder() {
                 <Table className="border-collapse border border-black w-full text-[10.5pt]">
                     <TableHeader>
                         <TableRow className="bg-gray-100 hover:bg-gray-100 border-none">
-                            <TableHead className="border border-black text-center w-12 text-black font-bold h-10 py-2">Sr. No.</TableHead>
+                            <TableHead className="border border-black text-center w-12 text-black font-bold h-10 py-2">Sr.</TableHead>
                             <TableHead className="border border-black text-black font-bold h-10 py-2">Description</TableHead>
-                            <TableHead className="border border-black text-center text-black font-bold w-48 h-10 py-2">Make/Model</TableHead>
-                            <TableHead className="border border-black text-right text-black font-bold w-16 h-10 py-2">Qty</TableHead>
-                            <TableHead className="border border-black text-right text-black font-bold w-40 h-10 py-2">Unit Price (₹)</TableHead>
-                            <TableHead className="border border-black text-right text-black font-bold w-40 h-10 py-2">Total (₹)</TableHead>
+                            <TableHead className="border border-black text-center text-black font-bold w-32 h-10 py-2">Make/Model</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-12 h-10 py-2">Qty</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-36 h-10 py-2">Unit Price (₹)</TableHead>
+                            <TableHead className="border border-black text-right text-black font-bold w-36 h-10 py-2">Total (₹)</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -416,9 +417,9 @@ export function QuotationBuilder() {
                     <div>
                         <h4 className="font-bold underline mb-3 text-[11pt]">Terms & Conditions:</h4>
                         <ul className="list-disc list-inside space-y-2 text-gray-800 leading-snug">
-                            <li>Delivery Period: Within 4–6 weeks after confirmation of order.</li>
-                            <li>Warranty: As per manufacturer’s standard warranty.</li>
-                            <li>Prices are valid for 7 days from the date of quotation.</li>
+                            <li>Delivery: Within 4–6 weeks after order.</li>
+                            <li>Warranty: As per manufacturer’s standard.</li>
+                            <li>Prices: Valid for 7 days from quotation date.</li>
                         </ul>
                     </div>
                     <div className="bg-gray-50/50 p-5 border border-black rounded-sm">
@@ -436,12 +437,12 @@ export function QuotationBuilder() {
                 {/* SIGNATURE SECTION */}
                 <div className="mt-16 flex justify-between items-end">
                   <div className="text-[9pt] text-gray-400 italic max-w-[300px] leading-tight">
-                    Note: This is a computer-generated quotation and does not require a physical signature for validity.
+                    Note: This is a computer-generated quotation. No physical signature required.
                   </div>
                   <div className="text-right">
                       <p className="font-bold text-[12pt] mb-1">For M/s DeeQasa-Tech</p>
                       <p className="font-bold text-gray-600 text-[10pt] mb-4">HPI Official Business Partner</p>
-                      <div className="h-24 flex items-center justify-end">
+                      <div className="h-20 flex items-center justify-end">
                         <div className="border border-dashed border-gray-300 px-10 py-4 text-gray-300 italic rounded-sm text-[10pt]">
                           Seal & Signature
                         </div>

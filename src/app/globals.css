@@ -227,48 +227,98 @@
   animation: scanline 10s linear infinite;
 }
 
-/* Print styles */
+/* Print Rules */
 @media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Hide all UI elements */
+  header, 
+  footer, 
+  nav, 
+  .no-print, 
+  .sidebar, 
+  .navbar, 
+  .app-header,
+  button,
+  .toaster,
+  [role="status"] {
+    display: none !important;
+  }
+
   body * {
     visibility: hidden;
   }
 
-  .quotation-preview,
-  .quotation-preview * {
+  /* Show only quotation content */
+  .quotation-wrapper,
+  .quotation-wrapper * {
     visibility: visible;
   }
 
-  .quotation-preview {
+  .quotation-wrapper {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    background: white;
-    padding: 0;
-    margin: 0;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    display: block !important;
+  }
+
+  /* Remove fixed height and shadowing */
+  .quotation-container {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: unset !important;
+    overflow: visible !important;
     box-shadow: none !important;
     border: none !important;
+    margin: 0 !important;
+    padding: 10mm !important;
+    background: white !important;
+    color: black !important;
   }
 
-  @page {
-    size: A4 landscape;
-    margin: 15mm;
+  /* Prevent blank pages and control breaks */
+  .quotation-container,
+  table,
+  tr,
+  td,
+  header,
+  footer,
+  section {
+    page-break-inside: avoid;
   }
 
-  /* Reset colors for print */
-  .quotation-preview {
-    color: #000 !important;
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-after: auto;
   }
-  .quotation-preview * {
-    color: #000 !important;
-    background-color: transparent !important;
+
+  /* Force color for print */
+  .bg-gray-100 {
+    background-color: #f3f4f6 !important;
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
   }
-  .quotation-preview .bg-gray-100 {
-    background-color: #f3f4f6 !important;
-  }
-  .quotation-preview .bg-gray-50\/50 {
+  
+  .bg-gray-50\/50 {
     background-color: #f9fafb !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  /* A4 Portrait Size */
+  @page {
+    size: A4;
+    margin: 12mm;
   }
 }
