@@ -98,6 +98,10 @@ const getLongDescription = (product: Product): string => {
   return parts.filter(Boolean).join(' | ');
 };
 
+const getShortLabel = (product: Product): string => {
+  return `${product.id} | ${product.processor} | ${product.memory}`;
+};
+
 export function QuotationBuilder() {
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
@@ -216,8 +220,10 @@ export function QuotationBuilder() {
                             <Label>Select Product</Label>
                             <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                                 <PopoverTrigger asChild>
-                                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal truncate">
-                                        {selectedProduct ? selectedProduct.name : "Search products..."}
+                                    <Button variant="outline" role="combobox" aria-expanded={openCombobox} className="w-full justify-between font-normal">
+                                        <span className="truncate">
+                                            {selectedProduct ? getShortLabel(selectedProduct) : "Search products..."}
+                                        </span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
@@ -242,7 +248,7 @@ export function QuotationBuilder() {
                                                     }}>
                                                     <Check className={cn("mr-2 h-4 w-4", selectedProduct?.id === product.id ? "opacity-100" : "opacity-0")}/>
                                                     <span className="truncate" title={product.name}>
-                                                        {product.name}
+                                                        {getShortLabel(product)}
                                                     </span>
                                                 </CommandItem>
                                                 ))}
@@ -342,10 +348,9 @@ export function QuotationBuilder() {
                             <TableRow key={index} className="hover:bg-transparent">
                                 <TableCell className="border border-black text-center py-2">{index + 1}</TableCell>
                                 <TableCell className="border border-black py-2">
-                                    <p className="font-bold leading-tight">{item.product.model}</p>
-                                    <p className="text-[9pt] mt-1 leading-snug">{getLongDescription(item.product)}</p>
+                                    <p className="text-[10pt] leading-snug">{getLongDescription(item.product)}</p>
                                 </TableCell>
-                                <TableCell className="border border-black text-center py-2">{item.product.id}</TableCell>
+                                <TableCell className="border border-black text-center py-2 font-bold">{item.product.model}</TableCell>
                                 <TableCell className="border border-black text-right py-2">{item.quantity}</TableCell>
                                 <TableCell className="border border-black text-right py-2">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
                                 <TableCell className="border border-black text-right py-2 font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
