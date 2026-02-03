@@ -234,9 +234,10 @@
     padding: 0;
     background: white !important;
     color: black !important;
+    height: auto !important;
   }
 
-  /* Hide all UI elements */
+  /* Hide UI elements */
   header, 
   footer, 
   nav, 
@@ -246,7 +247,8 @@
   .app-header,
   button,
   .toaster,
-  [role="status"] {
+  [role="status"],
+  .buttons {
     display: none !important;
   }
 
@@ -274,7 +276,7 @@
   /* Remove fixed height and shadowing */
   .quotation-container {
     width: 100% !important;
-    max-width: none !important;
+    max-width: 100% !important;
     height: auto !important;
     min-height: unset !important;
     overflow: visible !important;
@@ -292,8 +294,11 @@
   tr,
   td,
   header,
-  footer,
   section {
+    page-break-inside: avoid;
+  }
+
+  .totals-section {
     page-break-inside: avoid;
   }
 
@@ -301,6 +306,12 @@
     width: 100% !important;
     border-collapse: collapse !important;
     page-break-after: auto;
+  }
+
+  .print-logo {
+    width: 120px !important;
+    height: auto !important;
+    display: block !important;
   }
 
   /* Force color for print */
@@ -316,9 +327,9 @@
     color-adjust: exact;
   }
 
-  /* A4 Portrait Size */
+  /* A4 Landscape Size */
   @page {
-    size: A4;
+    size: A4 landscape;
     margin: 12mm;
   }
 }

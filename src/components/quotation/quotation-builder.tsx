@@ -98,7 +98,7 @@ const getLongDescription = (product: Product): string => {
 };
 
 const getShortLabel = (product: Product): string => {
-  return `${product.id} | ${product.processor} | ${product.memory}`;
+  return `${product.model} | ${product.processor} | ${product.memory}`;
 };
 
 export function QuotationBuilder() {
@@ -293,37 +293,34 @@ export function QuotationBuilder() {
       </Card>
 
       {/* ===== PREVIEW PANEL ===== */}
-      <div className="flex-1 relative quotation-wrapper">
+      <div className="flex-1 relative quotation-wrapper w-full">
         <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
         
-        <div className="quotation-container bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '1000px', maxWidth: '850px' }}>
+        <div className="quotation-container bg-white rounded-sm shadow-2xl p-12 text-black mx-auto" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '800px', width: '100%', maxWidth: '1123px' }}>
             
             {/* HEADER SECTION */}
-            <header className="mb-8">
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-[15px]">
-                        <img src="/hp-logo.png" alt="HP Logo" className="h-[70px] w-auto object-contain print:h-[65px]" />
-                        <div className="company-details">
-                            <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
-                            <div className="text-[10pt] leading-snug text-gray-800">
-                                <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70</p>
-                                <p>SAS Nagar, Mohali, Punjab</p>
-                                <p>Phone: 8595270950 | <span className="font-bold">GST No: 03EPIPK0093E1Z7</span></p>
-                                <p className="italic text-gray-500 text-[9pt]">HP Authorized Business Partner</p>
-                            </div>
+            <header className="mb-8 header flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                    <img src="/hp-logo.png" alt="HP Logo" className="print-logo w-[120px] h-auto object-contain" />
+                    <div className="company-details">
+                        <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
+                        <div className="text-[10pt] leading-snug text-gray-800">
+                            <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70</p>
+                            <p>SAS Nagar, Mohali, Punjab</p>
+                            <p>Phone: 8595270950 | <span className="font-bold">GST No: 03EPIPK0093E1Z7</span></p>
+                            <p className="italic text-gray-500 text-[9pt]">HP Authorized Business Partner</p>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <h1 className="text-[14pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION</h1>
-                        <p className="text-[9pt] font-medium text-gray-500 uppercase">(VALID TILL 7 DAYS)</p>
-                    </div>
                 </div>
-                <div className="border-b-[1.5px] border-black" />
+                <div className="text-right">
+                    <h1 className="text-[14pt] font-bold tracking-tight text-gray-900 uppercase">QUOTATION (THESE PRICES ARE VALID TILL 7 DAYS)</h1>
+                </div>
             </header>
+            <div className="border-b-[1.5px] border-black mb-8" />
 
             {/* INFO BOXES SECTION */}
             <section className="grid grid-cols-2 gap-0 mb-6 border-t border-l border-black">
@@ -406,51 +403,54 @@ export function QuotationBuilder() {
                 </Table>
             </section>
 
-            {/* AMOUNT IN WORDS SECTION */}
-            <div className="mb-8 p-4 border border-black bg-gray-50/50">
-                <p className="font-bold text-[11pt]">Amount in Words: <span className="font-normal italic ml-2 text-gray-800">{grandTotalInWords}</span></p>
-            </div>
-            
-            {/* FOOTER SECTION (TERMS & BANK) */}
-            <footer className="text-[10.5pt]">
-                <div className="grid grid-cols-2 gap-8 mb-12">
-                    <div>
-                        <h4 className="font-bold underline mb-3 text-[11pt]">Terms & Conditions:</h4>
-                        <ul className="list-disc list-inside space-y-2 text-gray-800 leading-snug">
-                            <li>Delivery: Within 4–6 weeks after order.</li>
-                            <li>Warranty: As per manufacturer’s standard.</li>
-                            <li>Prices: Valid for 7 days from quotation date.</li>
-                        </ul>
-                    </div>
-                    <div className="bg-gray-50/50 p-5 border border-black rounded-sm">
-                        <h4 className="font-bold underline mb-4 text-center text-[11pt]">Our Bank Details:</h4>
-                        <div className="space-y-2 text-[10pt] leading-tight">
-                          <p><span className="font-bold w-32 inline-block">Bank Name:</span> ICICI Bank</p>
-                          <p><span className="font-bold w-32 inline-block">Account No:</span> 103205001866</p>
-                          <p><span className="font-bold w-32 inline-block">IFSC Code:</span> ICIC0001032</p>
-                          <p><span className="font-bold w-32 inline-block">Account Type:</span> Corporate Current</p>
-                          <p><span className="font-bold w-32 inline-block">Website:</span> www.hpconnect.in</p>
-                        </div>
-                    </div>
+            {/* TOTALS & FOOTER WRAPPER */}
+            <div className="totals-section">
+                {/* AMOUNT IN WORDS SECTION */}
+                <div className="mb-8 p-4 border border-black bg-gray-50/50">
+                    <p className="font-bold text-[11pt]">Amount in Words: <span className="font-normal italic ml-2 text-gray-800">{grandTotalInWords}</span></p>
                 </div>
                 
-                {/* SIGNATURE SECTION */}
-                <div className="mt-16 flex justify-between items-end">
-                  <div className="text-[9pt] text-gray-400 italic max-w-[300px] leading-tight">
-                    Note: This is a computer-generated quotation. No physical signature required.
-                  </div>
-                  <div className="text-right">
-                      <p className="font-bold text-[12pt] mb-1">For M/s DeeQasa-Tech</p>
-                      <p className="font-bold text-gray-600 text-[10pt] mb-4">HPI Official Business Partner</p>
-                      <div className="h-20 flex items-center justify-end">
-                        <div className="border border-dashed border-gray-300 px-10 py-4 text-gray-300 italic rounded-sm text-[10pt]">
-                          Seal & Signature
+                {/* FOOTER SECTION (TERMS & BANK) */}
+                <footer className="text-[10.5pt]">
+                    <div className="grid grid-cols-2 gap-8 mb-12">
+                        <div>
+                            <h4 className="font-bold underline mb-3 text-[11pt]">Terms & Conditions:</h4>
+                            <ul className="list-disc list-inside space-y-2 text-gray-800 leading-snug">
+                                <li>Delivery: Within 4–6 weeks after order.</li>
+                                <li>Warranty: As per manufacturer’s standard.</li>
+                                <li>Prices: Valid for 7 days from quotation date.</li>
+                            </ul>
                         </div>
+                        <div className="bg-gray-50/50 p-5 border border-black rounded-sm">
+                            <h4 className="font-bold underline mb-4 text-center text-[11pt]">Our Bank Details:</h4>
+                            <div className="space-y-2 text-[10pt] leading-tight">
+                              <p><span className="font-bold w-32 inline-block">Bank Name:</span> ICICI Bank</p>
+                              <p><span className="font-bold w-32 inline-block">Account No:</span> 103205001866</p>
+                              <p><span className="font-bold w-32 inline-block">IFSC Code:</span> ICIC0001032</p>
+                              <p><span className="font-bold w-32 inline-block">Account Type:</span> Corporate Current</p>
+                              <p><span className="font-bold w-32 inline-block">Website:</span> www.hpconnect.in</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* SIGNATURE SECTION */}
+                    <div className="mt-16 flex justify-between items-end">
+                      <div className="text-[9pt] text-gray-400 italic max-w-[300px] leading-tight">
+                        Note: This is a computer-generated quotation. No physical signature required.
                       </div>
-                      <p className="font-bold text-[11.5pt] mt-3">Authorized Signatory: Pratik Chaudhary</p>
-                  </div>
-                </div>
-            </footer>
+                      <div className="text-right">
+                          <p className="font-bold text-[12pt] mb-1">For M/s DeeQasa-Tech</p>
+                          <p className="font-bold text-gray-600 text-[10pt] mb-4">HPI Official Business Partner</p>
+                          <div className="h-20 flex items-center justify-end">
+                            <div className="border border-dashed border-gray-300 px-10 py-4 text-gray-300 italic rounded-sm text-[10pt]">
+                              Seal & Signature
+                            </div>
+                          </div>
+                          <p className="font-bold text-[11.5pt] mt-3">Authorized Signatory: Pratik Chaudhary</p>
+                      </div>
+                    </div>
+                </footer>
+            </div>
         </div>
       </div>
     </div>
