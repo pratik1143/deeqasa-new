@@ -184,7 +184,7 @@ export function QuotationBuilder() {
   const quotationNumber = useMemo(() => `DQT/HPC-001 / ${format(new Date(), 'dd-MM-yyyy')}`, []);
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-[1400px] mx-auto items-start">
+    <div className="flex flex-col md:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-[1500px] mx-auto items-start">
       {/* ===== CONTROLS PANEL ===== */}
       <Card className="w-full md:max-w-md lg:max-w-lg flex-shrink-0 no-print">
           <div className="p-6">
@@ -293,20 +293,20 @@ export function QuotationBuilder() {
       </Card>
 
       {/* ===== PREVIEW PANEL (THE PRINT AREA) ===== */}
-      <div className="flex-1 relative w-full overflow-x-auto">
+      <div className="flex-1 relative w-full overflow-x-auto min-h-screen">
         <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
         
-        {/* Force pixel-perfect landscape width for WYSIWYG screen preview */}
-        <div className="print-area quotation-container bg-white text-black mx-auto p-12" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '800px', width: '1120px', minWidth: '1120px' }}>
+        {/* Force pixel-perfect landscape width for WYSIWYG screen preview (1122.52px is A4 Landscape at 96 DPI) */}
+        <div className="quotation-print bg-white text-black mx-auto p-12 shadow-2xl" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '793px', width: '1122px' }}>
             
             {/* HEADER SECTION */}
-            <header className="mb-8 header flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                    <img src="/hp-logo.png" alt="HP Logo" className="print-logo h-[65px] w-auto object-contain" />
+            <header className="mb-8 flex justify-between items-center">
+                <div className="flex items-center gap-6">
+                    <img src="/hp-logo.png" alt="HP Logo" className="h-[75px] w-auto object-contain" />
                     <div className="company-details">
                         <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
                         <div className="text-[10pt] leading-snug text-gray-800">
@@ -325,7 +325,7 @@ export function QuotationBuilder() {
 
             {/* INFO BOXES SECTION */}
             <section className="grid grid-cols-2 gap-0 mb-6 border-t border-l border-black">
-                <div className="border-r border-b border-black p-4 flex flex-col min-h-[130px]">
+                <div className="border-r border-b border-black p-4 flex flex-col min-h-[140px]">
                     <p className="font-bold text-[10pt] uppercase mb-2 text-gray-600">To,</p>
                     <p className="font-bold text-[12pt] mb-1 leading-tight">{form.watch('companyName') || form.watch('customerName') || 'Client Name'}</p>
                     <p className="whitespace-pre-line text-[10.5pt] mb-3 leading-snug">{form.watch('address') || 'Client Address'}</p>
