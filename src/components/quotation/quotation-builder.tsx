@@ -292,7 +292,7 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL (THE PRINT AREA) ===== */}
+      {/* ===== PREVIEW PANEL (WYSIWYG) ===== */}
       <div className="flex-1 relative w-full overflow-x-auto min-h-screen">
         <div className="sticky top-20 right-0 p-4 no-print z-10 flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -300,13 +300,13 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        {/* Force pixel-perfect landscape width for WYSIWYG screen preview (1122.52px is A4 Landscape at 96 DPI) */}
+        {/* Force pixel-perfect landscape width for WYSIWYG screen preview (A4 Landscape at 96 DPI) */}
         <div className="quotation-print bg-white text-black mx-auto p-12 shadow-2xl" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: '11pt', minHeight: '793px', width: '1122px' }}>
             
             {/* HEADER SECTION */}
             <header className="mb-8 flex justify-between items-center">
                 <div className="flex items-center gap-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="h-[75px] w-auto object-contain" />
+                    <img src="/hp-logo.png" alt="HP Logo" className="w-[140px] h-auto object-contain" />
                     <div className="company-details">
                         <h2 className="text-[18pt] font-bold mb-0 leading-tight">M/s DeeQasa-Tech</h2>
                         <div className="text-[10pt] leading-snug text-gray-800">

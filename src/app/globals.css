@@ -138,7 +138,7 @@
     print-color-adjust: exact;
   }
 
-  /* Universal Reset: Hide everything */
+  /* Reset all elements to hidden */
   body * {
     visibility: hidden;
   }
@@ -164,7 +164,7 @@
     border: none !important;
   }
 
-  /* Explicitly remove UI components */
+  /* Explicitly remove UI components from layout */
   nav, header, footer, aside, button, 
   .no-print, .navbar, .sidebar, 
   [role="dialog"], [role="status"], .toaster {
@@ -192,14 +192,5 @@
   .amount-words,
   .terms-bank-section {
     page-break-inside: avoid !important;
-  }
-
-  /* Color enforcement for background stripes or fills */
-  .bg-gray-100 {
-    background-color: #f3f4f6 !important;
-  }
-  
-  .bg-gray-50\/50 {
-    background-color: #f9fafb !important;
   }
 }
