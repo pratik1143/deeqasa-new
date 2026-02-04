@@ -261,7 +261,7 @@ export function QuotationBuilder() {
                 scale: 3, 
                 useCORS: true, 
                 letterRendering: true,
-                windowWidth: 794,
+                windowWidth: 794, // Standard A4 pixel width at 96 DPI
                 backgroundColor: '#ffffff'
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -280,8 +280,9 @@ export function QuotationBuilder() {
   };
 
   /**
-   * Financial Logic Engine: 100% precision.
-   * Calculates Subtotal from the SUM of all (Quantity * Unit Price) line items.
+   * FINANCIAL CALCULATION ENGINE
+   * 100% Precision reactivity logic. 
+   * Calculates row-level and document-level totals based on form state.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
@@ -289,7 +290,6 @@ export function QuotationBuilder() {
     }
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      // Convert to number strictly to prevent calculation errors
       const price = parseFloat(String(item.unitPrice || 0)) || 0;
       const qty = parseFloat(String(item.quantity || 0)) || 0;
       return acc + (price * qty);
@@ -423,7 +423,7 @@ export function QuotationBuilder() {
                                 <Input type="number" value={manualPrice} onChange={(e) => setManualPrice(Number(e.target.value))} placeholder="Price" />
                                 <Input type="number" value={manualQty} onChange={(e) => setManualQty(Number(e.target.value))} placeholder="Qty" />
                             </div>
-                            <Button type="button" className="w-full" onClick={handleAddManualProduct}>Add Manual Item</Button>
+                            <Button type="button" className="w-full" onClick={handleAddManualItem => handleAddManualProduct()}>Add Manual Item</Button>
                         </div>
                     )}
                 </div>
