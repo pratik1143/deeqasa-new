@@ -44,7 +44,7 @@
 
 /* 
    ==========================================================================
-   A4 PORTRAIT QUOTATION ENGINE (STRICT MM LOCK)
+   PREMIUM BORDERLESS A4 PORTRAIT ENGINE
    ==========================================================================
 */
 
@@ -54,26 +54,13 @@
   margin: 40px auto;
   background: #ffffff !important;
   color: #000000 !important;
-  padding: 15mm !important; /* 15mm Margins as requested */
-  box-shadow: 0 0 25px rgba(0,0,0,0.5);
+  padding: 20mm 18mm !important; /* Margins: T/B 20mm, L/R 18mm */
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif !important;
   position: relative;
   overflow: visible;
   line-height: 1.15;
-}
-
-/* PROFESSIONAL PAGE BORDER - 15mm from edge */
-.quotation-page::before {
-  content: '';
-  position: absolute;
-  top: 15mm;
-  left: 15mm;
-  right: 15mm;
-  bottom: 15mm;
-  border: 1pt solid #000000;
-  pointer-events: none;
-  z-index: 100;
 }
 
 /* TEXT JUSTIFICATION ENGINE */
@@ -86,28 +73,40 @@
   text-align: left !important;
 }
 
-/* TABLE LOCKING ENGINE (FIXED LAYOUT IN MM) */
+.right-aligned-text {
+  text-align: right !important;
+}
+
+/* PREMIUM TABLE LOCKING ENGINE (Light Grid) */
 .locked-table {
-  width: 180mm !important; /* A4 (210) - 15 - 15 = 180mm */
+  width: 174mm !important; /* A4(210) - 18 - 18 = 174mm */
   table-layout: fixed !important;
   border-collapse: collapse !important;
-  border: 1pt solid #000000 !important;
+  border: 0.5pt solid #e5e7eb !important; /* Light Grey Grid */
 }
 
 .locked-table th, .locked-table td {
-  border: 1pt solid #000000 !important;
+  border: 0.5pt solid #e5e7eb !important;
   padding: 3mm !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
   vertical-align: top !important;
 }
 
+.locked-table th {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  font-size: 9pt !important;
+}
+
 /* COLUMN WIDTH LOCKS (SR: 5%, DESC: 45%, QTY: 8%, PRICE: 21%, TOTAL: 21%) */
-.col-sr { width: 9mm !important; text-align: center !important; }
-.col-desc { width: 81mm !important; text-align: left !important; }
-.col-qty { width: 14.4mm !important; text-align: center !important; }
-.col-price { width: 37.8mm !important; text-align: right !important; }
-.col-total { width: 37.8mm !important; text-align: right !important; }
+.col-sr { width: 8.7mm !important; text-align: center !important; }
+.col-desc { width: 78.3mm !important; text-align: left !important; }
+.col-qty { width: 13.9mm !important; text-align: center !important; }
+.col-price { width: 36.5mm !important; text-align: right !important; }
+.col-total { width: 36.5mm !important; text-align: right !important; }
 
 /* PRINT ENGINE (A4 PORTRAIT) */
 @media print {
@@ -125,7 +124,11 @@
     overflow: visible !important;
   }
 
-  /* HIDE EVERYTHING EXCEPT THE QUOTATION ROOT */
+  /* HIDE UI ELEMENTS */
+  .no-print, button, [role="combobox"], header, nav {
+    display: none !important;
+  }
+
   body * {
     visibility: hidden !important;
   }
@@ -152,30 +155,23 @@
     border: none !important;
     width: 210mm !important;
     min-height: 297mm !important;
-    padding: 15mm !important;
+    padding: 20mm 18mm !important;
     page-break-after: always !important;
   }
 
-  /* REPEAT TABLE HEADER AT TOP OF NEW PAGES */
+  /* REPEAT TABLE HEADER */
   thead {
     display: table-header-group !important;
   }
 
-  /* PREVENT ROW SPLITS */
-  tr {
+  /* PREVENT CONTENT SPLITS */
+  tr, .keep-together {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  /* SECTION LOCKS */
-  .keep-together {
+  footer, .signature-block {
     page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* HIDE BUTTONS AND UI */
-  .no-print, button, [role="combobox"], header, nav {
-    display: none !important;
   }
 }
 
