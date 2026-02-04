@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo, useTransition } from 'react';
@@ -282,42 +281,58 @@ export function QuotationBuilder() {
 
   const handleDownloadPng = async () => {
     setIsDownloading(true);
-    const { toPng } = await import('html-to-image');
-    const pages = document.querySelectorAll('.quotation-page');
-    
-    if (pages.length > 0) {
-        try {
-            for (let i = 0; i < pages.length; i++) {
-                const page = pages[i] as HTMLElement;
-                const dataUrl = await toPng(page, { 
-                    quality: 1.0, 
-                    pixelRatio: 3,
-                    backgroundColor: '#ffffff'
-                });
-                const link = document.createElement('a');
-                link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_${i + 1}.png`;
-                link.href = dataUrl;
-                link.click();
-                await new Promise(resolve => setTimeout(resolve, 300));
-            }
-            toast({ title: 'Success', description: 'Individual PNG pages downloaded.' });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'PNG Generation Failed', description: error.message });
-        } finally {
-            setIsDownloading(false);
+    try {
+        const { toPng } = await import('html-to-image');
+        const pages = document.querySelectorAll('.quotation-page');
+        
+        if (pages.length === 0) {
+            toast({ variant: 'destructive', title: 'Error', description: 'No pages found to export.' });
+            return;
         }
+
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i] as HTMLElement;
+            
+            // Critical fix for black background: explicitly set backgroundColor and isolation
+            const dataUrl = await toPng(page, { 
+                quality: 1.0, 
+                pixelRatio: 3,
+                backgroundColor: '#ffffff',
+                cacheBust: true,
+                style: {
+                    margin: '0',
+                    boxShadow: 'none',
+                    border: 'none',
+                }
+            });
+
+            const link = document.createElement('a');
+            link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_${i + 1}.png`;
+            link.href = dataUrl;
+            link.click();
+            // Stagger downloads to prevent browser performance issues
+            await new Promise(resolve => setTimeout(resolve, 800));
+        }
+        toast({ title: 'Success', description: 'Individual PNG pages downloaded.' });
+    } catch (error: any) {
+        console.error("PNG Export Failed:", error);
+        toast({ variant: 'destructive', title: 'PNG Export Failed', description: error.message });
+    } finally {
+        setIsDownloading(false);
     }
   };
 
   const totals = useMemo(() => {
-    if (!watchedLineItems || watchedLineItems.length === 0) {
+    const items = watchedLineItems || [];
+    if (items.length === 0) {
       return { subTotal: 0, totalGst: 0, grandTotal: 0 };
     }
 
-    const subTotal = watchedLineItems.reduce((acc, item) => {
+    const subTotal = items.reduce((acc, item) => {
       if (!item) return acc;
-      const price = parseFloat(String(item.unitPrice || 0)) || 0;
-      const qty = parseFloat(String(item.quantity || 0)) || 0;
+      // Force conversion to number to prevent manual text calculation bugs
+      const price = Number(item.unitPrice) || 0;
+      const qty = Number(item.quantity) || 0;
       return acc + (price * qty);
     }, 0);
     
