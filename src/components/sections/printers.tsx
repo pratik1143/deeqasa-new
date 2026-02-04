@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Zap, ShieldCheck, ChevronsDown } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Printers() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const posterImage = PlaceHolderImages.find(img => img.id === 'case-study-2')?.imageUrl;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -42,7 +44,7 @@ export function Printers() {
         muted
         playsInline
         className="absolute top-0 left-0 w-full h-full object-cover -z-20"
-        poster="/printer-poster.jpg"
+        poster={posterImage}
       >
         <source src="/printer.mp4" type="video/mp4" />
         Your browser does not support the video tag.

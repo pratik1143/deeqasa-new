@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, MicOff, Camera } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Proof() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const posterImage = PlaceHolderImages.find(img => img.id === 'case-study-1')?.imageUrl;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -42,7 +44,7 @@ export function Proof() {
         muted
         playsInline
         className="absolute top-0 left-0 w-full h-full object-cover -z-20"
-        poster="/poly-poster.jpg" // A poster image provides a fallback and improves perceived load time.
+        poster={posterImage}
       >
         <source src="/poly.mp4" type="video/mp4" />
         Your browser does not support the video tag.
