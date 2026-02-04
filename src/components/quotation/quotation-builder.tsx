@@ -49,7 +49,8 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
  * Converts a number to Indian currency words (Rupees and Paisa).
  */
 function numberToWords(num: number): string {
-    if (num === 0) return 'Zero rupees only.';
+    const roundedNum = Math.round(num * 100) / 100;
+    if (roundedNum === 0) return 'Zero rupees only.';
     
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
@@ -68,7 +69,7 @@ function numberToWords(num: number): string {
         return str;
     };
     
-    const numStr = num.toFixed(2);
+    const numStr = roundedNum.toFixed(2);
     const [rupees, paisa] = numStr.split('.').map(Number);
 
     let rupeesInWords = '';
@@ -151,7 +152,7 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  const watchedLineItems = form.watch('lineItems') || [];
+  const watchedLineItems = form.watch('lineItems');
   const watchedSubject = form.watch('subject');
   const watchedCustomer = form.watch('customerName');
   const watchedCompany = form.watch('companyName');
@@ -278,12 +279,25 @@ export function QuotationBuilder() {
   };
 
   /**
-   * Financial Logic: Precision calculation of totals
+   * Financial Engine: Optimized for precision and Indian currency standards.
    */
   const totals = useMemo(() => {
+    if (!watchedLineItems || watchedLineItems.length === 0) {
+      return { subTotal: 0, totalGst: 0, grandTotal: 0 };
+    }
+
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      const price = Number(item.unitPrice) || 0;
-      const qty = Number(item.quantity) || 0;
+      // Robust numeric extraction
+      const cleanValue = (val: any) => {
+          if (typeof val === 'number') return val;
+          if (!val) return 0;
+          const cleaned = String(val).replace(/[^0-9.-]+/g, "");
+          const parsed = parseFloat(cleaned);
+          return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const price = cleanValue(item.unitPrice);
+      const qty = cleanValue(item.quantity);
       return acc + (price * qty);
     }, 0);
     
@@ -516,8 +530,15 @@ export function QuotationBuilder() {
                     </thead>
                     <tbody>
                         {watchedLineItems.map((item, index) => {
-                            const unitPrice = Number(item.unitPrice) || 0;
-                            const qty = Number(item.quantity) || 0;
+                            const cleanValue = (val: any) => {
+                                if (typeof val === 'number') return val;
+                                if (!val) return 0;
+                                const cleaned = String(val).replace(/[^0-9.-]+/g, "");
+                                const parsed = parseFloat(cleaned);
+                                return isNaN(parsed) ? 0 : parsed;
+                            };
+                            const unitPrice = cleanValue(item.unitPrice);
+                            const qty = cleanValue(item.quantity);
                             const rowTotal = unitPrice * qty;
                             
                             return (
