@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -244,12 +244,12 @@ export function QuotationBuilder() {
         const opt = {
             margin: 0,
             filename: `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
+            image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { 
                 scale: 2, 
                 useCORS: true, 
                 letterRendering: true,
-                windowWidth: 794 
+                windowWidth: 794 // Locks to exactly 210mm in px
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
@@ -277,26 +277,25 @@ export function QuotationBuilder() {
 
   const QuotationHeader = () => {
     return (
-      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-200 bg-white">
-          <div className="flex items-center gap-6 bg-white">
-               <div className="bg-white p-1">
+      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100 !bg-white">
+          <div className="flex items-center gap-6">
+               <div className="relative h-[28mm] w-[50mm]">
                  <Image 
                    src="/hp-logo.png" 
-                   alt="Logo" 
-                   width={110} 
-                   height={55} 
-                   className="object-contain"
+                   alt="HP Logo" 
+                   fill
+                   className="object-contain object-left"
                    priority
                  />
                </div>
-               <div className="flex flex-col border-l border-gray-300 pl-4 h-12 justify-center">
+               <div className="flex flex-col border-l border-gray-200 pl-4 h-[12mm] justify-center">
                    <span className="text-[7pt] font-bold text-gray-400 tracking-[0.2em] uppercase">HP Connect Partner</span>
                </div>
           </div>
-          <div className="text-right">
-              <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-none tracking-tight">M/s DeeQasa-Tech</h2>
-              <p className="text-[8pt] text-gray-500 mt-2 font-medium">Smart. Secure. Sustainable. IT Solutions.</p>
-              <p className="text-[7pt] text-gray-400 mt-0.5">GSTIN: 03ABCDE1234F1Z5</p>
+          <div className="text-right flex flex-col items-end">
+              <h2 className="text-[13pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
+              <p className="text-[8pt] text-gray-500 mt-1 font-medium italic">Smart. Secure. Sustainable. IT Solutions.</p>
+              <p className="text-[7pt] text-gray-400 mt-1">GSTIN: 03ABCDE1234F1Z5</p>
           </div>
       </div>
     );
@@ -437,19 +436,19 @@ export function QuotationBuilder() {
                 <div className="text-[11.5pt] leading-relaxed space-y-8">
                     <div className="flex justify-between items-start">
                         <div className="text-left font-medium space-y-1">
-                            <p className="font-bold">To,</p>
-                            <p className="uppercase font-bold">{watchedCustomer}</p>
-                            <p>{watchedCompany}</p>
-                            <p>{watchedAddress}</p>
+                            <p className="font-bold uppercase tracking-tight">To,</p>
+                            <p className="uppercase font-bold text-[12pt]">{watchedCustomer}</p>
+                            <p className="font-bold">{watchedCompany}</p>
+                            <p className="text-gray-600 italic">{watchedAddress}</p>
                         </div>
-                        <div className="text-right font-bold space-y-1 text-gray-700 text-[10pt]">
+                        <div className="text-right font-bold space-y-1 text-gray-500 text-[9pt]">
                             <p>Ref: DQT/2024/{format(new Date(), 'MM/yy')}</p>
                             <p>Date: {format(new Date(), 'dd-MM-yyyy')}</p>
                         </div>
                     </div>
 
-                    <div className="font-bold text-left py-2 border-l-4 border-gray-100 pl-4">
-                        <p><span className="underline uppercase mr-2 text-gray-400">Subject:</span> {watchedSubject}</p>
+                    <div className="font-bold text-left py-2 border-l-[3px] border-gray-100 pl-4 bg-gray-50/50">
+                        <p className="leading-tight"><span className="underline uppercase mr-2 text-gray-400 font-medium">Subject:</span> {watchedSubject}</p>
                     </div>
 
                     <div className="space-y-4">
@@ -460,8 +459,8 @@ export function QuotationBuilder() {
                     </div>
 
                     <div className="space-y-4 pt-4">
-                        <h4 className="font-bold uppercase text-[8.5pt] tracking-[0.2em] text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
-                        <div className="justified-text space-y-2 text-[10pt] text-gray-600">
+                        <h4 className="font-bold uppercase text-[8pt] tracking-[0.2em] text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
+                        <div className="justified-text space-y-2 text-[10.5pt] text-gray-700">
                           <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
                           <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official Purchase Order.</p>
                           <p>• <strong>Validity:</strong> 7 days from the date of issuance of this quotation.</p>
@@ -471,8 +470,8 @@ export function QuotationBuilder() {
 
                     <div className="pt-12 flex justify-end">
                         <div className="text-right space-y-12">
-                            <p className="font-bold uppercase tracking-tight">For M/s DeeQasa-Tech</p>
-                            <div className="pt-2 font-bold px-8 uppercase text-[9pt] border-t border-gray-200">Authorized Signatory</div>
+                            <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
+                            <div className="pt-2 font-bold px-10 uppercase text-[9pt] border-t border-gray-200 text-gray-400">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
@@ -482,13 +481,13 @@ export function QuotationBuilder() {
             <div className="quotation-page !bg-white !text-black relative">
                 <QuotationHeader />
                 
-                <div className="mb-8 text-center py-2 font-bold uppercase text-[10pt] border-y border-gray-100 tracking-[0.3em]">
+                <div className="mb-6 text-center py-2 font-bold uppercase text-[9pt] border-y border-gray-100 tracking-[0.4em] bg-gray-50/30 text-gray-500">
                   Technical & Commercial Quotation
                 </div>
 
                 <table className="locked-table mb-8">
                     <thead>
-                        <tr className="uppercase bg-gray-50 text-[8pt] border-b border-gray-200">
+                        <tr className="uppercase bg-gray-50/80 text-[8pt] border-b border-gray-200">
                             <th className="col-sr py-4">Sr.</th>
                             <th className="col-desc py-4">Technical Specifications</th>
                             <th className="col-qty py-4">Qty</th>
@@ -499,10 +498,10 @@ export function QuotationBuilder() {
                     <tbody>
                         {lineItems.map((item, index) => (
                             <tr key={index} className="border-b border-gray-50">
-                                <td className="col-sr font-bold text-gray-400 pt-5">{index + 1}</td>
+                                <td className="col-sr font-bold text-gray-300 pt-5">{index + 1}</td>
                                 <td className="col-desc pt-5">
-                                    <p className="font-bold mb-2 uppercase leading-none text-gray-900">{item.product.model}</p>
-                                    <div className="text-[9pt] justified-text text-gray-500 leading-relaxed">{getLongDescription(item.product)}</div>
+                                    <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
+                                    <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
                                 </td>
                                 <td className="col-qty font-bold text-center pt-5">{item.quantity}</td>
                                 <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
@@ -514,30 +513,30 @@ export function QuotationBuilder() {
 
                 <div className="keep-together pt-6">
                     <div className="flex justify-end mb-8">
-                        <div className="w-[85mm] space-y-2 border-t-2 border-gray-900 pt-4">
-                            <div className="flex justify-between text-[9pt] font-bold text-gray-500 uppercase tracking-widest">
+                        <div className="w-[85mm] space-y-2 border-t-[2px] border-gray-900 pt-4">
+                            <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
                                 <span>Sub Total</span>
                                 <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
                             </div>
-                            <div className="flex justify-between text-[9pt] font-bold text-gray-500 uppercase tracking-widest">
+                            <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
                                 <span>GST @ 18%</span>
                                 <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
                             </div>
-                            <div className="flex justify-between text-[13pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
-                                <span>GRAND TOTAL</span>
+                            <div className="flex justify-between text-[14pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
+                                <span className="tracking-tighter">GRAND TOTAL</span>
                                 <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mb-10 p-5 bg-gray-50 rounded-lg border-l-4 border-gray-900">
-                        <p className="font-bold text-[7.5pt] uppercase tracking-[0.2em] text-gray-400 mb-2">Amount In Words:</p>
-                        <p className="italic text-[11pt] font-bold text-gray-900 leading-tight">{grandTotalInWords}</p>
+                    <div className="mb-10 p-5 bg-gray-50 rounded-lg border-l-[4px] border-gray-900">
+                        <p className="font-bold text-[7pt] uppercase tracking-[0.2em] text-gray-400 mb-2">Amount In Words:</p>
+                        <p className="italic text-[11.5pt] font-bold text-gray-900 leading-tight tracking-tight">{grandTotalInWords}</p>
                     </div>
 
                     <div className="flex justify-between items-end gap-12 pt-8">
                         <div className="space-y-4">
-                            <p className="font-bold uppercase text-[8pt] tracking-[0.2em] text-gray-400">Company's Bank Details:</p>
+                            <p className="font-bold uppercase text-[7.5pt] tracking-[0.2em] text-gray-400">Company's Bank Details:</p>
                             <div className="space-y-1.5 font-bold text-[9.5pt] text-gray-700">
                               <p><span className="text-gray-400 font-medium mr-2">A/c Holder's Name:</span> DEE QASA</p>
                               <p><span className="text-gray-400 font-medium mr-2">Bank Name:</span> State Bank of India - CC Limit</p>
@@ -546,8 +545,8 @@ export function QuotationBuilder() {
                             </div>
                         </div>
                         <div className="text-right space-y-14">
-                             <p className="font-bold uppercase tracking-tight">For M/s DeeQasa-Tech</p>
-                             <div className="pt-2 font-bold text-center uppercase text-[9pt] border-t border-gray-200 px-10">Authorized Signatory</div>
+                             <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
+                             <div className="pt-2 font-bold text-center uppercase text-[9pt] border-t border-gray-200 px-12 text-gray-400">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
