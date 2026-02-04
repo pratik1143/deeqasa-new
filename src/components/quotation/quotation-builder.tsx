@@ -45,7 +45,12 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 2
 });
 
+/**
+ * Converts a number to Indian currency words (Rupees and Paisa).
+ */
 function numberToWords(num: number): string {
+    if (num === 0) return 'Zero rupees only.';
+    
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
 
@@ -69,12 +74,18 @@ function numberToWords(num: number): string {
     let rupeesInWords = '';
     if (rupees > 0) {
         let n = rupees;
-        rupeesInWords += n >= 10000000 ? inWords(Math.floor(n / 10000000)) + 'crore ' : '';
-        n %= 10000000;
-        rupeesInWords += n >= 100000 ? inWords(Math.floor(n / 100000)) + 'lakh ' : '';
-        n %= 100000;
-        rupeesInWords += n >= 1000 ? inWords(Math.floor(n / 1000)) + 'thousand ' : '';
-        n %= 1000;
+        if (n >= 10000000) {
+            rupeesInWords += inWords(Math.floor(n / 10000000)) + 'crore ';
+            n %= 10000000;
+        }
+        if (n >= 100000) {
+            rupeesInWords += inWords(Math.floor(n / 100000)) + 'lakh ';
+            n %= 100000;
+        }
+        if (n >= 1000) {
+            rupeesInWords += inWords(Math.floor(n / 1000)) + 'thousand ';
+            n %= 1000;
+        }
         rupeesInWords += inWords(n);
     }
     
@@ -140,7 +151,7 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  const lineItems = form.watch('lineItems') || [];
+  const watchedLineItems = form.watch('lineItems') || [];
   const watchedSubject = form.watch('subject');
   const watchedCustomer = form.watch('customerName');
   const watchedCompany = form.watch('companyName');
@@ -266,18 +277,21 @@ export function QuotationBuilder() {
     }
   };
 
+  /**
+   * Financial Logic: Precision calculation of totals
+   */
   const totals = useMemo(() => {
-    const items = lineItems || [];
-    const subTotal = items.reduce((acc, item) => {
-      const price = parseFloat(String(item.unitPrice || 0));
-      const qty = parseFloat(String(item.quantity || 0));
-      const rowTotal = isNaN(price) || isNaN(qty) ? 0 : price * qty;
-      return acc + rowTotal;
+    const subTotal = watchedLineItems.reduce((acc, item) => {
+      const price = Number(item.unitPrice) || 0;
+      const qty = Number(item.quantity) || 0;
+      return acc + (price * qty);
     }, 0);
+    
     const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
+    
     return { subTotal, totalGst, grandTotal };
-  }, [lineItems]);
+  }, [watchedLineItems]);
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
@@ -501,18 +515,24 @@ export function QuotationBuilder() {
                         </tr>
                     </thead>
                     <tbody>
-                        {lineItems.map((item, index) => (
-                            <tr key={index} className="border-b border-gray-50">
-                                <td className="col-sr font-bold text-gray-300 pt-5">{index + 1}</td>
-                                <td className="col-desc pt-5">
-                                    <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
-                                    <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
-                                </td>
-                                <td className="col-qty font-bold text-center pt-5">{item.quantity || 0}</td>
-                                <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice || 0)}</td>
-                                <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format((item.unitPrice || 0) * (item.quantity || 0))}</td>
-                            </tr>
-                        ))}
+                        {watchedLineItems.map((item, index) => {
+                            const unitPrice = Number(item.unitPrice) || 0;
+                            const qty = Number(item.quantity) || 0;
+                            const rowTotal = unitPrice * qty;
+                            
+                            return (
+                                <tr key={index} className="border-b border-gray-50">
+                                    <td className="col-sr font-bold text-gray-300 pt-5">{index + 1}</td>
+                                    <td className="col-desc pt-5">
+                                        <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
+                                        <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
+                                    </td>
+                                    <td className="col-qty font-bold text-center pt-5">{qty}</td>
+                                    <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(unitPrice)}</td>
+                                    <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format(rowTotal)}</td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
 
@@ -561,4 +581,3 @@ export function QuotationBuilder() {
     </div>
   );
 }
-
