@@ -46,10 +46,6 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 2
 });
 
-/**
- * Precision Indian Number to Words Engine.
- * Handles Lakhs, Crores, and Paisa for financial compliance.
- */
 function numberToWords(num: number): string {
     const roundedNum = Math.round(num * 100) / 100;
     if (roundedNum === 0) return 'Zero rupees only';
@@ -154,7 +150,6 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  // Watch fields for reactivity - using name 'lineItems' specifically for performance and deep monitoring
   const watchedLineItems = useWatch({
     control: form.control,
     name: 'lineItems',
@@ -288,20 +283,24 @@ export function QuotationBuilder() {
   const handleDownloadPng = async () => {
     setIsDownloading(true);
     const { toPng } = await import('html-to-image');
-    const element = document.getElementById('quotation-content-root');
+    const pages = document.querySelectorAll('.quotation-page');
     
-    if (element) {
+    if (pages.length > 0) {
         try {
-            const dataUrl = await toPng(element, { 
-                quality: 1.0, 
-                pixelRatio: 3, // High DPI for 300DPI equivalent quality
-                backgroundColor: '#ffffff'
-            });
-            const link = document.createElement('a');
-            link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.png`;
-            link.href = dataUrl;
-            link.click();
-            toast({ title: 'Success', description: 'PNG generated successfully.' });
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i] as HTMLElement;
+                const dataUrl = await toPng(page, { 
+                    quality: 1.0, 
+                    pixelRatio: 3,
+                    backgroundColor: '#ffffff'
+                });
+                const link = document.createElement('a');
+                link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_${i + 1}.png`;
+                link.href = dataUrl;
+                link.click();
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+            toast({ title: 'Success', description: 'Individual PNG pages downloaded.' });
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'PNG Generation Failed', description: error.message });
         } finally {
@@ -310,11 +309,6 @@ export function QuotationBuilder() {
     }
   };
 
-  /**
-   * REFINED FINANCIAL CALCULATION ENGINE
-   * Strictly sums row totals (Qty * UnitPrice) to derive Subtotal, GST, and Grand Total.
-   * This is computed on the fly based on form state to ensure it is always reactive.
-   */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
       return { subTotal: 0, totalGst: 0, grandTotal: 0 };
@@ -322,7 +316,6 @@ export function QuotationBuilder() {
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
       if (!item) return acc;
-      // Convert to pure numbers to ensure math is accurate regardless of manual string inputs
       const price = parseFloat(String(item.unitPrice || 0)) || 0;
       const qty = parseFloat(String(item.quantity || 0)) || 0;
       return acc + (price * qty);
@@ -367,7 +360,6 @@ export function QuotationBuilder() {
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background font-body">
-      {/* CONTROL PANEL */}
       <Card className="w-full xl:max-w-md flex-shrink-0 no-print z-30 shadow-2xl border-primary/20 bg-card/50 backdrop-blur-md">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
@@ -488,7 +480,6 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* DOCUMENT PREVIEW AREA */}
       <div className="flex-1 w-full flex flex-col items-center overflow-x-auto pb-20">
         <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
             <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-primary text-primary-foreground font-bold rounded-full shadow-lg hover:shadow-primary/50 transition-all">
@@ -500,7 +491,6 @@ export function QuotationBuilder() {
         </div>
         
         <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white overflow-visible shadow-2xl">
-            {/* PAGE 1: COVERING LETTER */}
             <div className="quotation-page mb-8 bg-white text-black relative">
                 <QuotationHeader />
 
@@ -548,7 +538,6 @@ export function QuotationBuilder() {
                 </div>
             </div>
 
-            {/* PAGE 2: TECHNICAL QUOTATION */}
             <div className="quotation-page bg-white text-black relative">
                 <QuotationHeader />
                 
