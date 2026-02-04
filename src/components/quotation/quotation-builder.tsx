@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useTransition } from 'react';
@@ -19,7 +20,7 @@ import { Label } from '@/components/ui/label';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Printer, Sparkles } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Printer, Sparkles, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -109,6 +110,7 @@ export function QuotationBuilder() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isGenerating, startTransition] = useTransition();
+  const [isDownloading, setIsDownloading] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -195,6 +197,43 @@ export function QuotationBuilder() {
   
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPdf = async () => {
+    const element = document.getElementById('quotation-content-root');
+    if (!element) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not find quotation content for PDF generation.' });
+        return;
+    }
+
+    setIsDownloading(true);
+    try {
+        // Dynamically import to avoid SSR issues
+        const html2pdf = (await import('html2pdf.js')).default;
+        
+        const opt = {
+            margin: 0,
+            filename: `Quotation_DeeQasa_${format(new Date(), 'dd-MM-yyyy')}.pdf`,
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: true,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        await html2pdf().set(opt).from(element).save();
+        toast({ title: 'Success', description: 'PDF has been downloaded successfully.' });
+    } catch (error: any) {
+        console.error('PDF Generation Error:', error);
+        toast({ variant: 'destructive', title: 'PDF Generation Failed', description: 'An unexpected error occurred during download.' });
+    } finally {
+        setIsDownloading(false);
+    }
   };
 
   const totals = useMemo(() => {
@@ -326,173 +365,177 @@ export function QuotationBuilder() {
       </Card>
 
       {/* ===== PREVIEW PANEL (1123px Fixed Width for WYSIWYG) ===== */}
-      <div id="print-root" className="flex-1 w-full flex flex-col items-center">
-        <div className="sticky top-20 right-0 p-4 no-print z-10 w-full flex justify-end">
+      <div className="flex-1 w-full flex flex-col items-center">
+        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3" data-html2canvas-ignore>
+            <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="shadow-2xl bg-accent hover:bg-accent/90 text-accent-foreground font-bold rounded-full px-8">
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download className="mr-2 h-5 w-5" /> Download PDF</>}
+            </Button>
             <Button onClick={handlePrint} size="lg" className="shadow-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full px-8">
-                <Printer className="mr-2 h-5 w-5" /> Print / Save PDF
+                <Printer className="mr-2 h-5 w-5" /> Print / Save
             </Button>
         </div>
         
-        {/* Page 1: Covering Letter */}
-        <div className="quotation-page mb-8">
-            <header className="flex justify-between items-start mb-10">
-                <div className="flex items-center gap-8">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ width: '140px' }} />
-                    <div className="company-details">
-                        <h2 className="text-[16pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
-                        <div className="text-[10pt] leading-relaxed text-gray-700 mt-1">
-                            <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, SAS Nagar, Mohali, Punjab</p>
-                            <p className="font-bold">Phone: 8595270950 | GST No: 03EPIPK0093E1Z7</p>
+        <div id="quotation-content-root" className="w-full flex flex-col items-center">
+            {/* Page 1: Covering Letter */}
+            <div className="quotation-page mb-8">
+                <header className="flex justify-between items-start mb-10">
+                    <div className="flex items-center gap-8">
+                        <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ width: '140px' }} />
+                        <div className="company-details">
+                            <h2 className="text-[16pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
+                            <div className="text-[10pt] leading-relaxed text-gray-700 mt-1">
+                                <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, SAS Nagar, Mohali, Punjab</p>
+                                <p className="font-bold">Phone: 8595270950 | GST No: 03EPIPK0093E1Z7</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="text-right">
-                    <h1 className="text-[12pt] font-bold text-gray-900 uppercase underline decoration-2 underline-offset-4">Quotation Submission</h1>
-                    <p className="text-[10pt] mt-2 text-gray-600 font-bold">Ref: {quotationNumber.split(' / ')[0]}</p>
-                    <p className="text-[10pt] text-gray-600">Date: {format(new Date(), 'dd-MM-yyyy')}</p>
-                </div>
-            </header>
-            
-            <div className="border-b-2 border-black mb-10" />
-
-            <div className="text-[11.5pt] leading-relaxed text-gray-900 space-y-8">
-                <div>
-                    <p className="font-bold">To,</p>
-                    <p>{form.watch('customerName')}</p>
-                    <p>{form.watch('companyName')}</p>
-                    <p>{form.watch('address')}</p>
-                </div>
-
-                <div className="font-bold">
-                    <p><span className="underline">Subject:</span> {form.watch('subject')}</p>
-                </div>
-
-                <div>
-                    <p>Dear Sir/Madam,</p>
-                    <div className="mt-4 whitespace-pre-wrap leading-relaxed">
-                        {form.watch('letterBody')}
-                    </div>
-                </div>
-
-                <div>
-                    <p className="font-bold underline decoration-1 underline-offset-2 mb-2">Commercial Terms & Conditions:</p>
-                    <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
-                        <li><strong>Taxes:</strong> GST at 18% is applicable extra as per government norms.</li>
-                        <li><strong>Delivery:</strong> Within 4-6 weeks from the date of official purchase order.</li>
-                        <li><strong>Validity:</strong> This quotation remains valid for 7 days from the date of submission.</li>
-                        <li><strong>Payment:</strong> As per the standard norms of the University/Department.</li>
-                    </ul>
-                </div>
-
-                <div className="pt-20 flex justify-end">
                     <div className="text-right">
-                        <p className="font-bold uppercase">For M/s DeeQasa-Tech</p>
-                        <p className="mt-20 border-t-2 border-black pt-2 font-bold px-10">Authorized Signatory</p>
+                        <h1 className="text-[12pt] font-bold text-gray-900 uppercase underline decoration-2 underline-offset-4">Quotation Submission</h1>
+                        <p className="text-[10pt] mt-2 text-gray-600 font-bold">Ref: {quotationNumber.split(' / ')[0]}</p>
+                        <p className="text-[10pt] text-gray-600">Date: {format(new Date(), 'dd-MM-yyyy')}</p>
+                    </div>
+                </header>
+                
+                <div className="border-b-2 border-black mb-10" />
+
+                <div className="text-[11.5pt] leading-relaxed text-gray-900 space-y-8">
+                    <div>
+                        <p className="font-bold">To,</p>
+                        <p>{form.watch('customerName')}</p>
+                        <p>{form.watch('companyName')}</p>
+                        <p>{form.watch('address')}</p>
+                    </div>
+
+                    <div className="font-bold">
+                        <p><span className="underline">Subject:</span> {form.watch('subject')}</p>
+                    </div>
+
+                    <div>
+                        <p>Dear Sir/Madam,</p>
+                        <div className="mt-4 whitespace-pre-wrap leading-relaxed">
+                            {form.watch('letterBody')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className="font-bold underline decoration-1 underline-offset-2 mb-2">Commercial Terms & Conditions:</p>
+                        <ul className="list-disc list-inside mt-2 space-y-1 ml-4">
+                            <li><strong>Taxes:</strong> GST at 18% is applicable extra as per government norms.</li>
+                            <li><strong>Delivery:</strong> Within 4-6 weeks from the date of official purchase order.</li>
+                            <li><strong>Validity:</strong> This quotation remains valid for 7 days from the date of submission.</li>
+                            <li><strong>Payment:</strong> As per the standard norms of the University/Department.</li>
+                        </ul>
+                    </div>
+
+                    <div className="pt-20 flex justify-end">
+                        <div className="text-right">
+                            <p className="font-bold uppercase">For M/s DeeQasa-Tech</p>
+                            <p className="mt-20 border-t-2 border-black pt-2 font-bold px-10">Authorized Signatory</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {/* Page 2: Technical Quotation Table */}
-        <div className="quotation-page">
-            <header className="flex justify-between items-start mb-10">
-                <div className="flex items-center gap-8">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ width: '140px' }} />
-                    <div className="company-details">
-                        <h2 className="text-[16pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
-                        <div className="text-[10pt] leading-relaxed text-gray-700">
-                            <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, SAS Nagar, Mohali, Punjab</p>
+            {/* Page 2: Technical Quotation Table */}
+            <div className="quotation-page">
+                <header className="flex justify-between items-start mb-10">
+                    <div className="flex items-center gap-8">
+                        <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ width: '140px' }} />
+                        <div className="company-details">
+                            <h2 className="text-[16pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
+                            <div className="text-[10pt] leading-relaxed text-gray-700">
+                                <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, SAS Nagar, Mohali, Punjab</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="text-right">
-                    <h1 className="text-[12pt] font-bold text-gray-900 uppercase underline decoration-2 underline-offset-4">Technical Quotation</h1>
-                    <p className="text-[10pt] mt-2 text-gray-600 font-bold">Ref: {quotationNumber}</p>
-                </div>
-            </header>
-            
-            <div className="border-b-2 border-black mb-8" />
-
-            <section className="mb-8">
-                <Table className="w-full text-[10pt] border border-black">
-                    <TableHeader>
-                        <TableRow className="bg-gray-100 hover:bg-gray-100 border-b border-black">
-                            <TableHead className="border-r border-black text-center w-12 text-black font-bold h-10 p-0">Sr.</TableHead>
-                            <TableHead className="border-r border-black text-black font-bold h-10 px-4">Detailed Technical Description</TableHead>
-                            <TableHead className="border-r border-black text-center text-black font-bold w-40 h-10 px-0">Make/Model</TableHead>
-                            <TableHead className="border-r border-black text-center text-black font-bold w-16 h-10 px-0">Qty</TableHead>
-                            <TableHead className="border-r border-black text-right text-black font-bold w-40 h-10 px-4">Unit Price (₹)</TableHead>
-                            <TableHead className="text-right text-black font-bold w-44 h-10 px-4">Total (₹)</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {lineItems.map((item, index) => (
-                            <TableRow key={index} className="hover:bg-transparent border-b border-black">
-                                <TableCell className="border-r border-black text-center py-4">{index + 1}</TableCell>
-                                <TableCell className="border-r border-black py-4 px-4 align-top">
-                                    <p className="font-bold mb-2 text-gray-900">{item.product.model}</p>
-                                    <p className="leading-relaxed text-gray-700 text-[9.5pt]">{getLongDescription(item.product)}</p>
-                                </TableCell>
-                                <TableCell className="border-r border-black text-center py-4 font-bold">{item.product.model}</TableCell>
-                                <TableCell className="border-r border-black text-center py-4 font-bold">{item.quantity}</TableCell>
-                                <TableCell className="border-r border-black text-right py-4 px-4 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
-                                <TableCell className="text-right py-4 px-4 font-bold text-gray-900">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
-                            </TableRow>
-                        ))}
-                         {lineItems.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={6} className="text-center h-40 italic text-gray-400">No items added. Use the builder to select HP products.</TableCell>
-                            </TableRow>
-                        )}
-                        <TableRow className="hover:bg-transparent border-t-2 border-black">
-                            <TableCell colSpan={5} className="border-r border-black text-right font-bold py-2 px-4 uppercase">Sub Total (Net)</TableCell>
-                            <TableCell className="text-right font-bold py-2 px-4">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
-                        </TableRow>
-                        <TableRow className="hover:bg-transparent border-t border-black">
-                            <TableCell colSpan={5} className="border-r border-black text-right font-bold py-2 px-4 uppercase">GST @18%</TableCell>
-                            <TableCell className="text-right font-bold py-2 px-4">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
-                        </TableRow>
-                        <TableRow className="bg-gray-100 hover:bg-gray-100 border-t border-black">
-                            <TableCell colSpan={5} className="border-r border-black text-right font-bold py-3 px-4 text-[11pt] uppercase tracking-tight">Grand Total (Inclusive of all Taxes)</TableCell>
-                            <TableCell className="text-right font-bold py-3 px-4 text-[11pt] text-gray-900">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
-            </section>
-
-            <div className="totals-section space-y-8">
-                <div className="p-4 border border-black bg-gray-50 flex items-center">
-                    <p className="font-bold text-[10pt] text-gray-900 uppercase shrink-0 mr-4">Total in Words:</p>
-                    <p className="font-semibold italic text-gray-800 text-[10.5pt] leading-tight">{grandTotalInWords}</p>
-                </div>
+                    <div className="text-right">
+                        <h1 className="text-[12pt] font-bold text-gray-900 uppercase underline decoration-2 underline-offset-4">Technical Quotation</h1>
+                        <p className="text-[10pt] mt-2 text-gray-600 font-bold">Ref: {quotationNumber}</p>
+                    </div>
+                </header>
                 
-                <footer className="footer-section">
-                    <div className="grid grid-cols-2 gap-10">
-                        <div className="p-4 border border-black bg-white">
-                            <h4 className="font-bold underline decoration-1 underline-offset-2 mb-3 text-[10pt] uppercase">Banking Particulars:</h4>
-                            <div className="space-y-1.5 text-[9.5pt]">
-                                <div className="flex"><span className="font-bold w-28 shrink-0">Beneficiary:</span> <span>M/s DeeQasa-Tech</span></div>
-                                <div className="flex"><span className="font-bold w-28 shrink-0">Bank Name:</span> <span>ICICI Bank</span></div>
-                                <div className="flex"><span className="font-bold w-28 shrink-0">Account No:</span> <span className="font-bold tracking-wider text-black">103205001866</span></div>
-                                <div className="flex"><span className="font-bold w-28 shrink-0">IFSC Code:</span> <span className="font-bold tracking-widest text-black">ICIC0001032</span></div>
-                                <div className="flex"><span className="font-bold w-28 shrink-0">Branch:</span> <span>Mohali Phase 7</span></div>
-                            </div>
-                        </div>
-                        <div className="text-right flex flex-col justify-between pt-2">
-                            <div>
-                                <p className="font-bold uppercase text-[11pt] text-gray-900">For M/s DeeQasa-Tech</p>
-                                <p className="font-bold text-gray-600 text-[9pt] uppercase tracking-widest mt-1">Authorized HP Connect Partner</p>
-                            </div>
-                            <div className="mt-20">
-                                <p className="font-bold border-t-2 border-black pt-2 inline-block px-12 uppercase text-[10pt]">Authorized Signatory</p>
-                            </div>
-                        </div>
+                <div className="border-b-2 border-black mb-8" />
+
+                <section className="mb-8">
+                    <Table className="w-full text-[10pt] border border-black">
+                        <TableHeader>
+                            <TableRow className="bg-gray-100 hover:bg-gray-100 border-b border-black">
+                                <TableHead className="border-r border-black text-center w-12 text-black font-bold h-10 p-0">Sr.</TableHead>
+                                <TableHead className="border-r border-black text-black font-bold h-10 px-4">Detailed Technical Description</TableHead>
+                                <TableHead className="border-r border-black text-center text-black font-bold w-40 h-10 px-0">Make/Model</TableHead>
+                                <TableHead className="border-r border-black text-center text-black font-bold w-16 h-10 px-0">Qty</TableHead>
+                                <TableHead className="border-r border-black text-right text-black font-bold w-40 h-10 px-4">Unit Price (₹)</TableHead>
+                                <TableHead className="text-right text-black font-bold w-44 h-10 px-4">Total (₹)</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {lineItems.map((item, index) => (
+                                <TableRow key={index} className="hover:bg-transparent border-b border-black">
+                                    <TableCell className="border-r border-black text-center py-4">{index + 1}</TableCell>
+                                    <TableCell className="border-r border-black py-4 px-4 align-top">
+                                        <p className="font-bold mb-2 text-gray-900">{item.product.model}</p>
+                                        <p className="leading-relaxed text-gray-700 text-[9.5pt]">{getLongDescription(item.product)}</p>
+                                    </TableCell>
+                                    <TableCell className="border-r border-black text-center py-4 font-bold">{item.product.model}</TableCell>
+                                    <TableCell className="border-r border-black text-center py-4 font-bold">{item.quantity}</TableCell>
+                                    <TableCell className="border-r border-black text-right py-4 px-4 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice)}</TableCell>
+                                    <TableCell className="text-right py-4 px-4 font-bold text-gray-900">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</TableCell>
+                                </TableRow>
+                            ))}
+                            {lineItems.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center h-40 italic text-gray-400">No items added. Use the builder to select HP products.</TableCell>
+                                </TableRow>
+                            )}
+                            <TableRow className="hover:bg-transparent border-t-2 border-black">
+                                <TableCell colSpan={5} className="border-r border-black text-right font-bold py-2 px-4 uppercase">Sub Total (Net)</TableCell>
+                                <TableCell className="text-right font-bold py-2 px-4">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
+                            </TableRow>
+                            <TableRow className="hover:bg-transparent border-t border-black">
+                                <TableCell colSpan={5} className="border-r border-black text-right font-bold py-2 px-4 uppercase">GST @18%</TableCell>
+                                <TableCell className="text-right font-bold py-2 px-4">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
+                            </TableRow>
+                            <TableRow className="bg-gray-100 hover:bg-gray-100 border-t border-black">
+                                <TableCell colSpan={5} className="border-r border-black text-right font-bold py-3 px-4 text-[11pt] uppercase tracking-tight">Grand Total (Inclusive of all Taxes)</TableCell>
+                                <TableCell className="text-right font-bold py-3 px-4 text-[11pt] text-gray-900">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </section>
+
+                <div className="totals-section space-y-8">
+                    <div className="p-4 border border-black bg-gray-50 flex items-center">
+                        <p className="font-bold text-[10pt] text-gray-900 uppercase shrink-0 mr-4">Total in Words:</p>
+                        <p className="font-semibold italic text-gray-800 text-[10.5pt] leading-tight">{grandTotalInWords}</p>
                     </div>
-                </footer>
+                    
+                    <footer className="footer-section">
+                        <div className="grid grid-cols-2 gap-10">
+                            <div className="p-4 border border-black bg-white">
+                                <h4 className="font-bold underline decoration-1 underline-offset-2 mb-3 text-[10pt] uppercase">Banking Particulars:</h4>
+                                <div className="space-y-1.5 text-[9.5pt]">
+                                    <div className="flex"><span className="font-bold w-28 shrink-0">Beneficiary:</span> <span>M/s DeeQasa-Tech</span></div>
+                                    <div className="flex"><span className="font-bold w-28 shrink-0">Bank Name:</span> <span>ICICI Bank</span></div>
+                                    <div className="flex"><span className="font-bold w-28 shrink-0">Account No:</span> <span className="font-bold tracking-wider text-black">103205001866</span></div>
+                                    <div className="flex"><span className="font-bold w-28 shrink-0">IFSC Code:</span> <span className="font-bold tracking-widest text-black">ICIC0001032</span></div>
+                                    <div className="flex"><span className="font-bold w-28 shrink-0">Branch:</span> <span>Mohali Phase 7</span></div>
+                                </div>
+                            </div>
+                            <div className="text-right flex flex-col justify-between pt-2">
+                                <div>
+                                    <p className="font-bold uppercase text-[11pt] text-gray-900">For M/s DeeQasa-Tech</p>
+                                    <p className="font-bold text-gray-600 text-[9pt] uppercase tracking-widest mt-1">Authorized HP Connect Partner</p>
+                                </div>
+                                <div className="mt-20">
+                                    <p className="font-bold border-t-2 border-black pt-2 inline-block px-12 uppercase text-[10pt]">Authorized Signatory</p>
+                                </div>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
             </div>
         </div>
       </div>
     </div>
   );
 }
-
