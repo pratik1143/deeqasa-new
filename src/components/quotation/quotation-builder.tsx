@@ -15,11 +15,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Printer, Sparkles, Download } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Printer, Sparkles, Download, Keyboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -88,6 +89,11 @@ function numberToWords(num: number): string {
 };
 
 const getLongDescription = (product: Product): string => {
+  // If it's a manual product, we might have just stored the whole thing in processor
+  if (product.id.startsWith('MAN-')) {
+    return product.processor;
+  }
+
   const parts = [
     product.processor,
     product.memory,
@@ -113,6 +119,13 @@ export function QuotationBuilder() {
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Manual Entry States
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualModel, setManualModel] = useState('');
+  const [manualSpec, setManualSpec] = useState('');
+  const [manualPrice, setManualPrice] = useState<number>(0);
+  const [manualQty, setManualQty] = useState<number>(1);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -171,6 +184,41 @@ export function QuotationBuilder() {
       setSelectedProduct(null);
       setSearchQuery('');
     }
+  };
+
+  const handleAddManualProduct = () => {
+      if (!manualModel) {
+          toast({ variant: 'destructive', title: 'Error', description: 'Product name is required.' });
+          return;
+      }
+      
+      const customProduct: Product = {
+          id: `MAN-${Date.now()}`,
+          model: manualModel,
+          plant: '-',
+          chassis: '-',
+          processor: manualSpec || '-',
+          memory: '-',
+          hdd: '-',
+          hdd2: '-',
+          gfx: '-',
+          os: '-',
+          odd: '-',
+          wlan: '-',
+          warranty: '-',
+          name: manualModel,
+          price: manualPrice,
+          gstRate: 18,
+      };
+
+      append({ product: customProduct, quantity: manualQty, unitPrice: manualPrice });
+      
+      // Reset manual fields
+      setManualModel('');
+      setManualSpec('');
+      setManualPrice(0);
+      setManualQty(1);
+      toast({ title: 'Success', description: 'Custom item added to quotation.' });
   };
 
   const handleGenerateBody = () => {
@@ -239,12 +287,14 @@ export function QuotationBuilder() {
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
   return (
-    <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background">
+    <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background font-body">
       {/* ===== CONTROLS PANEL (NON-PRINTABLE) ===== */}
-      <Card className="w-full xl:max-w-md flex-shrink-0 no-print z-30 shadow-2xl">
+      <Card className="w-full xl:max-w-md flex-shrink-0 no-print z-30 shadow-2xl border-primary/20 bg-card/50 backdrop-blur-md">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
-              <CardTitle className="font-headline text-2xl text-primary">Quotation Studio</CardTitle>
+              <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2">
+                  <Sparkles size={24} /> Quotation Studio
+              </CardTitle>
               <CardDescription>Draft official IT proposals with AI assistance.</CardDescription>
             </CardHeader>
             <Form {...form}>
@@ -254,13 +304,13 @@ export function QuotationBuilder() {
                         <Check className="text-primary h-4 w-4" /> Customer Details
                     </h3>
                     <FormField control={form.control} name="customerName" render={({ field }) => (
-                        <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="companyName" render={({ field }) => (
-                        <FormItem><FormLabel>Department / Organization*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Department / Organization*</FormLabel><FormControl><Input {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem><FormLabel>Location / Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Location / Address*</FormLabel><FormControl><Textarea rows={2} {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
 
@@ -274,61 +324,96 @@ export function QuotationBuilder() {
                          </Button>
                     </div>
                     <FormField control={form.control} name="subject" render={({ field }) => (
-                        <FormItem><FormLabel>Subject Line*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Subject Line*</FormLabel><FormControl><Textarea rows={2} {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="letterBody" render={({ field }) => (
-                        <FormItem><FormLabel>Letter Body*</FormLabel><FormControl><Textarea rows={6} {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Letter Body*</FormLabel><FormControl><Textarea rows={6} {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
                 
                 <div className="space-y-4">
-                    <h3 className="font-semibold text-lg border-b border-primary/20 pb-2 flex items-center gap-2">
-                        <Plus className="text-primary h-4 w-4" /> Item Master
-                    </h3>
-                    <div className="flex flex-col gap-3">
-                        <Label>Search & Add HP Products</Label>
-                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-between font-normal h-12 bg-secondary/20">
-                                    <span className="truncate">
-                                        {selectedProduct ? getShortLabel(selectedProduct) : "Search HP Products..."}
-                                    </span>
-                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 shadow-2xl" align="start">
-                                <Command shouldFilter={false}>
-                                    <CommandInput placeholder="Search SKU, Model, Processor..." value={searchQuery} onValueChange={setSearchQuery} />
-                                    <CommandList>
-                                        {isLoadingProducts && <div className="p-4 text-center text-sm"><LineLoader /></div>}
-                                        <CommandEmpty>No products found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {filteredProducts.slice(0, 50).map((product) => (
-                                            <CommandItem key={product.id} onSelect={() => { setSelectedProduct(product); setOpenCombobox(false); }}>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-xs">{product.model}</span>
-                                                    <span className="text-[10px] text-muted-foreground truncate">{getLongDescription(product)}</span>
-                                                </div>
-                                            </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                        <Button type="button" className="w-full bg-primary text-black hover:bg-primary/90 font-bold" onClick={handleAddProduct} disabled={!selectedProduct}>
-                            <Plus className="h-4 w-4 mr-2" /> Add to Quote
-                        </Button>
+                    <div className="flex justify-between items-center border-b border-primary/20 pb-2">
+                         <h3 className="font-semibold text-lg flex items-center gap-2">
+                            {isManualMode ? <Keyboard className="text-primary h-4 w-4" /> : <Plus className="text-primary h-4 w-4" />}
+                            Item Master
+                         </h3>
+                         <div className="flex items-center gap-2">
+                             <Label htmlFor="manual-mode" className="text-xs text-muted-foreground">Manual Entry</Label>
+                             <Switch id="manual-mode" checked={isManualMode} onCheckedChange={setIsManualMode} />
+                         </div>
                     </div>
+
+                    {!isManualMode ? (
+                        <div className="flex flex-col gap-3">
+                            <Label>Search HP Products</Label>
+                            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" className="w-full justify-between font-normal h-12 bg-secondary/20">
+                                        <span className="truncate">
+                                            {selectedProduct ? getShortLabel(selectedProduct) : "Search HP Products..."}
+                                        </span>
+                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 shadow-2xl" align="start">
+                                    <Command shouldFilter={false}>
+                                        <CommandInput placeholder="Search SKU, Model, Processor..." value={searchQuery} onValueChange={setSearchQuery} />
+                                        <CommandList>
+                                            {isLoadingProducts && <div className="p-4 text-center text-sm"><LineLoader /></div>}
+                                            <CommandEmpty>No products found.</CommandEmpty>
+                                            <CommandGroup>
+                                                {filteredProducts.slice(0, 50).map((product) => (
+                                                <CommandItem key={product.id} onSelect={() => { setSelectedProduct(product); setOpenCombobox(false); }}>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-xs">{product.model}</span>
+                                                        <span className="text-[10px] text-muted-foreground truncate">{getLongDescription(product)}</span>
+                                                    </div>
+                                                </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                            <Button type="button" className="w-full bg-primary text-black hover:bg-primary/90 font-bold" onClick={handleAddProduct} disabled={!selectedProduct}>
+                                <Plus className="h-4 w-4 mr-2" /> Add to Quote
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4 p-4 bg-secondary/20 rounded-lg border border-primary/10">
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase tracking-wider">Product Name / Model*</Label>
+                                <Input value={manualModel} onChange={(e) => setManualModel(e.target.value)} placeholder="e.g. HP ZBook Fury G11" className="bg-background" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs uppercase tracking-wider">Specifications / Description</Label>
+                                <Textarea value={manualSpec} onChange={(e) => setManualSpec(e.target.value)} placeholder="Core i9 | 64GB RAM | 2TB SSD..." className="bg-background" rows={3} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label className="text-xs uppercase tracking-wider">Price (₹)</Label>
+                                    <Input type="number" value={manualPrice} onChange={(e) => setManualPrice(Number(e.target.value))} className="bg-background" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs uppercase tracking-wider">Qty</Label>
+                                    <Input type="number" value={manualQty} onChange={(e) => setManualQty(Number(e.target.value))} className="bg-background" />
+                                </div>
+                            </div>
+                            <Button type="button" className="w-full bg-accent text-white hover:bg-accent/90 font-bold" onClick={handleAddManualProduct}>
+                                <Plus className="h-4 w-4 mr-2" /> Add Custom Item
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-3">
+                    {fields.length > 0 && <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mt-8">Selected Items ({fields.length})</h3>}
                     {fields.map((field, index) => (
-                        <Card key={field.id} className="p-3 bg-secondary/30 border-primary/10">
+                        <Card key={field.id} className="p-3 bg-secondary/30 border-primary/10 hover:border-primary/30 transition-all">
                              <div className="flex justify-between items-start">
                                 <div className="flex-1 min-w-0 pr-4">
                                     <p className="font-bold text-[10px] uppercase text-primary tracking-wider">{field.product.model}</p>
-                                    <p className="text-[9px] text-muted-foreground truncate mt-1">{getLongDescription(field.product)}</p>
+                                    <p className="text-[9px] text-muted-foreground mt-1 line-clamp-2">{getLongDescription(field.product)}</p>
                                 </div>
                                 <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => remove(index)}>
                                     <Trash2 className="h-3 w-3"/>
@@ -361,11 +446,11 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/30 p-8">
+        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/30 p-8 shadow-inner">
             {/* PAGE 1: COVERING LETTER */}
-            <div className="quotation-page">
+            <div className="quotation-page mb-8">
                 <div className="flex items-center gap-6 mb-12 border-b-2 border-black pb-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto' }} />
+                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto', objectFit: 'contain' }} />
                     <div className="pl-6 border-l-2 border-black">
                         <h2 className="text-[18pt] font-bold uppercase text-gray-900 tracking-tight leading-none">M/s DeeQasa-Tech</h2>
                         <p className="text-[9pt] text-gray-700 mt-2 font-medium">SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, Mohali, Punjab</p>
@@ -392,7 +477,7 @@ export function QuotationBuilder() {
 
                     <div className="space-y-4">
                         <p className="font-bold">Respected Sir/Madam,</p>
-                        <div className="justified-text whitespace-pre-wrap leading-relaxed">
+                        <div className="justified-text whitespace-pre-wrap leading-relaxed text-[11pt]">
                             {form.watch('letterBody')}
                         </div>
                     </div>
@@ -421,7 +506,7 @@ export function QuotationBuilder() {
             {/* PAGE 2+: TECHNICAL QUOTATION */}
             <div className="quotation-page">
                 <div className="flex items-center gap-6 mb-10 border-b-2 border-black pb-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto' }} />
+                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto', objectFit: 'contain' }} />
                     <div className="pl-6 border-l-2 border-black">
                         <h2 className="text-[18pt] font-bold uppercase text-gray-900 tracking-tight leading-none">M/s DeeQasa-Tech</h2>
                     </div>
