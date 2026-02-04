@@ -42,39 +42,55 @@
   }
 }
 
-/* SCREEN VIEW: FIXED A4 PORTRAIT PREVIEW */
+/* SCREEN PREVIEW: A4 PORTRAIT FIXED DIMENSIONS */
 .quotation-page {
   width: 210mm;
-  min-height: 297mm;
+  height: 297mm;
   margin: 40px auto;
   background: #fff !important;
   color: #000 !important;
-  padding: 20mm;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  padding: 30mm 25mm; /* Content margins */
+  box-shadow: 0 0 25px rgba(0,0,0,0.4);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
+  page-break-after: always;
 }
 
-/* PRINT ENGINE: PURE FORMAT PRESERVATION */
+/* PROFESSIONAL PAGE BORDER */
+.quotation-page::before {
+  content: '';
+  position: absolute;
+  top: 20mm;
+  left: 20mm;
+  right: 20mm;
+  bottom: 20mm;
+  border: 2pt solid black;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* TEXT JUSTIFICATION */
+.justified-text {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.left-aligned-text {
+  text-align: left !important;
+}
+
+/* PRINT ENGINE: PURE WYSIWYG PORTRAIT */
 @media print {
-  /* RESET & FORCE PORTRAIT */
   @page {
     size: A4 portrait;
-    margin: 20mm;
-  }
-
-  * {
-    box-shadow: none !important;
-    background: transparent !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
+    margin: 0;
   }
 
   html, body {
     width: 210mm !important;
-    height: auto !important;
+    height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
@@ -85,9 +101,10 @@
     visibility: hidden !important;
   }
 
-  /* SHOW ONLY QUOTATION CONTENT */
   #quotation-content-root,
-  #quotation-content-root * {
+  #quotation-content-root *,
+  .quotation-page,
+  .quotation-page * {
     visibility: visible !important;
   }
 
@@ -95,57 +112,46 @@
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
-    width: 100% !important;
+    width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
   .quotation-page {
-    position: static !important;
+    position: relative !important;
     width: 210mm !important;
+    height: 297mm !important;
     margin: 0 !important;
-    padding: 0 !important; /* Margins handled by @page */
+    padding: 30mm 25mm !important;
     box-shadow: none !important;
     border: none !important;
     background: #fff !important;
-    page-break-after: auto;
   }
 
   /* HIDE UI ELEMENTS */
-  header,
-  nav,
-  aside,
-  footer,
-  .no-print,
-  button,
-  input,
-  textarea,
-  [role="combobox"],
-  form,
-  .sidebar {
+  header, nav, aside, footer, .no-print, button, .sidebar, [role="combobox"], form {
     display: none !important;
   }
 
-  /* TABLE & PAGINATION SAFETY */
+  /* REPRODUCE BORDER IN PRINT */
+  .quotation-page::before {
+    visibility: visible !important;
+    border: 2pt solid black !important;
+  }
+
+  /* TABLE INTEGRITY */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
     table-layout: fixed !important;
-    page-break-inside: auto;
   }
-
+  
   tr {
     page-break-inside: avoid !important;
-    break-inside: avoid !important;
   }
 
-  thead {
-    display: table-header-group;
-  }
-
-  /* SUPPRESS BROWSER HEADERS */
-  body::after,
-  body::before {
+  /* DISABLE BROWSER CHROME */
+  body::after, body::before {
     display: none !important;
     content: none !important;
   }
