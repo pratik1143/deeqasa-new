@@ -44,7 +44,7 @@
 
 /* 
    ==========================================================================
-   A4 PORTRAIT QUOTATION ENGINE (WYSIWYG)
+   A4 PORTRAIT QUOTATION ENGINE (STRICT MM LOCK)
    ==========================================================================
 */
 
@@ -54,7 +54,7 @@
   margin: 40px auto;
   background: #ffffff !important;
   color: #000000 !important;
-  padding: 30mm 25mm !important; /* Content margins */
+  padding: 30mm 25mm !important; /* Standard 30mm Top, 25mm Sides */
   box-shadow: 0 0 25px rgba(0,0,0,0.5);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif !important;
@@ -63,7 +63,7 @@
   line-height: 1.15;
 }
 
-/* PROFESSIONAL PAGE BORDER - REPEATS ON EVERY PRINT PAGE */
+/* PROFESSIONAL PAGE BORDER - 20mm from edge */
 .quotation-page::before {
   content: '';
   position: absolute;
@@ -71,7 +71,7 @@
   left: 20mm;
   right: 20mm;
   bottom: 20mm;
-  border: 1px solid #000000;
+  border: 1pt solid #000000;
   pointer-events: none;
   z-index: 100;
 }
@@ -86,7 +86,7 @@
   text-align: left !important;
 }
 
-/* TABLE LOCKING ENGINE */
+/* TABLE LOCKING ENGINE (FIXED LAYOUT) */
 .locked-table {
   width: 100% !important;
   table-layout: fixed !important;
@@ -122,6 +122,7 @@
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
+    overflow: visible !important;
   }
 
   /* HIDE EVERYTHING EXCEPT THE QUOTATION ROOT */
