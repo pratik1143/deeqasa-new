@@ -222,7 +222,7 @@ export function QuotationBuilder() {
       setManualSpec('');
       setManualPrice(0);
       setManualQty(1);
-      toast({ title: 'Success', description: 'Custom item added.' });
+      toast({ title: 'Success', description: 'Custom item added to quotation.' });
   };
 
   const handleGenerateBody = () => {
