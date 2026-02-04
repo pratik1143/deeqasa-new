@@ -292,8 +292,8 @@ export function QuotationBuilder() {
 
     // Sum up every row total: (qty * price)
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      const price = Number(item.unitPrice) || 0;
-      const qty = Number(item.quantity) || 0;
+      const price = parseFloat(String(item.unitPrice || 0)) || 0;
+      const qty = parseFloat(String(item.quantity || 0)) || 0;
       return acc + (price * qty);
     }, 0);
     
