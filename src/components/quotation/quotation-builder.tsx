@@ -214,7 +214,7 @@ export function QuotationBuilder() {
             filename: `Quotation_DeeQasa_${format(new Date(), 'dd-MM-yyyy')}.pdf`,
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
@@ -340,9 +340,9 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL (1123px Fixed Width for WYSIWYG) ===== */}
+      {/* ===== PREVIEW PANEL (A4 Portrait 210mm Fixed Width) ===== */}
       <div className="flex-1 w-full flex flex-col items-center overflow-x-auto">
-        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[1123px]">
+        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
             <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-accent font-bold rounded-full">
                 {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download className="mr-2 h-5 w-5" /> Download PDF</>}
             </Button>
@@ -358,18 +358,24 @@ export function QuotationBuilder() {
                     <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '70px', width: 'auto' }} />
                     <div>
                         <h2 className="text-[16pt] font-bold uppercase text-gray-900">M/s DeeQasa-Tech</h2>
-                        <p className="text-[10pt] text-gray-700">SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, SAS Nagar, Mohali, Punjab</p>
+                        <p className="text-[10pt] text-gray-700">SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, Mohali, Punjab</p>
                     </div>
                 </div>
                 
                 <div className="border-b-2 border-black mb-10" />
 
                 <div className="text-[11.5pt] leading-relaxed text-gray-900 space-y-8">
-                    <div>
-                        <p className="font-bold">To,</p>
-                        <p>{watchedCustomer}</p>
-                        <p>{watchedCompany}</p>
-                        <p>{watchedAddress}</p>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="font-bold">To,</p>
+                            <p>{watchedCustomer}</p>
+                            <p>{watchedCompany}</p>
+                            <p>{watchedAddress}</p>
+                        </div>
+                        <div className="text-right">
+                            <p><strong>Ref:</strong> DQT/2024/{format(new Date(), 'MM/yy')}</p>
+                            <p><strong>Date:</strong> {format(new Date(), 'dd-MM-yyyy')}</p>
+                        </div>
                     </div>
 
                     <div className="font-bold">
@@ -386,22 +392,25 @@ export function QuotationBuilder() {
                     <div>
                         <p className="font-bold underline mb-2">Commercial Terms & Conditions:</p>
                         <ul className="list-disc list-inside ml-4 space-y-1">
-                            <li><strong>Taxes:</strong> GST at 18% is applicable extra.</li>
-                            <li><strong>Delivery:</strong> Within 4-6 weeks from official PO.</li>
+                            <li><strong>Taxes:</strong> GST at 18% is applicable extra as per actuals.</li>
+                            <li><strong>Delivery:</strong> Within 4-6 weeks from official purchase order.</li>
                             <li><strong>Validity:</strong> Quotation remains valid for 7 days.</li>
+                            <li><strong>Warranty:</strong> Comprehensive OEM onsite warranty as specified.</li>
                         </ul>
                     </div>
 
                     <div className="pt-20 flex justify-end">
                         <div className="text-right">
                             <p className="font-bold uppercase">For M/s DeeQasa-Tech</p>
-                            <p className="mt-20 border-t-2 border-black pt-2 font-bold px-10">Authorized Signatory</p>
+                            <div className="mt-24 border-t-2 border-black pt-2 font-bold px-10">
+                                Authorized Signatory
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Page 2: Table */}
+            {/* Page 2: Technical Table */}
             <div className="quotation-page mt-8">
                 <div className="flex items-center gap-4 mb-10">
                     <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '70px', width: 'auto' }} />
@@ -418,8 +427,8 @@ export function QuotationBuilder() {
                             <TableHead className="border-r border-black text-center w-12 font-bold text-black">Sr.</TableHead>
                             <TableHead className="border-r border-black font-bold text-black">Technical Description</TableHead>
                             <TableHead className="border-r border-black text-center w-16 font-bold text-black">Qty</TableHead>
-                            <TableHead className="border-r border-black text-right w-40 font-bold text-black">Unit Price (₹)</TableHead>
-                            <TableHead className="text-right w-44 font-bold text-black">Total (₹)</TableHead>
+                            <TableHead className="border-r border-black text-right w-32 font-bold text-black">Unit Price (₹)</TableHead>
+                            <TableHead className="text-right w-36 font-bold text-black">Total (₹)</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -453,6 +462,26 @@ export function QuotationBuilder() {
                 <div className="mt-8 p-4 border border-black bg-gray-50 flex items-center">
                     <p className="font-bold text-[10pt] uppercase shrink-0 mr-4">In Words:</p>
                     <p className="italic text-gray-800 text-[10pt]">{grandTotalInWords}</p>
+                </div>
+
+                {/* Bank Details Section */}
+                <div className="mt-12 grid grid-cols-2 gap-8 text-[10pt] page-break-inside-avoid">
+                    <div className="space-y-2 border border-black p-4">
+                        <p className="font-bold underline uppercase">Bank Account Details:</p>
+                        <p><strong>Account Name:</strong> DeeQasa-Tech</p>
+                        <p><strong>Bank Name:</strong> HDFC Bank Ltd.</p>
+                        <p><strong>Branch:</strong> Sector 70, Mohali</p>
+                        <p><strong>A/c No:</strong> 50200067215432</p>
+                        <p><strong>IFSC Code:</strong> HDFC0000000</p>
+                    </div>
+                    <div className="flex flex-col justify-end items-end pr-4">
+                        <div className="text-right">
+                             <p className="font-bold uppercase mb-16">For M/s DeeQasa-Tech</p>
+                             <div className="border-t border-black w-48 inline-block pt-1 font-bold text-center">
+                                Authorized Signatory
+                             </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
