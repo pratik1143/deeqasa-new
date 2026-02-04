@@ -271,12 +271,16 @@ export function QuotationBuilder() {
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
   const QuotationHeader = () => (
-    <div className="flex justify-between items-start mb-10 pb-6 border-b border-gray-200">
-        <img src="/hp-logo.png" alt="HP Logo" style={{ height: '16mm', width: 'auto' }} />
+    <div className="flex justify-between items-start mb-10 pb-6 border-b border-gray-100">
+        <div className="flex items-center gap-4">
+             <img src="/hp-logo.png" alt="HP Logo" style={{ height: '14mm', width: 'auto' }} />
+             <div className="h-10 w-px bg-gray-200 hidden sm:block" />
+             <span className="text-[8pt] font-bold text-gray-400 tracking-widest uppercase hidden sm:block">HP Connect Partner</span>
+        </div>
         <div className="text-right">
-            <h2 className="text-[16pt] font-bold text-gray-900 uppercase leading-tight">M/s DeeQasa-Tech</h2>
-            <p className="text-[9pt] text-gray-600 mt-1">Authorized HP Enterprise Partner</p>
-            <p className="text-[9pt] text-gray-500">Mohali, Punjab | GSTIN: 03ABCDE1234F1Z5</p>
+            <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
+            <p className="text-[8pt] text-gray-500 mt-1">Smart. Secure. Sustainable. IT Solutions.</p>
+            <p className="text-[8pt] text-gray-400">GSTIN: 03ABCDE1234F1Z5</p>
         </div>
     </div>
   );
@@ -429,7 +433,7 @@ export function QuotationBuilder() {
                     </div>
 
                     <div className="font-bold left-aligned-text py-2">
-                        <p><span className="underline uppercase mr-2">Subject:</span> {watchedSubject}</p>
+                        <p><span className="underline uppercase mr-2 text-gray-400">Subject:</span> {watchedSubject}</p>
                     </div>
 
                     <div className="space-y-6">
@@ -440,8 +444,8 @@ export function QuotationBuilder() {
                     </div>
 
                     <div className="space-y-6 pt-10">
-                        <p className="font-bold underline uppercase text-[10pt] text-gray-900">Commercial Terms & Conditions:</p>
-                        <div className="justified-text space-y-3 text-[10.5pt] text-gray-700">
+                        <h4 className="font-bold uppercase text-[9pt] tracking-widest text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
+                        <div className="justified-text space-y-4 text-[10.5pt] text-gray-600">
                           <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
                           <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official Purchase Order.</p>
                           <p>• <strong>Validity:</strong> 7 days from the date of issuance of this quotation.</p>
@@ -452,7 +456,7 @@ export function QuotationBuilder() {
                     <div className="pt-20 flex justify-end">
                         <div className="text-right space-y-16">
                             <p className="font-bold uppercase text-gray-900">For M/s DeeQasa-Tech</p>
-                            <div className="pt-2 font-bold px-4 uppercase text-[10pt] text-gray-800 border-t border-gray-300">Authorized Signatory</div>
+                            <div className="pt-2 font-bold px-4 uppercase text-[10pt] text-gray-800 border-t border-gray-100">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
@@ -462,73 +466,72 @@ export function QuotationBuilder() {
             <div className="quotation-page">
                 <QuotationHeader />
                 
-                <div className="mb-8 text-center py-2 font-bold uppercase text-[12pt] border-y border-gray-200 tracking-widest text-gray-900">
+                <div className="mb-10 text-center py-4 font-bold uppercase text-[11pt] border-y border-gray-50 tracking-[0.2em] text-gray-900">
                   Technical & Commercial Quotation
                 </div>
 
-                <table className="locked-table">
+                <table className="locked-table mb-10">
                     <thead>
-                        <tr className="uppercase">
-                            <th className="col-sr">Sr.</th>
-                            <th className="col-desc">Technical Specifications</th>
-                            <th className="col-qty">Qty</th>
-                            <th className="col-price">Unit Price (₹)</th>
-                            <th className="col-total">Total (₹)</th>
+                        <tr className="uppercase bg-gray-50/50">
+                            <th className="col-sr py-4">Sr.</th>
+                            <th className="col-desc py-4">Technical Specifications</th>
+                            <th className="col-qty py-4">Qty</th>
+                            <th className="col-price py-4">Unit Price (₹)</th>
+                            <th className="col-total py-4">Total (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
                         {lineItems.map((item, index) => (
                             <tr key={index}>
-                                <td className="col-sr font-bold text-gray-600">{index + 1}</td>
-                                <td className="col-desc">
-                                    <p className="font-bold mb-1 uppercase leading-tight text-gray-900">{item.product.model}</p>
-                                    <div className="text-[9.5pt] justified-text text-gray-600 leading-normal">{getLongDescription(item.product)}</div>
+                                <td className="col-sr font-bold text-gray-400 pt-4">{index + 1}</td>
+                                <td className="col-desc pt-4">
+                                    <p className="font-bold mb-2 uppercase leading-tight text-gray-900">{item.product.model}</p>
+                                    <div className="text-[9pt] justified-text text-gray-500 leading-relaxed">{getLongDescription(item.product)}</div>
                                 </td>
-                                <td className="col-qty font-bold text-center">{item.quantity}</td>
-                                <td className="col-price text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
-                                <td className="col-total font-bold text-right">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</td>
+                                <td className="col-qty font-bold text-center pt-4">{item.quantity}</td>
+                                <td className="col-price text-right pt-4 text-gray-600">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
+                                <td className="col-total font-bold text-right pt-4 text-gray-900">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
 
-                <div className="keep-together mt-0">
-                    <table className="locked-table border-t-0">
-                        <TableBody>
-                            <TableRow className="bg-gray-50/30">
-                                <TableCell colSpan={4} className="text-right uppercase tracking-wider font-semibold border-r border-gray-200" style={{ width: '79%' }}>Sub Total (Excl. GST)</TableCell>
-                                <TableCell className="text-right font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
-                            </TableRow>
-                            <TableRow className="bg-gray-50/30">
-                                <TableCell colSpan={4} className="text-right uppercase tracking-wider font-semibold border-r border-gray-200" style={{ width: '79%' }}>GST @ 18% Extra</TableCell>
-                                <TableCell className="text-right font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
-                            </TableRow>
-                            <TableRow className="font-bold text-[12pt] bg-gray-100">
-                                <TableCell colSpan={4} className="text-right uppercase tracking-widest border-r border-gray-300" style={{ width: '79%' }}>Grand Total</TableCell>
-                                <TableCell className="text-right font-bold text-gray-900" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </table>
-
-                    <div className="mt-8 p-4 border-l-4 border-gray-300 bg-gray-50 flex flex-col justify-center">
-                        <p className="font-bold text-[8.5pt] uppercase tracking-widest text-gray-500 mb-1">Amount In Words:</p>
-                        <p className="italic text-[11pt] font-bold text-gray-800">{grandTotalInWords}</p>
-                    </div>
-
-                    <div className="mt-12 flex justify-between items-end gap-10">
-                        <div className="p-4 bg-gray-50 rounded-sm border-l-2 border-gray-200 max-w-md">
-                            <p className="font-bold underline uppercase mb-3 text-[9pt] text-gray-700">Bank Account Details:</p>
-                            <div className="space-y-1 font-bold text-[9pt] text-gray-600">
-                              <p><span className="text-gray-400 mr-2">Beneficiary:</span> DeeQasa-Tech</p>
-                              <p><span className="text-gray-400 mr-2">Bank:</span> HDFC Bank Ltd.</p>
-                              <p><span className="text-gray-400 mr-2">Branch:</span> Sector 70, Mohali</p>
-                              <p><span className="text-gray-400 mr-2">A/c No:</span> 50200067215432</p>
-                              <p><span className="text-gray-400 mr-2">IFSC:</span> HDFC0000000</p>
+                <div className="keep-together border-t-2 border-gray-900 pt-6">
+                    <div className="flex justify-end mb-8">
+                        <div className="w-[80mm] space-y-3">
+                            <div className="flex justify-between text-[10pt] font-semibold text-gray-500 uppercase">
+                                <span>Sub Total</span>
+                                <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
+                            </div>
+                            <div className="flex justify-between text-[10pt] font-semibold text-gray-500 uppercase">
+                                <span>GST @ 18%</span>
+                                <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
+                            </div>
+                            <div className="flex justify-between text-[14pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
+                                <span>GRAND TOTAL</span>
+                                <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
                             </div>
                         </div>
-                        <div className="text-right space-y-16 flex-shrink-0">
+                    </div>
+
+                    <div className="mb-12 p-6 bg-gray-50 rounded-lg">
+                        <p className="font-bold text-[8pt] uppercase tracking-widest text-gray-400 mb-2">Amount In Words:</p>
+                        <p className="italic text-[11pt] font-bold text-gray-900 leading-tight">{grandTotalInWords}</p>
+                    </div>
+
+                    <div className="flex justify-between items-end gap-10">
+                        <div className="space-y-4">
+                            <p className="font-bold uppercase text-[8pt] tracking-widest text-gray-400">Bank Account Details:</p>
+                            <div className="space-y-1 font-bold text-[9.5pt] text-gray-700">
+                              <p><span className="text-gray-400 font-medium mr-2">Beneficiary:</span> DEE QASA</p>
+                              <p><span className="text-gray-400 font-medium mr-2">Bank:</span> State Bank of India - CC Limit</p>
+                              <p><span className="text-gray-400 font-medium mr-2">A/c No:</span> 44562745640</p>
+                              <p><span className="text-gray-400 font-medium mr-2">IFSC:</span> SBIN0001443</p>
+                            </div>
+                        </div>
+                        <div className="text-right space-y-16">
                              <p className="font-bold uppercase text-gray-900">For M/s DeeQasa-Tech</p>
-                             <div className="pt-2 font-bold text-center uppercase text-[10pt] text-gray-800 border-t border-gray-300 px-6">Authorized Signatory</div>
+                             <div className="pt-2 font-bold text-center uppercase text-[10pt] text-gray-800 border-t border-gray-100 px-6">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
