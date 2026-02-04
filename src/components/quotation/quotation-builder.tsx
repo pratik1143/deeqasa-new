@@ -313,7 +313,7 @@ export function QuotationBuilder() {
                         <FormItem><FormLabel>Organization*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem><FormLabel>Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormMessage>
+                        <FormItem><FormLabel>Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
 
