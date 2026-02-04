@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useTransition } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
@@ -153,12 +153,16 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  // CRITICAL: Watch the array of items for any changes to trigger re-calculation
-  const watchedLineItems = form.watch('lineItems');
-  const watchedSubject = form.watch('subject');
-  const watchedCustomer = form.watch('customerName');
-  const watchedCompany = form.watch('companyName');
-  const watchedAddress = form.watch('address');
+  // CRITICAL: Use useWatch to ensure subtotal updates instantly on any field change
+  const watchedLineItems = useWatch({
+    control: form.control,
+    name: 'lineItems',
+  });
+  
+  const watchedSubject = useWatch({ control: form.control, name: 'subject' });
+  const watchedCustomer = useWatch({ control: form.control, name: 'customerName' });
+  const watchedCompany = useWatch({ control: form.control, name: 'companyName' });
+  const watchedAddress = useWatch({ control: form.control, name: 'address' });
 
   useEffect(() => {
     async function fetchProducts() {
@@ -292,6 +296,7 @@ export function QuotationBuilder() {
 
     // Sum up every row total: (qty * price)
     const subTotal = watchedLineItems.reduce((acc, item) => {
+      if (!item) return acc;
       const price = parseFloat(String(item.unitPrice || 0)) || 0;
       const qty = parseFloat(String(item.quantity || 0)) || 0;
       return acc + (price * qty);
@@ -533,7 +538,8 @@ export function QuotationBuilder() {
                         </tr>
                     </thead>
                     <tbody>
-                        {watchedLineItems.map((item, index) => {
+                        {watchedLineItems?.map((item, index) => {
+                            if (!item) return null;
                             const unitPrice = parseFloat(String(item.unitPrice || 0)) || 0;
                             const qty = parseFloat(String(item.quantity || 0)) || 0;
                             const rowTotal = unitPrice * qty;
