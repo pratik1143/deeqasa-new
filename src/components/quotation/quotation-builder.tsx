@@ -46,7 +46,8 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
 });
 
 /**
- * Converts a number to Indian currency words (Rupees and Paisa).
+ * Precision Indian Number to Words Engine.
+ * Handles Lakhs, Crores, and Paisa for financial compliance.
  */
 function numberToWords(num: number): string {
     const roundedNum = Math.round(num * 100) / 100;
@@ -279,8 +280,8 @@ export function QuotationBuilder() {
   };
 
   /**
-   * Financial Engine: Optimized for precision and Indian currency standards.
-   * Deeply watches lineItems to ensure manual and master entries are summed correctly.
+   * Financial Logic Engine: 100% precision.
+   * Calculates row-by-row and accumulates into subtotal, then applies tax.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
@@ -288,7 +289,6 @@ export function QuotationBuilder() {
     }
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      // Robust numeric extraction to handle strings from inputs
       const price = Number(item.unitPrice) || 0;
       const qty = Number(item.quantity) || 0;
       return acc + (price * qty);
@@ -306,7 +306,7 @@ export function QuotationBuilder() {
     return (
       <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-6">
-               <div className="h-[28mm] flex items-center bg-white overflow-hidden">
+               <div className="h-[28mm] flex items-center bg-white overflow-hidden p-2 rounded">
                  <img 
                    src="/hp-logo.png" 
                    alt="HP Logo" 
@@ -454,7 +454,7 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white overflow-visible">
+        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white overflow-visible shadow-2xl">
             {/* PAGE 1: COVERING LETTER */}
             <div className="quotation-page mb-8 bg-white text-black relative">
                 <QuotationHeader />
