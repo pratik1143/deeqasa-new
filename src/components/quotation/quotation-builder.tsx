@@ -235,7 +235,6 @@ export function QuotationBuilder() {
   };
   
   const handleDownloadPdf = () => {
-    // FIX: Use native window.print() for 100% WYSIWYG matching with A4 Landscape CSS
     setIsDownloading(true);
     setTimeout(() => {
       window.print();
@@ -255,7 +254,6 @@ export function QuotationBuilder() {
   const QuotationHeader = () => (
     <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-4">
-             <img src="/hp-logo.png" alt="HP Logo" style={{ height: '14mm', width: 'auto' }} />
              <div className="h-10 w-px bg-gray-200" />
              <span className="text-[8pt] font-bold text-gray-400 tracking-widest uppercase">HP Connect Partner</span>
         </div>
@@ -276,7 +274,7 @@ export function QuotationBuilder() {
               <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2">
                   <Sparkles size={24} /> Quotation Studio
               </CardTitle>
-              <CardDescription>Draft official IT proposals (A4 Landscape).</CardDescription>
+              <CardDescription>Draft official IT proposals (A4 Portrait).</CardDescription>
             </CardHeader>
             <Form {...form}>
               <div className="space-y-6">
@@ -388,9 +386,9 @@ export function QuotationBuilder() {
 
       {/* DOCUMENT PREVIEW AREA */}
       <div className="flex-1 w-full flex flex-col items-center overflow-x-auto pb-20">
-        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[297mm]">
+        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
             <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-primary text-primary-foreground font-bold rounded-full shadow-lg hover:shadow-primary/50 transition-all">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> Download PDF (Print)</>}
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> Download PDF</>}
             </Button>
         </div>
         
