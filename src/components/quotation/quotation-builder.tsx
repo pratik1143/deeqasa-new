@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -115,7 +116,7 @@ export function QuotationBuilder() {
       customerName: '',
       companyName: '',
       address: '',
-      subject: '',
+      subject: 'Submission of Quotation for Server, Network, Storage, Firewall & Video Conferencing Solution',
       lineItems: [],
     },
   });
@@ -193,16 +194,16 @@ export function QuotationBuilder() {
                     <h3 className="font-semibold text-lg mb-4 border-b pb-2">Customer Details</h3>
                     <div className="space-y-4">
                         <FormField control={form.control} name="customerName" render={({ field }) => (
-                            <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} placeholder="e.g., Mr. John Doe" /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} placeholder="e.g., The Chairman" /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="companyName" render={({ field }) => (
-                            <FormItem><FormLabel>Company Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Acme Corporation" /></FormControl></FormItem>
+                            <FormItem><FormLabel>Department / Organization</FormLabel><FormControl><Input {...field} placeholder="e.g., Dept of Biotechnology, Panjab University" /></FormControl></FormItem>
                         )} />
                         <FormField control={form.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea rows={3} {...field} placeholder="Company Address" /></FormControl></FormItem>
+                            <FormItem><FormLabel>Location</FormLabel><FormControl><Textarea rows={3} {...field} placeholder="e.g., Sector 14, Chandigarh" /></FormControl></FormItem>
                         )} />
                          <FormField control={form.control} name="subject" render={({ field }) => (
-                            <FormItem><FormLabel>Subject*</FormLabel><FormControl><Input {...field} placeholder="e.g., Quotation for HP Workstation" /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Subject*</FormLabel><FormControl><Textarea rows={3} {...field} placeholder="Quotation Subject" /></FormControl><FormMessage /></FormItem>
                         )} />
                     </div>
                 </div>
@@ -295,10 +296,11 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-print" className="quotation-page">
+        {/* Page 1: Covering Letter */}
+        <div className="quotation-page print-page mb-8">
             <header className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo object-contain" />
+                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo object-contain" style={{ width: '130px' }} />
                     <div className="company-details">
                         <h2 className="text-[14pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
                         <div className="text-[9pt] leading-snug text-gray-700">
@@ -308,35 +310,87 @@ export function QuotationBuilder() {
                     </div>
                 </div>
                 <div className="text-right">
-                    <h1 className="text-[11pt] font-bold text-gray-900 uppercase">QUOTATION (VALID TILL 7 DAYS)</h1>
-                    <p className="text-[9pt] mt-1 text-gray-600">No: {quotationNumber}</p>
+                    <h1 className="text-[11pt] font-bold text-gray-900 uppercase">OFFICIAL SUBMISSION</h1>
+                    <p className="text-[9pt] mt-1 text-gray-600">Ref: {quotationNumber.split(' / ')[0]}</p>
                     <p className="text-[9pt] text-gray-600">Date: {format(new Date(), 'dd-MM-yyyy')}</p>
+                </div>
+            </header>
+            
+            <div className="border-b-2 border-black mb-8" />
+
+            <div className="text-[11pt] leading-relaxed text-gray-900 space-y-6">
+                <div>
+                    <p className="font-bold">To,</p>
+                    <p>{form.watch('customerName') || 'The Head of Department'},</p>
+                    <p>{form.watch('companyName') || 'Department of Biotechnology, Panjab University'},</p>
+                    <p>{form.watch('address') || 'Sector 14, Chandigarh'}.</p>
+                </div>
+
+                <div className="font-bold">
+                    <p><span className="underline">Subject:</span> {form.watch('subject')}</p>
+                </div>
+
+                <div>
+                    <p>Dear Sir/Madam,</p>
+                    <p className="mt-4">
+                        With reference to the requirements for advanced computing and networking infrastructure, we are pleased to submit our formal quotation for the supply and installation of HP Enterprise Servers, Storage, Networking, and Video Conferencing solutions.
+                    </p>
+                    <p className="mt-4">
+                        Our proposed solutions are designed to meet the high-performance requirements of modern research and academic environments, ensuring reliability, security, and scalability.
+                    </p>
+                </div>
+
+                <div>
+                    <p className="font-bold underline">Warranty & Support:</p>
+                    <p>All supplied hardware is covered under comprehensive onsite OEM warranty. We provide 24/7 technical support and proactive maintenance to ensure uninterrupted operations.</p>
+                </div>
+
+                <div>
+                    <p className="font-bold underline">Commercial Terms:</p>
+                    <ul className="list-disc list-inside mt-2">
+                        <li><strong>Taxes:</strong> GST at 18% is applicable extra as per government norms.</li>
+                        <li><strong>Delivery:</strong> Within 4-6 weeks from the date of official purchase order.</li>
+                        <li><strong>Validity:</strong> This quotation remains valid for 7 days from the date of submission.</li>
+                        <li><strong>Payment:</strong> As per the standard norms of the University/Department.</li>
+                    </ul>
+                </div>
+
+                <div className="pt-12 flex justify-end">
+                    <div className="text-right">
+                        <p className="font-bold">For M/s DeeQasa-Tech</p>
+                        <p className="mt-16 border-t border-black pt-1 font-bold">Authorized Signatory</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Page 2: Technical Quotation Table */}
+        <div className="quotation-page print-page">
+            <header className="flex justify-between items-start mb-8">
+                <div className="flex items-center gap-6">
+                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo object-contain" style={{ width: '130px' }} />
+                    <div className="company-details">
+                        <h2 className="text-[14pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
+                        <div className="text-[9pt] leading-snug text-gray-700">
+                            <p>SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, SAS Nagar, Mohali, Punjab</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <h1 className="text-[11pt] font-bold text-gray-900 uppercase">TECHNICAL QUOTATION</h1>
+                    <p className="text-[9pt] text-gray-600">Ref: {quotationNumber}</p>
                 </div>
             </header>
             
             <div className="border-b-2 border-black mb-6" />
 
-            {/* Customer Details */}
-            <section className="grid grid-cols-2 gap-8 mb-6 text-[10pt]">
-                <div className="p-3 border border-gray-200 rounded">
-                    <p className="font-bold text-gray-500 text-[8pt] uppercase mb-1">Attention To:</p>
-                    <p className="font-bold text-[12pt] text-gray-900">{form.watch('customerName') || 'Client Name'}</p>
-                    {form.watch('companyName') && <p className="font-semibold text-gray-800">{form.watch('companyName')}</p>}
-                    <p className="whitespace-pre-line text-gray-700 mt-2">{form.watch('address') || 'Client Address'}</p>
-                </div>
-                <div className="flex flex-col justify-center">
-                    <p className="text-gray-900"><span className="font-bold underline">Subject:</span> {form.watch('subject') || 'IT Solutions Quotation'}</p>
-                </div>
-            </section>
-            
-            {/* Products Table */}
             <section className="mb-6">
                 <Table className="w-full text-[9pt]">
                     <TableHeader>
                         <TableRow className="bg-gray-100 hover:bg-gray-100">
                             <TableHead className="border border-black text-center w-10 text-black font-bold h-8">Sr.</TableHead>
-                            <TableHead className="border border-black text-black font-bold h-8 px-2">Description</TableHead>
-                            <TableHead className="border border-black text-center text-black font-bold w-32 h-8">Make/Model</TableHead>
+                            <TableHead className="border border-black text-black font-bold h-8 px-2">Detailed Description of Items</TableHead>
+                            <TableHead className="border border-black text-center text-black font-bold w-32 h-8">Model</TableHead>
                             <TableHead className="border border-black text-right text-black font-bold w-12 h-8 px-2">Qty</TableHead>
                             <TableHead className="border border-black text-right text-black font-bold w-32 h-8 px-2">Unit Price (₹)</TableHead>
                             <TableHead className="border border-black text-right text-black font-bold w-32 h-8 px-2">Total (₹)</TableHead>
@@ -358,11 +412,11 @@ export function QuotationBuilder() {
                         ))}
                          {lineItems.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center h-24 border border-black italic text-gray-400">Add products to see preview.</TableCell>
+                                <TableCell colSpan={6} className="text-center h-24 border border-black italic text-gray-400">Please add line items in the control panel.</TableCell>
                             </TableRow>
                         )}
                         <TableRow className="hover:bg-transparent">
-                            <TableCell colSpan={5} className="border border-black text-right font-bold py-1 px-2">Sub Total</TableCell>
+                            <TableCell colSpan={5} className="border border-black text-right font-bold py-1 px-2">Sub Total (Net Amount)</TableCell>
                             <TableCell className="border border-black text-right font-bold py-1 px-2">{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
                         </TableRow>
                         <TableRow className="hover:bg-transparent">
@@ -370,7 +424,7 @@ export function QuotationBuilder() {
                             <TableCell className="border border-black text-right font-bold py-1 px-2">{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
                         </TableRow>
                         <TableRow className="bg-gray-100 hover:bg-gray-100">
-                            <TableCell colSpan={5} className="border border-black text-right font-bold py-2 px-2 text-[10pt] uppercase">Grand Total</TableCell>
+                            <TableCell colSpan={5} className="border border-black text-right font-bold py-2 px-2 text-[10pt] uppercase">Grand Total (Inclusive of all Taxes)</TableCell>
                             <TableCell className="border border-black text-right font-bold py-2 px-2 text-[10pt]">{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
                         </TableRow>
                     </TableBody>
@@ -379,37 +433,25 @@ export function QuotationBuilder() {
 
             <div className="totals-section">
                 <div className="mb-6 p-3 border border-black bg-gray-50">
-                    <p className="font-bold text-[9pt] text-gray-900">Amount in Words: <span className="font-normal italic ml-3 text-gray-700">{grandTotalInWords}</span></p>
+                    <p className="font-bold text-[9pt] text-gray-900">Total Amount in Words: <span className="font-normal italic ml-3 text-gray-700">{grandTotalInWords}</span></p>
                 </div>
                 
                 <footer className="footer-section text-[9pt]">
                     <div className="grid grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <h4 className="font-bold underline mb-2">Terms & Conditions:</h4>
-                            <ul className="list-disc list-inside space-y-1 text-gray-700">
-                                <li>Delivery: Within 4–6 weeks after order.</li>
-                                <li>Warranty: As per manufacturer’s policy.</li>
-                                <li>Price Validity: 7 days from quotation date.</li>
-                            </ul>
-                        </div>
                         <div className="p-3 border border-black">
-                            <h4 className="font-bold underline mb-2">Bank Details:</h4>
+                            <h4 className="font-bold underline mb-2">Banking Particulars:</h4>
                             <div className="space-y-0.5 text-[8.5pt]">
-                                <p><span className="font-bold w-24 inline-block">Bank:</span> ICICI Bank</p>
-                                <p><span className="font-bold w-24 inline-block">Account:</span> 103205001866</p>
-                                <p><span className="font-bold w-24 inline-block">IFSC:</span> ICIC0001032</p>
+                                <p><span className="font-bold w-24 inline-block">Beneficiary:</span> M/s DeeQasa-Tech</p>
+                                <p><span className="font-bold w-24 inline-block">Bank Name:</span> ICICI Bank</p>
+                                <p><span className="font-bold w-24 inline-block">Account No:</span> 103205001866</p>
+                                <p><span className="font-bold w-24 inline-block">IFSC Code:</span> ICIC0001032</p>
+                                <p><span className="font-bold w-24 inline-block">Branch:</span> Mohali Phase 7</p>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-end">
-                        <div className="text-[8pt] text-gray-400 italic">
-                            Computer generated. No signature required.
                         </div>
                         <div className="text-right">
                             <p className="font-bold mb-1">For M/s DeeQasa-Tech</p>
-                            <p className="font-semibold text-gray-600 mb-8">Official Business Partner</p>
-                            <p className="font-bold border-t border-gray-300 pt-1">Authorized Signatory: Pratik Chaudhary</p>
+                            <p className="font-semibold text-gray-600 mb-12">Authorized HP Connect Partner</p>
+                            <p className="font-bold border-t border-gray-300 pt-1">Pratik Chaudhary</p>
                         </div>
                     </div>
                 </footer>
