@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useTransition } from 'react';
@@ -19,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -153,7 +154,7 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  // Watch fields for reactivity
+  // Watch fields for reactivity - using name 'lineItems' specifically for performance and deep monitoring
   const watchedLineItems = useWatch({
     control: form.control,
     name: 'lineItems',
@@ -284,9 +285,35 @@ export function QuotationBuilder() {
     }
   };
 
+  const handleDownloadPng = async () => {
+    setIsDownloading(true);
+    const { toPng } = await import('html-to-image');
+    const element = document.getElementById('quotation-content-root');
+    
+    if (element) {
+        try {
+            const dataUrl = await toPng(element, { 
+                quality: 1.0, 
+                pixelRatio: 3, // High DPI for 300DPI equivalent quality
+                backgroundColor: '#ffffff'
+            });
+            const link = document.createElement('a');
+            link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.png`;
+            link.href = dataUrl;
+            link.click();
+            toast({ title: 'Success', description: 'PNG generated successfully.' });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'PNG Generation Failed', description: error.message });
+        } finally {
+            setIsDownloading(false);
+        }
+    }
+  };
+
   /**
    * REFINED FINANCIAL CALCULATION ENGINE
    * Strictly sums row totals (Qty * UnitPrice) to derive Subtotal, GST, and Grand Total.
+   * This is computed on the fly based on form state to ensure it is always reactive.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
@@ -295,6 +322,7 @@ export function QuotationBuilder() {
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
       if (!item) return acc;
+      // Convert to pure numbers to ensure math is accurate regardless of manual string inputs
       const price = parseFloat(String(item.unitPrice || 0)) || 0;
       const qty = parseFloat(String(item.quantity || 0)) || 0;
       return acc + (price * qty);
@@ -464,7 +492,10 @@ export function QuotationBuilder() {
       <div className="flex-1 w-full flex flex-col items-center overflow-x-auto pb-20">
         <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
             <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-primary text-primary-foreground font-bold rounded-full shadow-lg hover:shadow-primary/50 transition-all">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> Download PDF</>}
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> PDF</>}
+            </Button>
+            <Button onClick={handleDownloadPng} size="lg" disabled={isDownloading} variant="outline" className="border-primary text-primary font-bold rounded-full shadow-lg hover:bg-primary/10 transition-all">
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><ImageIcon size={20} className="mr-2" /> PNG</>}
             </Button>
         </div>
         
