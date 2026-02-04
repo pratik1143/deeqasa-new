@@ -281,7 +281,7 @@ export function QuotationBuilder() {
 
   /**
    * Financial Logic Engine: 100% precision.
-   * Calculations are reactive to all line item changes.
+   * Calculates Subtotal from the SUM of all (Quantity * Unit Price) line items.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
@@ -289,9 +289,9 @@ export function QuotationBuilder() {
     }
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      // Ensure numeric precision by parsing all fields
-      const price = parseFloat(String(item.unitPrice)) || 0;
-      const qty = parseFloat(String(item.quantity)) || 0;
+      // Convert to number strictly to prevent calculation errors
+      const price = parseFloat(String(item.unitPrice || 0)) || 0;
+      const qty = parseFloat(String(item.quantity || 0)) || 0;
       return acc + (price * qty);
     }, 0);
     
@@ -352,7 +352,11 @@ export function QuotationBuilder() {
                         <FormItem><FormLabel>Organization*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem><FormLabel>Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem>
+                            <FormLabel>Address*</FormLabel>
+                            <FormControl><Textarea rows={2} {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
                     )} />
                 </div>
 
@@ -524,8 +528,8 @@ export function QuotationBuilder() {
                     </thead>
                     <tbody>
                         {watchedLineItems.map((item, index) => {
-                            const unitPrice = parseFloat(String(item.unitPrice)) || 0;
-                            const qty = parseFloat(String(item.quantity)) || 0;
+                            const unitPrice = parseFloat(String(item.unitPrice || 0)) || 0;
+                            const qty = parseFloat(String(item.quantity || 0)) || 0;
                             const rowTotal = unitPrice * qty;
                             
                             return (
