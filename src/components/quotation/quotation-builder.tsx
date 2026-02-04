@@ -249,7 +249,7 @@ export function QuotationBuilder() {
                 scale: 2, 
                 useCORS: true, 
                 letterRendering: true,
-                windowWidth: 794 // 210mm in pixels at 96 DPI
+                windowWidth: 794 
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
@@ -277,16 +277,18 @@ export function QuotationBuilder() {
 
   const QuotationHeader = () => {
     return (
-      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-200">
-          <div className="flex items-center gap-6">
-               <Image 
-                 src="/hp-logo.png" 
-                 alt="DeeQasa Tech Logo" 
-                 width={110} 
-                 height={55} 
-                 className="object-contain"
-                 priority
-               />
+      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-200 bg-white">
+          <div className="flex items-center gap-6 bg-white">
+               <div className="bg-white p-1">
+                 <Image 
+                   src="/hp-logo.png" 
+                   alt="Logo" 
+                   width={110} 
+                   height={55} 
+                   className="object-contain"
+                   priority
+                 />
+               </div>
                <div className="flex flex-col border-l border-gray-300 pl-4 h-12 justify-center">
                    <span className="text-[7pt] font-bold text-gray-400 tracking-[0.2em] uppercase">HP Connect Partner</span>
                </div>
@@ -427,9 +429,9 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white shadow-inner overflow-visible">
+        <div id="quotation-content-root" className="w-full flex flex-col items-center !bg-white overflow-visible">
             {/* PAGE 1: COVERING LETTER */}
-            <div className="quotation-page mb-8 bg-white text-black relative">
+            <div className="quotation-page mb-8 !bg-white !text-black relative">
                 <QuotationHeader />
 
                 <div className="text-[11.5pt] leading-relaxed space-y-8">
@@ -477,7 +479,7 @@ export function QuotationBuilder() {
             </div>
 
             {/* PAGE 2: TECHNICAL QUOTATION */}
-            <div className="quotation-page bg-white text-black relative">
+            <div className="quotation-page !bg-white !text-black relative">
                 <QuotationHeader />
                 
                 <div className="mb-8 text-center py-2 font-bold uppercase text-[10pt] border-y border-gray-100 tracking-[0.3em]">
