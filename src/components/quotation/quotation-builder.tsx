@@ -153,7 +153,7 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  // CRITICAL: Use useWatch to ensure subtotal updates instantly on any field change
+  // Watch fields for reactivity
   const watchedLineItems = useWatch({
     control: form.control,
     name: 'lineItems',
@@ -287,14 +287,12 @@ export function QuotationBuilder() {
   /**
    * REFINED FINANCIAL CALCULATION ENGINE
    * Strictly sums row totals (Qty * UnitPrice) to derive Subtotal, GST, and Grand Total.
-   * Updates reactive on any field change.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
       return { subTotal: 0, totalGst: 0, grandTotal: 0 };
     }
 
-    // Sum up every row total: (qty * price)
     const subTotal = watchedLineItems.reduce((acc, item) => {
       if (!item) return acc;
       const price = parseFloat(String(item.unitPrice || 0)) || 0;
