@@ -419,7 +419,7 @@ export function QuotationBuilder() {
             </div>
 
             {/* PAGE 2+: TECHNICAL QUOTATION */}
-            <div className="quotation-page" style={{ pageBreakBefore: 'always' }}>
+            <div className="quotation-page">
                 <div className="flex items-center gap-6 mb-10 border-b-2 border-black pb-6">
                     <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto' }} />
                     <div className="pl-6 border-l-2 border-black">
