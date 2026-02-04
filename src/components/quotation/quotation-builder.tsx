@@ -24,7 +24,6 @@ import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download } from 'lucide-
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
@@ -236,12 +235,35 @@ export function QuotationBuilder() {
     });
   };
   
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     setIsDownloading(true);
-    setTimeout(() => {
-      window.print();
-      setIsDownloading(false);
-    }, 500);
+    const html2pdf = (await import('html2pdf.js')).default;
+    const element = document.getElementById('quotation-content-root');
+    
+    if (element) {
+        const opt = {
+            margin: 0,
+            filename: `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: true,
+                windowWidth: 794 // 210mm in pixels at 96 DPI
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        try {
+            await html2pdf().from(element).set(opt).save();
+            toast({ title: 'Success', description: 'PDF generated successfully.' });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'PDF Generation Failed', description: error.message });
+        } finally {
+            setIsDownloading(false);
+        }
+    }
   };
 
   const totals = useMemo(() => {
@@ -254,29 +276,25 @@ export function QuotationBuilder() {
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
   const QuotationHeader = () => {
-    const logo = PlaceHolderImages.find(img => img.id === 'company-logo');
     return (
-      <div className="quotation-header flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-200">
           <div className="flex items-center gap-6">
-               {logo && (
-                 <Image 
-                   src={logo.imageUrl} 
-                   alt="DeeQasa Tech Logo" 
-                   width={120} 
-                   height={60} 
-                   className="object-contain"
-                   priority
-                   data-ai-hint={logo.imageHint}
-                 />
-               )}
-               <div className="flex flex-col border-l border-gray-200 pl-4">
-                   <span className="text-[8pt] font-bold text-gray-400 tracking-widest uppercase">HP Connect Partner</span>
+               <Image 
+                 src="/hp-logo.png" 
+                 alt="DeeQasa Tech Logo" 
+                 width={110} 
+                 height={55} 
+                 className="object-contain"
+                 priority
+               />
+               <div className="flex flex-col border-l border-gray-300 pl-4 h-12 justify-center">
+                   <span className="text-[7pt] font-bold text-gray-400 tracking-[0.2em] uppercase">HP Connect Partner</span>
                </div>
           </div>
           <div className="text-right">
-              <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
-              <p className="text-[8pt] text-gray-500 mt-1">Smart. Secure. Sustainable. IT Solutions.</p>
-              <p className="text-[8pt] text-gray-400">GSTIN: 03ABCDE1234F1Z5</p>
+              <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-none tracking-tight">M/s DeeQasa-Tech</h2>
+              <p className="text-[8pt] text-gray-500 mt-2 font-medium">Smart. Secure. Sustainable. IT Solutions.</p>
+              <p className="text-[7pt] text-gray-400 mt-0.5">GSTIN: 03ABCDE1234F1Z5</p>
           </div>
       </div>
     );
@@ -409,39 +427,39 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/10 shadow-inner overflow-visible">
+        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white shadow-inner overflow-visible">
             {/* PAGE 1: COVERING LETTER */}
-            <div className="quotation-page mb-8">
+            <div className="quotation-page mb-8 bg-white text-black relative">
                 <QuotationHeader />
 
-                <div className="text-[11.5pt] leading-relaxed space-y-8 text-gray-800">
+                <div className="text-[11.5pt] leading-relaxed space-y-8">
                     <div className="flex justify-between items-start">
-                        <div className="left-aligned-text font-medium space-y-1">
-                            <p className="font-bold text-gray-900">To,</p>
+                        <div className="text-left font-medium space-y-1">
+                            <p className="font-bold">To,</p>
                             <p className="uppercase font-bold">{watchedCustomer}</p>
                             <p>{watchedCompany}</p>
                             <p>{watchedAddress}</p>
                         </div>
-                        <div className="text-right font-bold space-y-1 text-gray-700">
+                        <div className="text-right font-bold space-y-1 text-gray-700 text-[10pt]">
                             <p>Ref: DQT/2024/{format(new Date(), 'MM/yy')}</p>
                             <p>Date: {format(new Date(), 'dd-MM-yyyy')}</p>
                         </div>
                     </div>
 
-                    <div className="font-bold left-aligned-text py-2">
+                    <div className="font-bold text-left py-2 border-l-4 border-gray-100 pl-4">
                         <p><span className="underline uppercase mr-2 text-gray-400">Subject:</span> {watchedSubject}</p>
                     </div>
 
                     <div className="space-y-4">
-                        <p className="font-bold text-gray-900">Respected Sir/Madam,</p>
-                        <div className="justified-text whitespace-pre-wrap text-gray-700 leading-relaxed">
+                        <p className="font-bold">Respected Sir/Madam,</p>
+                        <div className="justified-text whitespace-pre-wrap text-gray-800 leading-[1.6]">
                             {form.watch('letterBody')}
                         </div>
                     </div>
 
                     <div className="space-y-4 pt-4">
-                        <h4 className="font-bold uppercase text-[9pt] tracking-widest text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
-                        <div className="justified-text space-y-2 text-[10.5pt] text-gray-600">
+                        <h4 className="font-bold uppercase text-[8.5pt] tracking-[0.2em] text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
+                        <div className="justified-text space-y-2 text-[10pt] text-gray-600">
                           <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
                           <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official Purchase Order.</p>
                           <p>• <strong>Validity:</strong> 7 days from the date of issuance of this quotation.</p>
@@ -451,83 +469,83 @@ export function QuotationBuilder() {
 
                     <div className="pt-12 flex justify-end">
                         <div className="text-right space-y-12">
-                            <p className="font-bold uppercase text-gray-900">For M/s DeeQasa-Tech</p>
-                            <div className="pt-2 font-bold px-4 uppercase text-[10pt] text-gray-800 border-t border-gray-100">Authorized Signatory</div>
+                            <p className="font-bold uppercase tracking-tight">For M/s DeeQasa-Tech</p>
+                            <div className="pt-2 font-bold px-8 uppercase text-[9pt] border-t border-gray-200">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* PAGE 2: TECHNICAL QUOTATION */}
-            <div className="quotation-page">
+            <div className="quotation-page bg-white text-black relative">
                 <QuotationHeader />
                 
-                <div className="mb-6 text-center py-2 font-bold uppercase text-[11pt] border-y border-gray-50 tracking-[0.2em] text-gray-900">
+                <div className="mb-8 text-center py-2 font-bold uppercase text-[10pt] border-y border-gray-100 tracking-[0.3em]">
                   Technical & Commercial Quotation
                 </div>
 
                 <table className="locked-table mb-8">
                     <thead>
-                        <tr className="uppercase bg-gray-50/50">
-                            <th className="col-sr py-3">Sr.</th>
-                            <th className="col-desc py-3">Technical Specifications</th>
-                            <th className="col-qty py-3">Qty</th>
-                            <th className="col-price py-3">Unit Price (₹)</th>
-                            <th className="col-total py-3">Total (₹)</th>
+                        <tr className="uppercase bg-gray-50 text-[8pt] border-b border-gray-200">
+                            <th className="col-sr py-4">Sr.</th>
+                            <th className="col-desc py-4">Technical Specifications</th>
+                            <th className="col-qty py-4">Qty</th>
+                            <th className="col-price py-4">Unit Price (₹)</th>
+                            <th className="col-total py-4">Total (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
                         {lineItems.map((item, index) => (
-                            <tr key={index}>
-                                <td className="col-sr font-bold text-gray-400 pt-4">{index + 1}</td>
-                                <td className="col-desc pt-4">
-                                    <p className="font-bold mb-2 uppercase leading-tight text-gray-900">{item.product.model}</p>
+                            <tr key={index} className="border-b border-gray-50">
+                                <td className="col-sr font-bold text-gray-400 pt-5">{index + 1}</td>
+                                <td className="col-desc pt-5">
+                                    <p className="font-bold mb-2 uppercase leading-none text-gray-900">{item.product.model}</p>
                                     <div className="text-[9pt] justified-text text-gray-500 leading-relaxed">{getLongDescription(item.product)}</div>
                                 </td>
-                                <td className="col-qty font-bold text-center pt-4">{item.quantity}</td>
-                                <td className="col-price text-right pt-4 text-gray-600">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
-                                <td className="col-total font-bold text-right pt-4 text-gray-900">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</td>
+                                <td className="col-qty font-bold text-center pt-5">{item.quantity}</td>
+                                <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
+                                <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
 
-                <div className="keep-together border-t-2 border-gray-900 pt-4">
-                    <div className="flex justify-end mb-6">
-                        <div className="w-[80mm] space-y-2">
-                            <div className="flex justify-between text-[10pt] font-semibold text-gray-500 uppercase">
+                <div className="keep-together pt-6">
+                    <div className="flex justify-end mb-8">
+                        <div className="w-[85mm] space-y-2 border-t-2 border-gray-900 pt-4">
+                            <div className="flex justify-between text-[9pt] font-bold text-gray-500 uppercase tracking-widest">
                                 <span>Sub Total</span>
                                 <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
                             </div>
-                            <div className="flex justify-between text-[10pt] font-semibold text-gray-500 uppercase">
+                            <div className="flex justify-between text-[9pt] font-bold text-gray-500 uppercase tracking-widest">
                                 <span>GST @ 18%</span>
                                 <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
                             </div>
-                            <div className="flex justify-between text-[14pt] font-bold text-gray-900 border-t border-gray-100 pt-2">
+                            <div className="flex justify-between text-[13pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
                                 <span>GRAND TOTAL</span>
                                 <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-                        <p className="font-bold text-[8pt] uppercase tracking-widest text-gray-400 mb-1">Amount In Words:</p>
+                    <div className="mb-10 p-5 bg-gray-50 rounded-lg border-l-4 border-gray-900">
+                        <p className="font-bold text-[7.5pt] uppercase tracking-[0.2em] text-gray-400 mb-2">Amount In Words:</p>
                         <p className="italic text-[11pt] font-bold text-gray-900 leading-tight">{grandTotalInWords}</p>
                     </div>
 
-                    <div className="flex justify-between items-end gap-10">
+                    <div className="flex justify-between items-end gap-12 pt-8">
                         <div className="space-y-4">
-                            <p className="font-bold uppercase text-[8pt] tracking-widest text-gray-400">Bank Account Details:</p>
-                            <div className="space-y-1 font-bold text-[9.5pt] text-gray-700">
-                              <p><span className="text-gray-400 font-medium mr-2">Beneficiary:</span> DEE QASA</p>
-                              <p><span className="text-gray-400 font-medium mr-2">Bank:</span> State Bank of India - CC Limit</p>
-                              <p><span className="text-gray-400 font-medium mr-2">A/c No:</span> 44562745640</p>
-                              <p><span className="text-gray-400 font-medium mr-2">IFSC:</span> SBIN0001443</p>
+                            <p className="font-bold uppercase text-[8pt] tracking-[0.2em] text-gray-400">Company's Bank Details:</p>
+                            <div className="space-y-1.5 font-bold text-[9.5pt] text-gray-700">
+                              <p><span className="text-gray-400 font-medium mr-2">A/c Holder's Name:</span> DEE QASA</p>
+                              <p><span className="text-gray-400 font-medium mr-2">Bank Name:</span> State Bank of India - CC Limit</p>
+                              <p><span className="text-gray-400 font-medium mr-2">A/c No.:</span> 44562745640</p>
+                              <p><span className="text-gray-400 font-medium mr-2">Branch & IFS Code:</span> SBIN0001443</p>
                             </div>
                         </div>
-                        <div className="text-right space-y-12">
-                             <p className="font-bold uppercase text-gray-900">For M/s DeeQasa-Tech</p>
-                             <div className="pt-2 font-bold text-center uppercase text-[10pt] text-gray-800 border-t border-gray-100 px-6">Authorized Signatory</div>
+                        <div className="text-right space-y-14">
+                             <p className="font-bold uppercase tracking-tight">For M/s DeeQasa-Tech</p>
+                             <div className="pt-2 font-bold text-center uppercase text-[9pt] border-t border-gray-200 px-10">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
