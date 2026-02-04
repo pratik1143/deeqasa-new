@@ -89,11 +89,9 @@ function numberToWords(num: number): string {
 };
 
 const getLongDescription = (product: Product): string => {
-  // If it's a manual product, we might have just stored the whole thing in processor
   if (product.id.startsWith('MAN-')) {
     return product.processor;
   }
-
   const parts = [
     product.processor,
     product.memory,
@@ -120,7 +118,6 @@ export function QuotationBuilder() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Manual Entry States
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualModel, setManualModel] = useState('');
   const [manualSpec, setManualSpec] = useState('');
@@ -191,7 +188,6 @@ export function QuotationBuilder() {
           toast({ variant: 'destructive', title: 'Error', description: 'Product name is required.' });
           return;
       }
-      
       const customProduct: Product = {
           id: `MAN-${Date.now()}`,
           model: manualModel,
@@ -210,15 +206,12 @@ export function QuotationBuilder() {
           price: manualPrice,
           gstRate: 18,
       };
-
       append({ product: customProduct, quantity: manualQty, unitPrice: manualPrice });
-      
-      // Reset manual fields
       setManualModel('');
       setManualSpec('');
       setManualPrice(0);
       setManualQty(1);
-      toast({ title: 'Success', description: 'Custom item added to quotation.' });
+      toast({ title: 'Success', description: 'Custom item added.' });
   };
 
   const handleGenerateBody = () => {
@@ -235,7 +228,7 @@ export function QuotationBuilder() {
                 address: watchedAddress,
             });
             form.setValue('letterBody', result.letterBody);
-            toast({ title: 'Success', description: 'AI has generated a formal letter body.' });
+            toast({ title: 'Success', description: 'AI generated letter body.' });
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'AI Generation Failed', description: error.message });
         }
@@ -248,15 +241,10 @@ export function QuotationBuilder() {
 
   const handleDownloadPdf = async () => {
     const element = document.getElementById('quotation-content-root');
-    if (!element) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not find quotation content for PDF generation.' });
-        return;
-    }
-
+    if (!element) return;
     setIsDownloading(true);
     try {
         const html2pdf = (await import('html2pdf.js')).default;
-        
         const opt = {
             margin: 0,
             filename: `Quotation_DeeQasa_${format(new Date(), 'dd-MM-yyyy')}.pdf`,
@@ -265,12 +253,9 @@ export function QuotationBuilder() {
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
-
         await html2pdf().set(opt).from(element).save();
-        toast({ title: 'Success', description: 'PDF has been downloaded successfully.' });
     } catch (error: any) {
         console.error('PDF Generation Error:', error);
-        toast({ variant: 'destructive', title: 'PDF Generation Failed', description: 'An unexpected error occurred during download.' });
     } finally {
         setIsDownloading(false);
     }
@@ -280,7 +265,6 @@ export function QuotationBuilder() {
     const subTotal = lineItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
     const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
-
     return { subTotal, totalGst, grandTotal };
   }, [lineItems]);
   
@@ -288,85 +272,76 @@ export function QuotationBuilder() {
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background font-body">
-      {/* ===== CONTROLS PANEL (NON-PRINTABLE) ===== */}
       <Card className="w-full xl:max-w-md flex-shrink-0 no-print z-30 shadow-2xl border-primary/20 bg-card/50 backdrop-blur-md">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
               <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2">
                   <Sparkles size={24} /> Quotation Studio
               </CardTitle>
-              <CardDescription>Draft official IT proposals with AI assistance.</CardDescription>
+              <CardDescription>Draft official IT proposals.</CardDescription>
             </CardHeader>
             <Form {...form}>
-              <form className="space-y-6">
+              <div className="space-y-6">
                 <div className="space-y-4">
                     <h3 className="font-semibold text-lg mb-2 border-b border-primary/20 pb-2 flex items-center gap-2">
                         <Check className="text-primary h-4 w-4" /> Customer Details
                     </h3>
                     <FormField control={form.control} name="customerName" render={({ field }) => (
-                        <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="companyName" render={({ field }) => (
-                        <FormItem><FormLabel>Department / Organization*</FormLabel><FormControl><Input {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Organization*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem><FormLabel>Location / Address*</FormLabel><FormControl><Textarea rows={2} {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
 
                 <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-primary/20 pb-2">
-                         <h3 className="font-semibold text-lg flex items-center gap-2">
-                            <Sparkles className="text-primary h-4 w-4" /> AI Covering Letter
-                         </h3>
-                         <Button type="button" variant="outline" size="sm" onClick={handleGenerateBody} disabled={isGenerating} className="rounded-full border-primary/30 hover:bg-primary/10">
-                             {isGenerating ? <LineLoader className="w-12 h-0.5" /> : <><Sparkles size={14} className="mr-1" /> AI Write</>}
+                         <h3 className="font-semibold text-lg flex items-center gap-2"><Sparkles size={16} /> Letter Content</h3>
+                         <Button type="button" variant="outline" size="sm" onClick={handleGenerateBody} disabled={isGenerating}>
+                             {isGenerating ? <LineLoader className="w-12 h-0.5" /> : <Sparkles size={14} className="mr-1" />} AI Write
                          </Button>
                     </div>
                     <FormField control={form.control} name="subject" render={({ field }) => (
-                        <FormItem><FormLabel>Subject Line*</FormLabel><FormControl><Textarea rows={2} {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Subject Line*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="letterBody" render={({ field }) => (
-                        <FormItem><FormLabel>Letter Body*</FormLabel><FormControl><Textarea rows={6} {...field} className="bg-background/50" /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Letter Body*</FormLabel><FormControl><Textarea rows={6} {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
                 
                 <div className="space-y-4">
                     <div className="flex justify-between items-center border-b border-primary/20 pb-2">
-                         <h3 className="font-semibold text-lg flex items-center gap-2">
-                            {isManualMode ? <Keyboard className="text-primary h-4 w-4" /> : <Plus className="text-primary h-4 w-4" />}
-                            Item Master
-                         </h3>
+                         <h3 className="font-semibold text-lg flex items-center gap-2"><Plus size={16} /> Item Master</h3>
                          <div className="flex items-center gap-2">
-                             <Label htmlFor="manual-mode" className="text-xs text-muted-foreground">Manual Entry</Label>
+                             <Label htmlFor="manual-mode" className="text-xs">Manual</Label>
                              <Switch id="manual-mode" checked={isManualMode} onCheckedChange={setIsManualMode} />
                          </div>
                     </div>
 
                     {!isManualMode ? (
                         <div className="flex flex-col gap-3">
-                            <Label>Search HP Products</Label>
                             <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                                 <PopoverTrigger asChild>
                                     <Button variant="outline" className="w-full justify-between font-normal h-12 bg-secondary/20">
-                                        <span className="truncate">
-                                            {selectedProduct ? getShortLabel(selectedProduct) : "Search HP Products..."}
-                                        </span>
+                                        <span className="truncate">{selectedProduct ? getShortLabel(selectedProduct) : "Search HP Products..."}</span>
                                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 shadow-2xl" align="start">
+                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                                     <Command shouldFilter={false}>
-                                        <CommandInput placeholder="Search SKU, Model, Processor..." value={searchQuery} onValueChange={setSearchQuery} />
+                                        <CommandInput placeholder="Search SKU..." value={searchQuery} onValueChange={setSearchQuery} />
                                         <CommandList>
-                                            {isLoadingProducts && <div className="p-4 text-center text-sm"><LineLoader /></div>}
+                                            {isLoadingProducts && <div className="p-4"><LineLoader /></div>}
                                             <CommandEmpty>No products found.</CommandEmpty>
                                             <CommandGroup>
-                                                {filteredProducts.slice(0, 50).map((product) => (
+                                                {filteredProducts.slice(0, 30).map((product) => (
                                                 <CommandItem key={product.id} onSelect={() => { setSelectedProduct(product); setOpenCombobox(false); }}>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-xs">{product.model}</span>
-                                                        <span className="text-[10px] text-muted-foreground truncate">{getLongDescription(product)}</span>
+                                                        <span className="text-[10px] truncate">{getLongDescription(product)}</span>
                                                     </div>
                                                 </CommandItem>
                                                 ))}
@@ -375,89 +350,65 @@ export function QuotationBuilder() {
                                     </Command>
                                 </PopoverContent>
                             </Popover>
-                            <Button type="button" className="w-full bg-primary text-black hover:bg-primary/90 font-bold" onClick={handleAddProduct} disabled={!selectedProduct}>
-                                <Plus className="h-4 w-4 mr-2" /> Add to Quote
-                            </Button>
+                            <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>Add Product</Button>
                         </div>
                     ) : (
                         <div className="space-y-4 p-4 bg-secondary/20 rounded-lg border border-primary/10">
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase tracking-wider">Product Name / Model*</Label>
-                                <Input value={manualModel} onChange={(e) => setManualModel(e.target.value)} placeholder="e.g. HP ZBook Fury G11" className="bg-background" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs uppercase tracking-wider">Specifications / Description</Label>
-                                <Textarea value={manualSpec} onChange={(e) => setManualSpec(e.target.value)} placeholder="Core i9 | 64GB RAM | 2TB SSD..." className="bg-background" rows={3} />
-                            </div>
+                            <Input value={manualModel} onChange={(e) => setManualModel(e.target.value)} placeholder="Model Name*" />
+                            <Textarea value={manualSpec} onChange={(e) => setManualSpec(e.target.value)} placeholder="Specifications*" />
                             <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider">Price (₹)</Label>
-                                    <Input type="number" value={manualPrice} onChange={(e) => setManualPrice(Number(e.target.value))} className="bg-background" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs uppercase tracking-wider">Qty</Label>
-                                    <Input type="number" value={manualQty} onChange={(e) => setManualQty(Number(e.target.value))} className="bg-background" />
-                                </div>
+                                <Input type="number" value={manualPrice} onChange={(e) => setManualPrice(Number(e.target.value))} placeholder="Price" />
+                                <Input type="number" value={manualQty} onChange={(e) => setManualQty(Number(e.target.value))} placeholder="Qty" />
                             </div>
-                            <Button type="button" className="w-full bg-accent text-white hover:bg-accent/90 font-bold" onClick={handleAddManualProduct}>
-                                <Plus className="h-4 w-4 mr-2" /> Add Custom Item
-                            </Button>
+                            <Button type="button" className="w-full" onClick={handleAddManualProduct}>Add Manual Item</Button>
                         </div>
                     )}
                 </div>
 
                 <div className="space-y-3">
-                    {fields.length > 0 && <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mt-8">Selected Items ({fields.length})</h3>}
                     {fields.map((field, index) => (
-                        <Card key={field.id} className="p-3 bg-secondary/30 border-primary/10 hover:border-primary/30 transition-all">
-                             <div className="flex justify-between items-start">
-                                <div className="flex-1 min-w-0 pr-4">
-                                    <p className="font-bold text-[10px] uppercase text-primary tracking-wider">{field.product.model}</p>
-                                    <p className="text-[9px] text-muted-foreground mt-1 line-clamp-2">{getLongDescription(field.product)}</p>
-                                </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => remove(index)}>
-                                    <Trash2 className="h-3 w-3"/>
-                                </Button>
+                        <Card key={field.id} className="p-3 bg-secondary/30">
+                             <div className="flex justify-between">
+                                <p className="font-bold text-[10px] uppercase text-primary truncate">{field.product.model}</p>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove(index)}><Trash2 size={12}/></Button>
                             </div>
-                            <div className="grid grid-cols-2 gap-4 mt-3">
+                            <div className="grid grid-cols-2 gap-4 mt-2">
                                 <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
-                                    <FormItem><FormLabel className="text-[9px] uppercase">Qty</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs bg-background" /></FormControl></FormItem>
+                                    <FormItem><FormLabel className="text-[9px]">Qty</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
                                 )} />
                                 <FormField control={form.control} name={`lineItems.${index}.unitPrice`} render={({ field }) => (
-                                    <FormItem><FormLabel className="text-[9px] uppercase">Unit Price (₹)</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs bg-background" /></FormControl></FormItem>
+                                    <FormItem><FormLabel className="text-[9px]">Price (₹)</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
                                 )} />
                             </div>
                         </Card>
                     ))}
                 </div>
-              </form>
+              </div>
             </Form>
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL (A4 Portrait 210mm x 297mm) ===== */}
       <div className="flex-1 w-full flex flex-col items-center">
         <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
-            <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-accent text-white font-bold rounded-full shadow-lg shadow-accent/20">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download className="mr-2 h-5 w-5" /> Download PDF</>}
+            <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-accent text-white font-bold rounded-full">
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> Download PDF</>}
             </Button>
-            <Button onClick={handlePrint} size="lg" className="bg-primary text-black font-bold rounded-full shadow-lg shadow-primary/20">
-                <Printer className="mr-2 h-5 w-5" /> Print Quotation
+            <Button onClick={handlePrint} size="lg" className="bg-primary text-black font-bold rounded-full">
+                <Printer size={20} className="mr-2" /> Print
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/30 p-8 shadow-inner">
-            {/* PAGE 1: COVERING LETTER */}
+        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/30 p-8 shadow-inner overflow-visible">
             <div className="quotation-page mb-8">
                 <div className="flex items-center gap-6 mb-12 border-b-2 border-black pb-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto', objectFit: 'contain' }} />
+                    <img src="/hp-logo.png" alt="HP Logo" style={{ height: '18mm', width: 'auto' }} />
                     <div className="pl-6 border-l-2 border-black">
-                        <h2 className="text-[18pt] font-bold uppercase text-gray-900 tracking-tight leading-none">M/s DeeQasa-Tech</h2>
-                        <p className="text-[9pt] text-gray-700 mt-2 font-medium">SCO 105–106, 1st Floor, Jubilee Walk, Sector 70, Mohali, Punjab</p>
+                        <h2 className="text-[18pt] font-bold uppercase leading-none">M/s DeeQasa-Tech</h2>
+                        <p className="text-[9pt] mt-2">Mohali, Punjab | Authorized HP Enterprise Partner</p>
                     </div>
                 </div>
 
-                <div className="text-[11.5pt] leading-relaxed text-gray-900 space-y-10">
+                <div className="text-[11.5pt] leading-relaxed space-y-10">
                     <div className="flex justify-between items-start">
                         <div className="left-aligned-text font-medium space-y-1">
                             <p className="font-bold">To,</p>
@@ -471,56 +422,49 @@ export function QuotationBuilder() {
                         </div>
                     </div>
 
-                    <div className="font-bold border-y border-black/10 py-3 left-aligned-text bg-gray-50/50 px-4">
-                        <p><span className="underline uppercase tracking-wide mr-2">Subject:</span> {watchedSubject}</p>
+                    <div className="font-bold border-y border-black/10 py-3 left-aligned-text px-4 bg-gray-50/50">
+                        <p><span className="underline uppercase mr-2">Subject:</span> {watchedSubject}</p>
                     </div>
 
                     <div className="space-y-4">
                         <p className="font-bold">Respected Sir/Madam,</p>
-                        <div className="justified-text whitespace-pre-wrap leading-relaxed text-[11pt]">
+                        <div className="justified-text whitespace-pre-wrap leading-relaxed">
                             {form.watch('letterBody')}
                         </div>
                     </div>
 
                     <div className="space-y-6 pt-6 border-t border-black/5">
-                        <p className="font-bold underline uppercase tracking-tight text-[10pt] bg-black text-white px-2 inline-block">Commercial Terms & Conditions:</p>
+                        <p className="font-bold underline uppercase text-[10pt]">Commercial Terms & Conditions:</p>
                         <div className="justified-text space-y-3 text-[10.5pt]">
-                          <p>• <strong>Taxes:</strong> Goods & Services Tax (GST) at the rate of 18% shall be applicable extra over and above the quoted prices as per prevailing government norms.</p>
-                          <p>• <strong>Delivery:</strong> The specified equipment shall be delivered, commissioned, and installed within a period of 4 to 6 weeks from the receipt of an official confirmed purchase order.</p>
-                          <p>• <strong>Validity:</strong> This commercial proposal remains firm and valid for a period of 7 days from the date of issuance for your kind consideration.</p>
-                          <p>• <strong>Warranty:</strong> All products supplied are backed by comprehensive OEM onsite warranty and professional technical support services.</p>
+                          <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
+                          <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official PO.</p>
+                          <p>• <strong>Validity:</strong> 7 days from the date of issuance.</p>
+                          <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty as specified.</p>
                         </div>
                     </div>
 
                     <div className="pt-20 flex justify-end">
                         <div className="text-right space-y-20">
-                            <p className="font-bold uppercase tracking-widest text-gray-800">For M/s DeeQasa-Tech</p>
-                            <div className="border-t-2 border-black pt-2 font-bold px-10 inline-block uppercase text-[10pt]">
-                                Authorized Signatory
-                            </div>
+                            <p className="font-bold uppercase">For M/s DeeQasa-Tech</p>
+                            <div className="border-t-2 border-black pt-2 font-bold px-10 uppercase text-[10pt]">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* PAGE 2+: TECHNICAL QUOTATION */}
             <div className="quotation-page">
                 <div className="flex items-center gap-6 mb-10 border-b-2 border-black pb-6">
-                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto', objectFit: 'contain' }} />
-                    <div className="pl-6 border-l-2 border-black">
-                        <h2 className="text-[18pt] font-bold uppercase text-gray-900 tracking-tight leading-none">M/s DeeQasa-Tech</h2>
-                    </div>
+                    <img src="/hp-logo.png" alt="HP Logo" style={{ height: '18mm', width: 'auto' }} />
+                    <div className="pl-6 border-l-2 border-black"><h2 className="text-[18pt] font-bold uppercase">M/s DeeQasa-Tech</h2></div>
                 </div>
                 
-                <div className="mb-6 bg-black text-white text-center py-2 font-bold tracking-widest uppercase text-[12pt]">
-                    Technical & Commercial Quotation
-                </div>
+                <div className="mb-6 bg-black text-white text-center py-2 font-bold uppercase text-[12pt]">Technical & Commercial Quotation</div>
 
                 <table className="locked-table">
                     <thead>
                         <tr className="bg-gray-100 font-bold uppercase text-[9pt]">
                             <th className="col-sr">Sr.</th>
-                            <th className="col-desc">Detailed Technical Specifications</th>
+                            <th className="col-desc">Technical Specifications</th>
                             <th className="col-qty">Qty</th>
                             <th className="col-price">Unit Price (₹)</th>
                             <th className="col-total">Total (₹)</th>
@@ -531,60 +475,55 @@ export function QuotationBuilder() {
                             <tr key={index}>
                                 <td className="col-sr font-bold">{index + 1}</td>
                                 <td className="col-desc">
-                                    <p className="font-bold mb-2 text-black text-[10.5pt] uppercase leading-tight">{item.product.model}</p>
-                                    <div className="text-[9.5pt] text-gray-800 leading-relaxed font-medium justified-text">
-                                        {getLongDescription(item.product)}
-                                    </div>
+                                    <p className="font-bold mb-2 uppercase leading-tight">{item.product.model}</p>
+                                    <div className="text-[9.5pt] justified-text">{getLongDescription(item.product)}</div>
                                 </td>
-                                <td className="col-qty font-bold text-[10.5pt]">{item.quantity}</td>
-                                <td className="col-price font-medium">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
+                                <td className="col-qty font-bold">{item.quantity}</td>
+                                <td className="col-price">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
                                 <td className="col-total font-bold">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
 
-                {/* TOTALS & FOOTER SECTION - LOCKED TOGETHER */}
-                <div className="keep-together mt-0">
+                <div className="keep-together">
                     <table className="locked-table border-t-0">
                         <TableBody>
-                            <TableRow className="font-bold border-t-0 bg-gray-50/50">
-                                <TableCell colSpan={4} className="border-r border-black text-right py-3 px-4 uppercase tracking-wider" style={{ width: '79%' }}>Sub Total (Excl. GST)</TableCell>
-                                <TableCell className="text-right py-3 px-4 font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
+                            <TableRow className="font-bold bg-gray-50/50">
+                                <TableCell colSpan={4} className="text-right uppercase tracking-wider border-r border-black" style={{ width: '79%' }}>Sub Total (Excl. GST)</TableCell>
+                                <TableCell className="text-right font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
                             </TableRow>
                             <TableRow className="font-bold bg-gray-50/50">
-                                <TableCell colSpan={4} className="border-r border-black text-right py-3 px-4 uppercase tracking-wider" style={{ width: '79%' }}>GST @ 18% Extra</TableCell>
-                                <TableCell className="text-right py-3 px-4 font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
+                                <TableCell colSpan={4} className="text-right uppercase tracking-wider border-r border-black" style={{ width: '79%' }}>GST @ 18% Extra</TableCell>
+                                <TableCell className="text-right font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
                             </TableRow>
                             <TableRow className="bg-gray-200 font-bold text-[12pt] border-t-2 border-black">
-                                <TableCell colSpan={4} className="border-r border-black text-right py-4 px-4 uppercase tracking-widest" style={{ width: '79%' }}>Grand Total (All Incl.)</TableCell>
-                                <TableCell className="text-right py-4 px-4 font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
+                                <TableCell colSpan={4} className="text-right uppercase tracking-widest border-r border-black" style={{ width: '79%' }}>Grand Total</TableCell>
+                                <TableCell className="text-right font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
                             </TableRow>
                         </TableBody>
                     </table>
 
-                    <div className="mt-8 p-6 border-2 border-black bg-gray-50 flex items-center shadow-inner">
-                        <p className="font-bold text-[9pt] uppercase shrink-0 mr-6 tracking-widest text-gray-600">Amount In Words:</p>
-                        <p className="italic text-gray-900 text-[11pt] font-bold">{grandTotalInWords}</p>
+                    <div className="mt-8 p-6 border-2 border-black bg-gray-50 flex items-center">
+                        <p className="font-bold text-[9pt] uppercase mr-6 tracking-widest text-gray-600">Amount In Words:</p>
+                        <p className="italic text-[11pt] font-bold">{grandTotalInWords}</p>
                     </div>
 
-                    <div className="mt-10 grid grid-cols-2 gap-10 text-[9.5pt]">
-                        <div className="space-y-4 border-2 border-black p-6 bg-gray-50/30">
-                            <p className="font-bold underline uppercase tracking-widest mb-2 text-primary">Our Bank Account Details:</p>
-                            <div className="space-y-2 font-bold text-gray-800">
-                              <p><span className="text-gray-500 font-medium">Beneficiary Name:</span> DeeQasa-Tech</p>
-                              <p><span className="text-gray-500 font-medium">Bank Name:</span> HDFC Bank Ltd.</p>
-                              <p><span className="text-gray-500 font-medium">Branch:</span> Sector 70, Mohali, PB</p>
-                              <p><span className="text-gray-500 font-medium">Current A/c No:</span> 50200067215432</p>
-                              <p><span className="text-gray-500 font-medium">IFSC Code:</span> HDFC0000000</p>
+                    <div className="mt-10 grid grid-cols-2 gap-10">
+                        <div className="border-2 border-black p-6 bg-gray-50/30">
+                            <p className="font-bold underline uppercase mb-2">Our Bank Account Details:</p>
+                            <div className="space-y-1 font-bold text-[9.5pt]">
+                              <p>Beneficiary: DeeQasa-Tech</p>
+                              <p>Bank: HDFC Bank Ltd.</p>
+                              <p>Branch: Sector 70, Mohali</p>
+                              <p>A/c No: 50200067215432</p>
+                              <p>IFSC: HDFC0000000</p>
                             </div>
                         </div>
                         <div className="flex flex-col justify-end items-end pr-4">
                             <div className="text-right space-y-20">
-                                 <p className="font-bold uppercase tracking-widest text-gray-800">For M/s DeeQasa-Tech</p>
-                                 <div className="border-t-2 border-black w-60 inline-block pt-2 font-bold text-center uppercase tracking-tighter text-[10pt]">
-                                    Authorized Signatory
-                                 </div>
+                                 <p className="font-bold uppercase">For M/s DeeQasa-Tech</p>
+                                 <div className="border-t-2 border-black w-60 pt-2 font-bold text-center uppercase text-[10pt]">Authorized Signatory</div>
                             </div>
                         </div>
                     </div>

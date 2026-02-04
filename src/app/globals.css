@@ -54,7 +54,7 @@
   margin: 40px auto;
   background: #ffffff !important;
   color: #000000 !important;
-  padding: 30mm 25mm !important; /* Standard 30mm Top, 25mm Sides */
+  padding: 15mm !important; /* 15mm Margins as requested */
   box-shadow: 0 0 25px rgba(0,0,0,0.5);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif !important;
@@ -63,14 +63,14 @@
   line-height: 1.15;
 }
 
-/* PROFESSIONAL PAGE BORDER - 20mm from edge */
+/* PROFESSIONAL PAGE BORDER - 15mm from edge */
 .quotation-page::before {
   content: '';
   position: absolute;
-  top: 20mm;
-  left: 20mm;
-  right: 20mm;
-  bottom: 20mm;
+  top: 15mm;
+  left: 15mm;
+  right: 15mm;
+  bottom: 15mm;
   border: 1pt solid #000000;
   pointer-events: none;
   z-index: 100;
@@ -86,9 +86,9 @@
   text-align: left !important;
 }
 
-/* TABLE LOCKING ENGINE (FIXED LAYOUT) */
+/* TABLE LOCKING ENGINE (FIXED LAYOUT IN MM) */
 .locked-table {
-  width: 100% !important;
+  width: 180mm !important; /* A4 (210) - 15 - 15 = 180mm */
   table-layout: fixed !important;
   border-collapse: collapse !important;
   border: 1pt solid #000000 !important;
@@ -96,18 +96,18 @@
 
 .locked-table th, .locked-table td {
   border: 1pt solid #000000 !important;
-  padding: 8pt !important;
+  padding: 3mm !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
   vertical-align: top !important;
 }
 
-/* COLUMN WIDTH LOCKS (SR: 5, DESC: 45, QTY: 8, PRICE: 21, TOTAL: 21) */
-.col-sr { width: 5% !important; text-align: center !important; }
-.col-desc { width: 45% !important; text-align: left !important; }
-.col-qty { width: 8% !important; text-align: center !important; }
-.col-price { width: 21% !important; text-align: right !important; }
-.col-total { width: 21% !important; text-align: right !important; }
+/* COLUMN WIDTH LOCKS (SR: 5%, DESC: 45%, QTY: 8%, PRICE: 21%, TOTAL: 21%) */
+.col-sr { width: 9mm !important; text-align: center !important; }
+.col-desc { width: 81mm !important; text-align: left !important; }
+.col-qty { width: 14.4mm !important; text-align: center !important; }
+.col-price { width: 37.8mm !important; text-align: right !important; }
+.col-total { width: 37.8mm !important; text-align: right !important; }
 
 /* PRINT ENGINE (A4 PORTRAIT) */
 @media print {
@@ -152,7 +152,7 @@
     border: none !important;
     width: 210mm !important;
     min-height: 297mm !important;
-    padding: 30mm 25mm !important;
+    padding: 15mm !important;
     page-break-after: always !important;
   }
 
