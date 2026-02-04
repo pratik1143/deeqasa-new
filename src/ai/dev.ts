@@ -8,3 +8,4 @@ import '@/ai/flows/ai-funnel-analyzer.ts';
 import '@/ai/flows/get-sheet-data.ts';
 import '@/ai/flows/update-sheet-data.ts';
 import '@/ai/flows/get-product-data.ts';
+import '@/ai/flows/ai-quotation-letter-generation.ts';
