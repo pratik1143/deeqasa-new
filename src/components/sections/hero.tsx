@@ -9,7 +9,7 @@ export function Hero() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Show main content quickly now that intro is gone
+    // Show main content quickly
     const timer = setTimeout(() => setShow(true), 200); 
     return () => clearTimeout(timer);
   }, []);
