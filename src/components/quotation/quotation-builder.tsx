@@ -214,10 +214,10 @@ export function QuotationBuilder() {
           wlan: '-',
           warranty: '-',
           name: manualModel,
-          price: manualPrice,
+          price: Number(manualPrice) || 0,
           gstRate: 18,
       };
-      append({ product: customProduct, quantity: manualQty, unitPrice: manualPrice });
+      append({ product: customProduct, quantity: Number(manualQty) || 1, unitPrice: Number(manualPrice) || 0 });
       setManualModel('');
       setManualSpec('');
       setManualPrice(0);
@@ -280,6 +280,7 @@ export function QuotationBuilder() {
 
   /**
    * Financial Engine: Optimized for precision and Indian currency standards.
+   * Deeply watches lineItems to ensure manual and master entries are summed correctly.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
@@ -287,17 +288,9 @@ export function QuotationBuilder() {
     }
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      // Robust numeric extraction
-      const cleanValue = (val: any) => {
-          if (typeof val === 'number') return val;
-          if (!val) return 0;
-          const cleaned = String(val).replace(/[^0-9.-]+/g, "");
-          const parsed = parseFloat(cleaned);
-          return isNaN(parsed) ? 0 : parsed;
-      };
-
-      const price = cleanValue(item.unitPrice);
-      const qty = cleanValue(item.quantity);
+      // Robust numeric extraction to handle strings from inputs
+      const price = Number(item.unitPrice) || 0;
+      const qty = Number(item.quantity) || 0;
       return acc + (price * qty);
     }, 0);
     
@@ -311,7 +304,7 @@ export function QuotationBuilder() {
 
   const QuotationHeader = () => {
     return (
-      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100 !bg-white">
+      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100 bg-white">
           <div className="flex items-center gap-6">
                <div className="h-[28mm] flex items-center bg-white overflow-hidden">
                  <img 
@@ -461,9 +454,9 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center !bg-white overflow-visible">
+        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white overflow-visible">
             {/* PAGE 1: COVERING LETTER */}
-            <div className="quotation-page mb-8 !bg-white !text-black relative">
+            <div className="quotation-page mb-8 bg-white text-black relative">
                 <QuotationHeader />
 
                 <div className="text-[11.5pt] leading-relaxed space-y-8">
@@ -511,7 +504,7 @@ export function QuotationBuilder() {
             </div>
 
             {/* PAGE 2: TECHNICAL QUOTATION */}
-            <div className="quotation-page !bg-white !text-black relative">
+            <div className="quotation-page bg-white text-black relative">
                 <QuotationHeader />
                 
                 <div className="mb-6 text-center py-2 font-bold uppercase text-[9pt] border-y border-gray-100 tracking-[0.4em] bg-gray-50/30 text-gray-500">
@@ -530,15 +523,8 @@ export function QuotationBuilder() {
                     </thead>
                     <tbody>
                         {watchedLineItems.map((item, index) => {
-                            const cleanValue = (val: any) => {
-                                if (typeof val === 'number') return val;
-                                if (!val) return 0;
-                                const cleaned = String(val).replace(/[^0-9.-]+/g, "");
-                                const parsed = parseFloat(cleaned);
-                                return isNaN(parsed) ? 0 : parsed;
-                            };
-                            const unitPrice = cleanValue(item.unitPrice);
-                            const qty = cleanValue(item.quantity);
+                            const unitPrice = Number(item.unitPrice) || 0;
+                            const qty = Number(item.quantity) || 0;
                             const rowTotal = unitPrice * qty;
                             
                             return (
