@@ -54,7 +54,7 @@
   margin: 40px auto;
   background: #ffffff !important;
   color: #000000 !important;
-  padding: 12mm 10mm !important; 
+  padding: 20mm !important; 
   box-shadow: 0 0 30px rgba(0,0,0,0.4);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif !important;
@@ -140,7 +140,7 @@
     width: 210mm !important;
     height: auto !important;
     min-height: 297mm !important;
-    padding: 12mm 10mm !important;
+    padding: 20mm !important;
     page-break-after: always !important;
     display: block !important;
     background: #ffffff !important;

@@ -258,7 +258,7 @@ export function QuotationBuilder() {
             filename: `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.pdf`,
             image: { type: 'jpeg', quality: 1.0 },
             html2canvas: { 
-                scale: 2, 
+                scale: 3, 
                 useCORS: true, 
                 letterRendering: true,
                 windowWidth: 794,
@@ -515,7 +515,7 @@ export function QuotationBuilder() {
                     <thead>
                         <tr className="uppercase bg-gray-50/80 text-[8pt] border-b border-gray-200">
                             <th className="col-sr py-4">Sr.</th>
-                            <th className="col-desc py-4">Technical Specifications</th>
+                            <th className="col-desc py-4 text-left">Technical Specifications</th>
                             <th className="col-qty py-4">Qty</th>
                             <th className="col-price py-4">Unit Price (₹)</th>
                             <th className="col-total py-4">Total (₹)</th>
