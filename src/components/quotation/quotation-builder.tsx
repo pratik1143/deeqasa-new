@@ -5,7 +5,6 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download, FileText } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -249,7 +248,8 @@ export function QuotationBuilder() {
                 scale: 2, 
                 useCORS: true, 
                 letterRendering: true,
-                windowWidth: 794 // Locks to exactly 210mm in px
+                windowWidth: 794,
+                backgroundColor: '#ffffff'
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
@@ -279,13 +279,12 @@ export function QuotationBuilder() {
     return (
       <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100 !bg-white">
           <div className="flex items-center gap-6">
-               <div className="relative h-[28mm] w-[50mm]">
-                 <Image 
+               <div className="h-[28mm] flex items-center bg-white overflow-hidden">
+                 <img 
                    src="/hp-logo.png" 
                    alt="HP Logo" 
-                   fill
-                   className="object-contain object-left"
-                   priority
+                   className="h-full w-auto object-contain"
+                   style={{ maxHeight: '28mm' }}
                  />
                </div>
                <div className="flex flex-col border-l border-gray-200 pl-4 h-[12mm] justify-center">
