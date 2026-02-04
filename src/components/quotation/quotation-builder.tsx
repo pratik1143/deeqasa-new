@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Label } from '@/components/ui/label';
@@ -20,7 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, FileText, Sparkles } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, FileText, Sparkles, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -235,62 +234,32 @@ export function QuotationBuilder() {
     });
   };
   
-  const handleDownloadWord = () => {
+  const handleDownloadPdf = async () => {
     const element = document.getElementById('quotation-content-root');
     if (!element) return;
     
     setIsDownloading(true);
 
     try {
-      const header = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-              xmlns:w='urn:schemas-microsoft-com:office:word' 
-              xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-          <meta charset='utf-8'>
-          <title>Quotation</title>
-          <style>
-            @page {
-              size: 210mm 297mm;
-              margin: 20mm 18mm 20mm 18mm;
-            }
-            body { font-family: 'Times New Roman', Times, serif; }
-            .quotation-page { margin: 0; padding: 0; }
-            table { border-collapse: collapse; width: 100%; table-layout: fixed; margin-bottom: 20pt; }
-            th, td { border: 0.5pt solid #e5e7eb; padding: 6pt; vertical-align: top; word-wrap: break-word; }
-            th { background-color: #f9fafb; font-weight: bold; text-transform: uppercase; font-size: 9pt; }
-            .text-right { text-align: right; }
-            .text-center { text-align: center; }
-            .justified-text { text-align: justify; }
-            .font-bold { font-weight: bold; }
-            .uppercase { text-transform: uppercase; }
-            .leading-relaxed { line-height: 1.5; }
-            .mb-10 { margin-bottom: 30pt; }
-            .pt-20 { padding-top: 60pt; }
-          </style>
-        </head>
-        <body>
-      `;
-      const footer = "</body></html>";
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt = {
+        margin: 0,
+        filename: `Quotation_DeeQasa_${format(new Date(), 'dd-MM-yyyy')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          letterRendering: true,
+          windowWidth: 794 // 210mm in pixels at 96DPI
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
       
-      const htmlContent = header + element.innerHTML + footer;
-      
-      const blob = new Blob(['\ufeff', htmlContent], {
-        type: 'application/msword'
-      });
-      
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Quotation_DeeQasa_${format(new Date(), 'dd-MM-yyyy')}.doc`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({ title: 'Success', description: 'Word document downloaded successfully.' });
+      await html2pdf().from(element).set(opt).save();
+      toast({ title: 'Success', description: 'PDF generated successfully.' });
     } catch (error: any) {
-      console.error('Word Generation Error:', error);
-      toast({ variant: 'destructive', title: 'Export Failed', description: 'Could not generate Word document.' });
+      console.error('PDF Generation Error:', error);
+      toast({ variant: 'destructive', title: 'Export Failed', description: 'Could not generate PDF.' });
     } finally {
       setIsDownloading(false);
     }
@@ -344,7 +313,7 @@ export function QuotationBuilder() {
                         <FormItem><FormLabel>Organization*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem><FormLabel>Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Address*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormMessage>
                     )} />
                 </div>
 
@@ -442,8 +411,8 @@ export function QuotationBuilder() {
       {/* DOCUMENT PREVIEW AREA */}
       <div className="flex-1 w-full flex flex-col items-center overflow-x-auto pb-20">
         <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
-            <Button onClick={handleDownloadWord} size="lg" disabled={isDownloading} className="bg-accent text-white font-bold rounded-full shadow-lg hover:shadow-accent/50 transition-all">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><FileText size={20} className="mr-2" /> Download Word</>}
+            <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-primary text-primary-foreground font-bold rounded-full shadow-lg hover:shadow-primary/50 transition-all">
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> Download PDF</>}
             </Button>
         </div>
         
