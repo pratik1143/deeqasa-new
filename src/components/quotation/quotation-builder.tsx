@@ -140,7 +140,7 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
-  const lineItems = form.watch('lineItems');
+  const lineItems = form.watch('lineItems') || [];
   const watchedSubject = form.watch('subject');
   const watchedCustomer = form.watch('customerName');
   const watchedCompany = form.watch('companyName');
@@ -267,7 +267,13 @@ export function QuotationBuilder() {
   };
 
   const totals = useMemo(() => {
-    const subTotal = lineItems.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    const items = lineItems || [];
+    const subTotal = items.reduce((acc, item) => {
+      const price = parseFloat(String(item.unitPrice || 0));
+      const qty = parseFloat(String(item.quantity || 0));
+      const rowTotal = isNaN(price) || isNaN(qty) ? 0 : price * qty;
+      return acc + rowTotal;
+    }, 0);
     const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
     return { subTotal, totalGst, grandTotal };
@@ -283,7 +289,7 @@ export function QuotationBuilder() {
                  <img 
                    src="/hp-logo.png" 
                    alt="HP Logo" 
-                   className="h-full w-auto object-contain"
+                   className="h-full w-auto object-contain block"
                    style={{ maxHeight: '28mm' }}
                  />
                </div>
@@ -470,7 +476,7 @@ export function QuotationBuilder() {
                     <div className="pt-12 flex justify-end">
                         <div className="text-right space-y-12">
                             <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
-                            <div className="pt-2 font-bold px-10 uppercase text-[9pt] border-t border-gray-200 text-gray-400">Authorized Signatory</div>
+                            <div className="pt-2 font-bold px-10 uppercase text-[9pt] border-t border-gray-200 text-gray-400 text-center">Authorized Signatory</div>
                         </div>
                     </div>
                 </div>
@@ -502,9 +508,9 @@ export function QuotationBuilder() {
                                     <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
                                     <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
                                 </td>
-                                <td className="col-qty font-bold text-center pt-5">{item.quantity}</td>
-                                <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
-                                <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format(item.unitPrice * item.quantity)}</td>
+                                <td className="col-qty font-bold text-center pt-5">{item.quantity || 0}</td>
+                                <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(item.unitPrice || 0)}</td>
+                                <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format((item.unitPrice || 0) * (item.quantity || 0))}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -555,3 +561,4 @@ export function QuotationBuilder() {
     </div>
   );
 }
+
