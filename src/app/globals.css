@@ -42,22 +42,24 @@
   }
 }
 
-/* STEP 2 — WEBSITE VIEW FIX */
+/* SCREEN VIEW: FIXED A4 LANDSCAPE PREVIEW */
 .quotation-page {
-  width: 1123px;           /* A4 landscape usable width at 96dpi */
-  min-height: 794px;
-  margin: 24px auto;
+  width: 1123px; /* A4 landscape width at 96dpi */
+  min-height: 794px; /* A4 landscape height */
+  margin: 20px auto;
   background: #fff;
   color: #000;
-  padding: 24px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.25);
+  padding: 40px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif;
   position: relative;
+  overflow: visible;
 }
 
-/* STEP 3 — PRINT CSS */
+/* PRINT ENGINE: PURE FORMAT PRESERVATION */
 @media print {
+  /* RESET & FORCE LANDSCAPE */
   @page {
     size: A4 landscape;
     margin: 10mm;
@@ -71,10 +73,10 @@
   }
 
   html, body {
-    width: 100%;
-    height: auto;
-    margin: 0;
-    padding: 0;
+    width: 297mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
     overflow: visible !important;
   }
@@ -84,20 +86,29 @@
   }
 
   /* SHOW ONLY QUOTATION CONTENT */
-  .quotation-page,
-  .quotation-page * {
+  #quotation-content-root,
+  #quotation-content-root * {
     visibility: visible !important;
+  }
+
+  #quotation-content-root {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .quotation-page {
     position: static !important;
-    width: 1123px !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
+    width: 297mm !important;
+    margin: 0 !important;
+    padding: 10mm !important;
     box-shadow: none !important;
     border: none !important;
     background: #fff !important;
-    page-break-after: auto;
+    page-break-after: always;
   }
 
   /* HIDE UI ELEMENTS */
@@ -110,14 +121,18 @@
   input,
   textarea,
   [role="combobox"],
-  .sidebar,
-  form {
+  form,
+  .sidebar {
     display: none !important;
   }
-  
-  /* Ensure the print content inside form wrappers still shows if necessary */
-  /* But usually we place the print-root outside interactive forms */
 
+  /* LOGO SIZE FIX */
+  .company-logo {
+    width: 35mm !important;
+    height: auto !important;
+  }
+
+  /* TABLE & PAGINATION SAFETY */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -133,16 +148,7 @@
     display: table-header-group;
   }
 
-  tfoot {
-    display: table-footer-group;
-  }
-
-  .totals-section, .amount-words, .footer-section {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* REMOVE URL / DATE FOOTER */
+  /* SUPPRESS BROWSER HEADERS */
   body::after,
   body::before {
     display: none !important;

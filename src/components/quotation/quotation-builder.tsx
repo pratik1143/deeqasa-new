@@ -237,7 +237,6 @@ export function QuotationBuilder() {
   }, [lineItems]);
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
-  const quotationNumber = useMemo(() => `DQT/HPC-001 / ${format(new Date(), 'dd-MM-yyyy')}`, []);
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen">
@@ -341,9 +340,9 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      {/* ===== PREVIEW PANEL ===== */}
-      <div className="flex-1 w-full flex flex-col items-center">
-        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3">
+      {/* ===== PREVIEW PANEL (1123px Fixed Width for WYSIWYG) ===== */}
+      <div className="flex-1 w-full flex flex-col items-center overflow-x-auto">
+        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[1123px]">
             <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-accent font-bold rounded-full">
                 {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download className="mr-2 h-5 w-5" /> Download PDF</>}
             </Button>
