@@ -55,10 +55,10 @@
   font-family: 'Times New Roman', Times, serif;
   position: relative;
   overflow: visible;
-  page-break-after: always;
+  line-height: 1.15;
 }
 
-/* PROFESSIONAL PAGE BORDER */
+/* PROFESSIONAL PAGE BORDER - REPEATS ON PRINT */
 .quotation-page::before {
   content: '';
   position: absolute;
@@ -66,12 +66,12 @@
   left: 20mm;
   right: 20mm;
   bottom: 20mm;
-  border: 2pt solid black;
+  border: 1px solid black;
   pointer-events: none;
   z-index: 100;
 }
 
-/* TEXT JUSTIFICATION */
+/* TEXT JUSTIFICATION ENGINE */
 .justified-text {
   text-align: justify;
   text-justify: inter-word;
@@ -150,7 +150,7 @@
 
   .quotation-page::before {
     visibility: visible !important;
-    border: 2pt solid black !important;
+    border: 1px solid black !important;
     position: fixed !important; /* Forces border on every page */
     top: 20mm !important;
     left: 20mm !important;

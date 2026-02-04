@@ -392,7 +392,7 @@ export function QuotationBuilder() {
 
                     <div className="space-y-4">
                         <p className="font-bold">Respected Sir/Madam,</p>
-                        <div className="justified-text whitespace-pre-wrap leading-relaxed first-letter:text-2xl first-letter:font-bold first-letter:mr-1">
+                        <div className="justified-text whitespace-pre-wrap leading-relaxed">
                             {form.watch('letterBody')}
                         </div>
                     </div>
@@ -419,7 +419,7 @@ export function QuotationBuilder() {
             </div>
 
             {/* PAGE 2+: TECHNICAL QUOTATION */}
-            <div className="quotation-page">
+            <div className="quotation-page" style={{ pageBreakBefore: 'always' }}>
                 <div className="flex items-center gap-6 mb-10 border-b-2 border-black pb-6">
                     <img src="/hp-logo.png" alt="HP Logo" className="company-logo" style={{ height: '18mm', width: 'auto' }} />
                     <div className="pl-6 border-l-2 border-black">
@@ -447,7 +447,7 @@ export function QuotationBuilder() {
                                 <td className="col-sr font-bold">{index + 1}</td>
                                 <td className="col-desc">
                                     <p className="font-bold mb-2 text-black text-[10.5pt] uppercase leading-tight">{item.product.model}</p>
-                                    <div className="text-[9.5pt] text-gray-800 leading-relaxed font-medium">
+                                    <div className="text-[9.5pt] text-gray-800 leading-relaxed font-medium justified-text">
                                         {getLongDescription(item.product)}
                                     </div>
                                 </td>
@@ -464,16 +464,16 @@ export function QuotationBuilder() {
                     <table className="locked-table border-t-0">
                         <TableBody>
                             <TableRow className="font-bold border-t-0 bg-gray-50/50">
-                                <TableCell colSpan={4} className="border-r border-black text-right py-3 px-4 uppercase tracking-wider col-total-label" style={{ width: '79%' }}>Sub Total (Excl. GST)</TableCell>
-                                <TableCell className="text-right py-3 px-4" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
+                                <TableCell colSpan={4} className="border-r border-black text-right py-3 px-4 uppercase tracking-wider" style={{ width: '79%' }}>Sub Total (Excl. GST)</TableCell>
+                                <TableCell className="text-right py-3 px-4 font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.subTotal)}</TableCell>
                             </TableRow>
                             <TableRow className="font-bold bg-gray-50/50">
                                 <TableCell colSpan={4} className="border-r border-black text-right py-3 px-4 uppercase tracking-wider" style={{ width: '79%' }}>GST @ 18% Extra</TableCell>
-                                <TableCell className="text-right py-3 px-4" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
+                                <TableCell className="text-right py-3 px-4 font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.totalGst)}</TableCell>
                             </TableRow>
                             <TableRow className="bg-gray-200 font-bold text-[12pt] border-t-2 border-black">
                                 <TableCell colSpan={4} className="border-r border-black text-right py-4 px-4 uppercase tracking-widest" style={{ width: '79%' }}>Grand Total (All Incl.)</TableCell>
-                                <TableCell className="text-right py-4 px-4" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
+                                <TableCell className="text-right py-4 px-4 font-bold" style={{ width: '21%' }}>{CURRENCY_FORMATTER.format(totals.grandTotal)}</TableCell>
                             </TableRow>
                         </TableBody>
                     </table>
