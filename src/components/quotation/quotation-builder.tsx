@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,10 +20,11 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, FileText, Sparkles, Download } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
@@ -251,19 +253,34 @@ export function QuotationBuilder() {
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
-  const QuotationHeader = () => (
-    <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
-        <div className="flex items-center gap-4">
-             <div className="h-10 w-px bg-gray-200" />
-             <span className="text-[8pt] font-bold text-gray-400 tracking-widest uppercase">HP Connect Partner</span>
-        </div>
-        <div className="text-right">
-            <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
-            <p className="text-[8pt] text-gray-500 mt-1">Smart. Secure. Sustainable. IT Solutions.</p>
-            <p className="text-[8pt] text-gray-400">GSTIN: 03ABCDE1234F1Z5</p>
-        </div>
-    </div>
-  );
+  const QuotationHeader = () => {
+    const logo = PlaceHolderImages.find(img => img.id === 'company-logo');
+    return (
+      <div className="quotation-header flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+          <div className="flex items-center gap-6">
+               {logo && (
+                 <Image 
+                   src={logo.imageUrl} 
+                   alt="DeeQasa Tech Logo" 
+                   width={120} 
+                   height={60} 
+                   className="object-contain"
+                   priority
+                   data-ai-hint={logo.imageHint}
+                 />
+               )}
+               <div className="flex flex-col border-l border-gray-200 pl-4">
+                   <span className="text-[8pt] font-bold text-gray-400 tracking-widest uppercase">HP Connect Partner</span>
+               </div>
+          </div>
+          <div className="text-right">
+              <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
+              <p className="text-[8pt] text-gray-500 mt-1">Smart. Secure. Sustainable. IT Solutions.</p>
+              <p className="text-[8pt] text-gray-400">GSTIN: 03ABCDE1234F1Z5</p>
+          </div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background font-body">
