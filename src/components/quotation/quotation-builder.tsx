@@ -51,7 +51,7 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
  */
 function numberToWords(num: number): string {
     const roundedNum = Math.round(num * 100) / 100;
-    if (roundedNum === 0) return 'Zero rupees only.';
+    if (roundedNum === 0) return 'Zero rupees only';
     
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
@@ -153,6 +153,7 @@ export function QuotationBuilder() {
     name: 'lineItems',
   });
 
+  // CRITICAL: Watch the array of items for any changes to trigger re-calculation
   const watchedLineItems = form.watch('lineItems');
   const watchedSubject = form.watch('subject');
   const watchedCustomer = form.watch('customerName');
@@ -261,7 +262,7 @@ export function QuotationBuilder() {
                 scale: 3, 
                 useCORS: true, 
                 letterRendering: true,
-                windowWidth: 794, // Standard A4 pixel width at 96 DPI
+                windowWidth: 794, 
                 backgroundColor: '#ffffff'
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -280,25 +281,30 @@ export function QuotationBuilder() {
   };
 
   /**
-   * FINANCIAL CALCULATION ENGINE
-   * 100% Precision reactivity logic. 
-   * Calculates row-level and document-level totals based on form state.
+   * REFINED FINANCIAL CALCULATION ENGINE
+   * Strictly sums row totals (Qty * UnitPrice) to derive Subtotal, GST, and Grand Total.
+   * Updates reactive on any field change.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
       return { subTotal: 0, totalGst: 0, grandTotal: 0 };
     }
 
+    // Sum up every row total: (qty * price)
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      const price = parseFloat(String(item.unitPrice || 0)) || 0;
-      const qty = parseFloat(String(item.quantity || 0)) || 0;
+      const price = Number(item.unitPrice) || 0;
+      const qty = Number(item.quantity) || 0;
       return acc + (price * qty);
     }, 0);
     
     const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
     
-    return { subTotal, totalGst, grandTotal };
+    return { 
+        subTotal, 
+        totalGst, 
+        grandTotal 
+    };
   }, [watchedLineItems]);
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
@@ -423,7 +429,7 @@ export function QuotationBuilder() {
                                 <Input type="number" value={manualPrice} onChange={(e) => setManualPrice(Number(e.target.value))} placeholder="Price" />
                                 <Input type="number" value={manualQty} onChange={(e) => setManualQty(Number(e.target.value))} placeholder="Qty" />
                             </div>
-                            <Button type="button" className="w-full" onClick={handleAddManualItem => handleAddManualProduct()}>Add Manual Item</Button>
+                            <Button type="button" className="w-full" onClick={handleAddManualProduct}>Add Manual Item</Button>
                         </div>
                     )}
                 </div>
