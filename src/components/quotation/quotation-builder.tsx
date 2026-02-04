@@ -281,7 +281,7 @@ export function QuotationBuilder() {
 
   /**
    * Financial Logic Engine: 100% precision.
-   * Calculates row-by-row and accumulates into subtotal, then applies tax.
+   * Calculations are reactive to all line item changes.
    */
   const totals = useMemo(() => {
     if (!watchedLineItems || watchedLineItems.length === 0) {
@@ -289,8 +289,9 @@ export function QuotationBuilder() {
     }
 
     const subTotal = watchedLineItems.reduce((acc, item) => {
-      const price = Number(item.unitPrice) || 0;
-      const qty = Number(item.quantity) || 0;
+      // Ensure numeric precision by parsing all fields
+      const price = parseFloat(String(item.unitPrice)) || 0;
+      const qty = parseFloat(String(item.quantity)) || 0;
       return acc + (price * qty);
     }, 0);
     
@@ -523,8 +524,8 @@ export function QuotationBuilder() {
                     </thead>
                     <tbody>
                         {watchedLineItems.map((item, index) => {
-                            const unitPrice = Number(item.unitPrice) || 0;
-                            const qty = Number(item.quantity) || 0;
+                            const unitPrice = parseFloat(String(item.unitPrice)) || 0;
+                            const qty = parseFloat(String(item.quantity)) || 0;
                             const rowTotal = unitPrice * qty;
                             
                             return (
