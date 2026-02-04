@@ -288,17 +288,17 @@ export function QuotationBuilder() {
       </Card>
 
       {/* ===== PREVIEW PANEL (WYSIWYG) ===== */}
-      <div className="flex-1 w-full flex flex-col items-center">
+      <div id="print-root" className="flex-1 w-full flex flex-col items-center">
         <div className="sticky top-20 right-0 p-4 no-print z-10 w-full flex justify-end">
             <Button onClick={handlePrint} size="lg" className="shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full">
                 <Printer className="mr-2 h-4 w-4" /> Print / Save PDF
             </Button>
         </div>
         
-        <div className="quotation-page">
+        <div id="quotation-print" className="quotation-page">
             <header className="flex justify-between items-start mb-8">
                 <div className="flex items-center gap-6">
-                    <img src="/hp-logo.png" alt="HP Logo" style={{ height: '18mm', width: 'auto' }} className="object-contain" />
+                    <img src="/hp-logo.png" alt="HP Logo" className="company-logo object-contain" />
                     <div className="company-details">
                         <h2 className="text-[14pt] font-bold uppercase tracking-tight text-gray-900">M/s DeeQasa-Tech</h2>
                         <div className="text-[9pt] leading-snug text-gray-700">

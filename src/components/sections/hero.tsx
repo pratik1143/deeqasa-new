@@ -9,8 +9,8 @@ export function Hero() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // This timer should align with the end of the `animate-dee-qasa` animation
-    const timer = setTimeout(() => setShow(true), 1500); 
+    // Show main content quickly now that intro is gone
+    const timer = setTimeout(() => setShow(true), 200); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -42,14 +42,6 @@ export function Hero() {
       <HeroVideoBackground />
       
       <div className="relative z-20 flex flex-col items-center justify-center text-center p-4 w-full">
-        {/* Scene 1: DEEQASA intro animation */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter animate-dee-qasa">
-            DEEQASA
-          </h1>
-        </div>
-        
-        {/* Scene 2: The new "NASA control room" typography */}
         <div className="w-full">
           <AnimatePresence>
           {show && (
@@ -87,7 +79,6 @@ export function Hero() {
           )}
           </AnimatePresence>
         </div>
-
       </div>
     </section>
   );
