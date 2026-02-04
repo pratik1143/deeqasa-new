@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useTransition } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'z';
+import { z } from 'zod';
 import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Printer, Sparkles, FileText } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, FileText, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -235,10 +235,6 @@ export function QuotationBuilder() {
     });
   };
   
-  const handlePrint = () => {
-    window.print();
-  };
-
   const handleDownloadWord = () => {
     const element = document.getElementById('quotation-content-root');
     if (!element) return;
@@ -271,8 +267,6 @@ export function QuotationBuilder() {
             .leading-relaxed { line-height: 1.5; }
             .mb-10 { margin-bottom: 30pt; }
             .pt-20 { padding-top: 60pt; }
-            .header-info { text-align: right; margin-bottom: 20pt; }
-            .sub-info { font-size: 9pt; color: #666; }
           </style>
         </head>
         <body>
@@ -450,9 +444,6 @@ export function QuotationBuilder() {
         <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
             <Button onClick={handleDownloadWord} size="lg" disabled={isDownloading} className="bg-accent text-white font-bold rounded-full shadow-lg hover:shadow-accent/50 transition-all">
                 {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><FileText size={20} className="mr-2" /> Download Word</>}
-            </Button>
-            <Button onClick={handlePrint} size="lg" className="bg-primary text-black font-bold rounded-full shadow-lg hover:shadow-primary/50 transition-all">
-                <Printer size={20} className="mr-2" /> Print Preview
             </Button>
         </div>
         
