@@ -249,8 +249,14 @@ export function QuotationBuilder() {
             margin: 0,
             filename: `Quotation_DeeQasa_${format(new Date(), 'dd-MM-yyyy')}.pdf`,
             image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            html2canvas: { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: true,
+                logging: false,
+                windowWidth: 210 * 3.7795275591, // Lock to A4 width in pixels
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
         await html2pdf().set(opt).from(element).save();
@@ -287,6 +293,7 @@ export function QuotationBuilder() {
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background font-body">
+      {/* CONTROL PANEL */}
       <Card className="w-full xl:max-w-md flex-shrink-0 no-print z-30 shadow-2xl border-primary/20 bg-card/50 backdrop-blur-md">
           <div className="p-6">
             <CardHeader className="p-0 mb-6">
@@ -403,7 +410,8 @@ export function QuotationBuilder() {
           </div>
       </Card>
 
-      <div className="flex-1 w-full flex flex-col items-center">
+      {/* DOCUMENT PREVIEW AREA */}
+      <div className="flex-1 w-full flex flex-col items-center overflow-x-auto pb-20">
         <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
             <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-accent text-white font-bold rounded-full shadow-lg">
                 {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> Download PDF</>}
@@ -413,7 +421,7 @@ export function QuotationBuilder() {
             </Button>
         </div>
         
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/10 p-8 shadow-inner overflow-visible">
+        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-muted/10 shadow-inner overflow-visible">
             {/* PAGE 1: COVERING LETTER */}
             <div className="quotation-page mb-8">
                 <QuotationHeader />
