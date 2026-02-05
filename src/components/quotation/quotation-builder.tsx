@@ -283,37 +283,31 @@ export function QuotationBuilder() {
     setIsDownloading(true);
     try {
         const { toPng } = await import('html-to-image');
-        const pages = document.querySelectorAll('.quotation-page');
+        const page = document.querySelector('.quotation-page') as HTMLElement;
         
-        if (pages.length === 0) {
-            toast({ variant: 'destructive', title: 'Error', description: 'No pages found to export.' });
+        if (!page) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Page 1 not found.' });
             return;
         }
 
-        for (let i = 0; i < pages.length; i++) {
-            const page = pages[i] as HTMLElement;
-            
-            // Critical fix for black background: explicitly set backgroundColor and isolation
-            const dataUrl = await toPng(page, { 
-                quality: 1.0, 
-                pixelRatio: 3,
-                backgroundColor: '#ffffff',
-                cacheBust: true,
-                style: {
-                    margin: '0',
-                    boxShadow: 'none',
-                    border: 'none',
-                }
-            });
+        const dataUrl = await toPng(page, { 
+            quality: 1.0, 
+            pixelRatio: 3,
+            backgroundColor: '#ffffff',
+            cacheBust: true,
+            style: {
+                margin: '0',
+                boxShadow: 'none',
+                border: 'none',
+            }
+        });
 
-            const link = document.createElement('a');
-            link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_${i + 1}.png`;
-            link.href = dataUrl;
-            link.click();
-            // Stagger downloads to prevent browser performance issues
-            await new Promise(resolve => setTimeout(resolve, 800));
-        }
-        toast({ title: 'Success', description: 'Individual PNG pages downloaded.' });
+        const link = document.createElement('a');
+        link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_1.png`;
+        link.href = dataUrl;
+        link.click();
+        
+        toast({ title: 'Success', description: 'Page 1 HD PNG downloaded.' });
     } catch (error: any) {
         console.error("PNG Export Failed:", error);
         toast({ variant: 'destructive', title: 'PNG Export Failed', description: error.message });
@@ -324,35 +318,25 @@ export function QuotationBuilder() {
 
   const totals = useMemo(() => {
     const items = watchedLineItems || [];
-    if (items.length === 0) {
-      return { subTotal: 0, totalGst: 0, grandTotal: 0 };
-    }
-
     const subTotal = items.reduce((acc, item) => {
-      if (!item) return acc;
-      // Force conversion to number to prevent manual text calculation bugs
-      const price = Number(item.unitPrice) || 0;
-      const qty = Number(item.quantity) || 0;
-      return acc + (price * qty);
+      const qty = Number(item?.quantity) || 0;
+      const price = Number(item?.unitPrice) || 0;
+      return acc + (qty * price);
     }, 0);
     
     const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
     
-    return { 
-        subTotal, 
-        totalGst, 
-        grandTotal 
-    };
+    return { subTotal, totalGst, grandTotal };
   }, [watchedLineItems]);
   
   const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
 
   const QuotationHeader = () => {
     return (
-      <div className="quotation-header flex justify-between items-start mb-8 pb-4 border-b border-gray-100 bg-white">
-          <div className="flex items-center gap-6">
-               <div className="h-[28mm] flex items-center bg-white overflow-hidden p-2 rounded">
+      <div className="quotation-header flex justify-between items-start mb-10 pb-6 border-b border-gray-100 bg-white">
+          <div className="flex flex-col items-start gap-2">
+               <div className="h-[28mm] flex items-center bg-white overflow-hidden p-0">
                  <img 
                    src="/hp-logo.png" 
                    alt="HP Logo" 
@@ -360,14 +344,12 @@ export function QuotationBuilder() {
                    style={{ maxHeight: '28mm' }}
                  />
                </div>
-               <div className="flex flex-col border-l border-gray-200 pl-4 h-[12mm] justify-center">
-                   <span className="text-[7pt] font-bold text-gray-400 tracking-[0.2em] uppercase">HP Connect Partner</span>
-               </div>
+               <span className="text-[7pt] font-bold text-gray-400 tracking-[0.2em] uppercase mt-2">HP Connect Partner</span>
           </div>
           <div className="text-right flex flex-col items-end">
-              <h2 className="text-[13pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
+              <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
               <p className="text-[8pt] text-gray-500 mt-1 font-medium italic">Smart. Secure. Sustainable. IT Solutions.</p>
-              <p className="text-[7pt] text-gray-400 mt-1">GSTIN: 03ABCDE1234F1Z5</p>
+              <p className="text-[7pt] text-gray-400 mt-1 uppercase">GSTIN: 03ABCDE1234F1Z5</p>
           </div>
       </div>
     );
@@ -501,12 +483,12 @@ export function QuotationBuilder() {
                 {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> PDF</>}
             </Button>
             <Button onClick={handleDownloadPng} size="lg" disabled={isDownloading} variant="outline" className="border-primary text-primary font-bold rounded-full shadow-lg hover:bg-primary/10 transition-all">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><ImageIcon size={20} className="mr-2" /> PNG</>}
+                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><ImageIcon size={20} className="mr-2" /> Page 1 PNG</>}
             </Button>
         </div>
         
         <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white overflow-visible shadow-2xl">
-            <div className="quotation-page mb-8 bg-white text-black relative">
+            <div className="quotation-page bg-white text-black relative">
                 <QuotationHeader />
 
                 <div className="text-[11.5pt] leading-relaxed space-y-8">
@@ -534,101 +516,86 @@ export function QuotationBuilder() {
                         </div>
                     </div>
 
-                    <div className="space-y-4 pt-4">
-                        <h4 className="font-bold uppercase text-[8pt] tracking-[0.2em] text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
-                        <div className="justified-text space-y-2 text-[10.5pt] text-gray-700">
-                          <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
-                          <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official Purchase Order.</p>
-                          <p>• <strong>Validity:</strong> 7 days from the date of issuance of this quotation.</p>
-                          <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty and technical support.</p>
-                        </div>
-                    </div>
+                    <table className="locked-table mb-8 mt-10">
+                        <thead>
+                            <tr className="uppercase bg-gray-50/80 text-[8pt] border-b border-gray-200">
+                                <th className="col-sr py-4 text-center">Sr.</th>
+                                <th className="col-desc py-4 text-left">Technical Specifications</th>
+                                <th className="col-qty py-4 text-center">Qty</th>
+                                <th className="col-price py-4 text-right">Unit Price (₹)</th>
+                                <th className="col-total py-4 text-right">Total (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {watchedLineItems?.map((item, index) => {
+                                if (!item) return null;
+                                const unitPrice = parseFloat(String(item.unitPrice || 0)) || 0;
+                                const qty = parseFloat(String(item.quantity || 0)) || 0;
+                                const rowTotal = unitPrice * qty;
+                                
+                                return (
+                                    <tr key={index} className="border-b border-gray-50">
+                                        <td className="col-sr font-bold text-gray-300 pt-5 text-center">{index + 1}</td>
+                                        <td className="col-desc pt-5">
+                                            <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
+                                            <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
+                                        </td>
+                                        <td className="col-qty font-bold text-center pt-5">{qty}</td>
+                                        <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(unitPrice)}</td>
+                                        <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format(rowTotal)}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
 
-                    <div className="pt-12 flex justify-end">
-                        <div className="text-right space-y-12">
-                            <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
-                            <div className="pt-2 font-bold px-10 uppercase text-[9pt] border-t border-gray-200 text-gray-400 text-center">Authorized Signatory</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="quotation-page bg-white text-black relative">
-                <QuotationHeader />
-                
-                <div className="mb-6 text-center py-2 font-bold uppercase text-[9pt] border-y border-gray-100 tracking-[0.4em] bg-gray-50/30 text-gray-500">
-                  Technical & Commercial Quotation
-                </div>
-
-                <table className="locked-table mb-8">
-                    <thead>
-                        <tr className="uppercase bg-gray-50/80 text-[8pt] border-b border-gray-200">
-                            <th className="col-sr py-4">Sr.</th>
-                            <th className="col-desc py-4 text-left">Technical Specifications</th>
-                            <th className="col-qty py-4">Qty</th>
-                            <th className="col-price py-4">Unit Price (₹)</th>
-                            <th className="col-total py-4">Total (₹)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {watchedLineItems?.map((item, index) => {
-                            if (!item) return null;
-                            const unitPrice = parseFloat(String(item.unitPrice || 0)) || 0;
-                            const qty = parseFloat(String(item.quantity || 0)) || 0;
-                            const rowTotal = unitPrice * qty;
-                            
-                            return (
-                                <tr key={index} className="border-b border-gray-50">
-                                    <td className="col-sr font-bold text-gray-300 pt-5">{index + 1}</td>
-                                    <td className="col-desc pt-5">
-                                        <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
-                                        <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
-                                    </td>
-                                    <td className="col-qty font-bold text-center pt-5">{qty}</td>
-                                    <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(unitPrice)}</td>
-                                    <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format(rowTotal)}</td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-
-                <div className="keep-together pt-6">
-                    <div className="flex justify-end mb-8">
-                        <div className="w-[85mm] space-y-2 border-t-[2px] border-gray-900 pt-4">
-                            <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
-                                <span>Sub Total</span>
-                                <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
-                            </div>
-                            <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
-                                <span>GST @ 18%</span>
-                                <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
-                            </div>
-                            <div className="flex justify-between text-[14pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
-                                <span className="tracking-tighter">GRAND TOTAL</span>
-                                <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
+                    <div className="keep-together pt-6">
+                        <div className="flex justify-end mb-8">
+                            <div className="w-[85mm] space-y-2 border-t-[2px] border-gray-900 pt-4">
+                                <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
+                                    <span>Sub Total</span>
+                                    <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
+                                </div>
+                                <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
+                                    <span>GST @ 18%</span>
+                                    <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
+                                </div>
+                                <div className="flex justify-between text-[14pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
+                                    <span className="tracking-tighter">GRAND TOTAL</span>
+                                    <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="mb-10 p-5 bg-gray-50 rounded-lg border-l-[4px] border-gray-900">
-                        <p className="font-bold text-[7pt] uppercase tracking-[0.2em] text-gray-400 mb-2">Amount In Words:</p>
-                        <p className="italic text-[11.5pt] font-bold text-gray-900 leading-tight tracking-tight">{grandTotalInWords}</p>
-                    </div>
+                        <div className="mb-10 p-5 bg-gray-50 rounded-lg border-l-[4px] border-gray-900">
+                            <p className="font-bold text-[7pt] uppercase tracking-[0.2em] text-gray-400 mb-2">Amount In Words:</p>
+                            <p className="italic text-[11.5pt] font-bold text-gray-900 leading-tight tracking-tight">{grandTotalInWords}</p>
+                        </div>
 
-                    <div className="flex justify-between items-end gap-12 pt-8">
-                        <div className="space-y-4">
-                            <p className="font-bold uppercase text-[7.5pt] tracking-[0.2em] text-gray-400">Company's Bank Details:</p>
-                            <div className="space-y-1.5 font-bold text-[9.5pt] text-gray-700">
-                              <p><span className="text-gray-400 font-medium mr-2">A/c Holder's Name:</span> DEE QASA</p>
-                              <p><span className="text-gray-400 font-medium mr-2">Bank Name:</span> State Bank of India - CC Limit</p>
-                              <p><span className="text-gray-400 font-medium mr-2">A/c No.:</span> 44562745640</p>
-                              <p><span className="text-gray-400 font-medium mr-2">Branch & IFS Code:</span> SBIN0001443</p>
+                        <div className="space-y-4 pt-4">
+                            <h4 className="font-bold uppercase text-[8pt] tracking-[0.2em] text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
+                            <div className="justified-text space-y-2 text-[10.5pt] text-gray-700">
+                              <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
+                              <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official Purchase Order.</p>
+                              <p>• <strong>Validity:</strong> 7 days from the date of issuance of this quotation.</p>
+                              <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty and technical support.</p>
                             </div>
                         </div>
-                        <div className="text-right space-y-14">
-                             <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
-                             <div className="pt-2 font-bold text-center uppercase text-[9pt] border-t border-gray-200 px-12 text-gray-400">Authorized Signatory</div>
+
+                        <div className="flex justify-between items-end gap-12 pt-16">
+                            <div className="space-y-4">
+                                <p className="font-bold uppercase text-[7.5pt] tracking-[0.2em] text-gray-400">Company's Bank Details:</p>
+                                <div className="space-y-1.5 font-bold text-[9.5pt] text-gray-700">
+                                  <p><span className="text-gray-400 font-medium mr-2">A/c Name:</span> DEE QASA</p>
+                                  <p><span className="text-gray-400 font-medium mr-2">Bank:</span> State Bank of India - CC Limit</p>
+                                  <p><span className="text-gray-400 font-medium mr-2">A/c No:</span> 44562745640</p>
+                                  <p><span className="text-gray-400 font-medium mr-2">IFSC:</span> SBIN0001443</p>
+                                </div>
+                            </div>
+                            <div className="text-right space-y-16">
+                                 <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
+                                 <div className="pt-2 font-bold text-center uppercase text-[9pt] border-t border-gray-200 px-12 text-gray-400">Authorized Signatory</div>
+                            </div>
                         </div>
                     </div>
                 </div>

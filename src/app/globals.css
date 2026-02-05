@@ -54,7 +54,7 @@
   margin: 40px auto;
   background: #ffffff !important;
   color: #000000 !important;
-  padding: 20mm !important; 
+  padding: 20mm 18mm !important; 
   box-shadow: 0 0 30px rgba(0,0,0,0.4);
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif !important;
@@ -80,11 +80,11 @@
 
 .locked-table th, .locked-table td {
   border: 0.5pt solid #e5e7eb !important;
-  padding: 2.5mm !important;
+  padding: 3mm 2mm !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
   vertical-align: top !important;
-  font-size: 10pt !important;
+  font-size: 10.5pt !important;
 }
 
 .locked-table th {
@@ -96,10 +96,10 @@
 }
 
 /* COLUMN WIDTH LOCKS */
-.col-sr { width: 40px !important; text-align: center !important; }
-.col-qty { width: 50px !important; text-align: center !important; }
-.col-price { width: 120px !important; text-align: right !important; }
-.col-total { width: 120px !important; text-align: right !important; }
+.col-sr { width: 40px !important; }
+.col-qty { width: 50px !important; }
+.col-price { width: 120px !important; }
+.col-total { width: 120px !important; }
 
 /* PRINT ENGINE (A4 PORTRAIT) */
 @media print {
@@ -138,16 +138,10 @@
     box-shadow: none !important;
     border: none !important;
     width: 210mm !important;
-    height: auto !important;
     min-height: 297mm !important;
-    padding: 20mm !important;
-    page-break-after: always !important;
+    padding: 20mm 18mm !important;
     display: block !important;
     background: #ffffff !important;
-  }
-
-  thead {
-    display: table-header-group !important;
   }
 
   tr, .keep-together {
