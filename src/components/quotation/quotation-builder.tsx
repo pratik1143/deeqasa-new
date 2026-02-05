@@ -17,9 +17,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
 import { getProductData } from '@/ai/flows/get-product-data';
-import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText } from 'lucide-react';
+import { ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -116,7 +115,6 @@ export function QuotationBuilder() {
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-  const [isGenerating, startTransition] = useTransition();
   const [isDownloading, setIsDownloading] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);

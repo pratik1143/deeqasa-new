@@ -14,7 +14,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -44,7 +43,7 @@ import {
 } from "@/components/ui/select";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "../ui/chart";
 import { Button } from "../ui/button";
-import { BrainCircuit, Edit, RefreshCw, AlertTriangle, Lightbulb, TrendingUp, TrendingDown, Target, Award, UserX, DollarSign } from "lucide-react";
+import { BrainCircuit, Edit, RefreshCw, AlertTriangle, Lightbulb, TrendingUp, TrendingDown, Target, Award, UserX, DollarSign, Bot } from "lucide-react";
 import { FunnelAnalysisOutput, analyzeFunnelData } from "@/ai/flows/ai-funnel-analyzer";
 import { getSheetData } from "@/ai/flows/get-sheet-data";
 import { updateSheetData } from "@/ai/flows/update-sheet-data";
@@ -487,7 +486,7 @@ export function FunnelAnalyzerDashboard() {
               </CardHeader>
               <CardContent className="h-[300px]">
                   {statusData.length > 0 ? (
-                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                    <ChartContainer config={chartConfig} className="h-full w-full">
                         <PieChart>
                             <Tooltip content={<ChartTooltipContent hideLabel />} />
                             <Pie 
@@ -512,7 +511,7 @@ export function FunnelAnalyzerDashboard() {
               </CardHeader>
               <CardContent className="h-[300px]">
                   {funnelsByOwnerData.length > 0 ? (
-                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                    <ChartContainer config={chartConfig} className="h-full w-full">
                         <BarChart data={funnelsByOwnerData} layout="vertical" margin={{ left: 40, right: 20 }}>
                             <CartesianGrid horizontal={false} strokeDasharray="3 3" />
                             <XAxis type="number" hide />
@@ -538,7 +537,7 @@ export function FunnelAnalyzerDashboard() {
               </CardHeader>
               <CardContent className="h-[400px]">
                 {revenueByMonthData.length > 0 ? (
-                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                    <ChartContainer config={chartConfig} className="h-full w-full">
                         <LineChart data={revenueByMonthData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                             <CartesianGrid vertical={false} strokeDasharray="3 3" />
                             <XAxis 
