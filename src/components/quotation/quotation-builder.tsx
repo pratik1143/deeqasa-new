@@ -19,14 +19,14 @@ import { Switch } from '@/components/ui/switch';
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
 
 const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
-  companyName: z.string().min(1, 'Department name is required'),
+  companyName: z.string().min(1, 'Organization name is required'),
   address: z.string().min(1, 'Address is required'),
   subject: z.string().min(1, 'Subject is required.'),
   letterBody: z.string().min(1, 'Letter body is required.'),
@@ -112,10 +112,6 @@ const getLongDescription = (product: Product): string => {
   return parts.filter(Boolean).join(' | ');
 };
 
-const getShortLabel = (product: Product): string => {
-  return `${product.model} | ${product.processor} | ${product.memory}`;
-};
-
 export function QuotationBuilder() {
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
@@ -180,12 +176,23 @@ export function QuotationBuilder() {
     return products.filter(p => 
       p.id.toLowerCase().includes(q) ||
       p.model.toLowerCase().includes(q) ||
-      p.processor.toLowerCase().includes(q) ||
-      p.memory.toLowerCase().includes(q) ||
-      p.gfx.toLowerCase().includes(q) ||
-      p.os.toLowerCase().includes(q)
+      p.processor.toLowerCase().includes(q)
     );
   }, [products, searchQuery]);
+
+  const totals = useMemo(() => {
+    const items = watchedLineItems || [];
+    const subTotal = items.reduce((acc, item) => {
+      const qty = parseFloat(String(item?.quantity || 0));
+      const price = parseFloat(String(item?.unitPrice || 0));
+      return acc + (qty * price);
+    }, 0);
+    
+    const totalGst = subTotal * 0.18;
+    const grandTotal = subTotal + totalGst;
+    
+    return { subTotal, totalGst, grandTotal };
+  }, [watchedLineItems]);
 
   const handleAddProduct = () => {
     if (selectedProduct) {
@@ -196,10 +203,7 @@ export function QuotationBuilder() {
   };
 
   const handleAddManualProduct = () => {
-      if (!manualModel) {
-          toast({ variant: 'destructive', title: 'Error', description: 'Product name is required.' });
-          return;
-      }
+      if (!manualModel) return;
       const customProduct: Product = {
           id: `MAN-${Date.now()}`,
           model: manualModel,
@@ -219,63 +223,30 @@ export function QuotationBuilder() {
           gstRate: 18,
       };
       append({ product: customProduct, quantity: Number(manualQty) || 1, unitPrice: Number(manualPrice) || 0 });
-      setManualModel('');
-      setManualSpec('');
-      setManualPrice(0);
-      setManualQty(1);
-      toast({ title: 'Success', description: 'Custom item added to quotation.' });
+      setManualModel(''); setManualSpec(''); setManualPrice(0); setManualQty(1);
   };
 
-  const handleGenerateBody = () => {
-    if (!watchedSubject) {
-        toast({ variant: 'destructive', title: 'Error', description: 'Please enter a subject first.' });
-        return;
-    }
-    startTransition(async () => {
-        try {
-            const result = await generateLetterBody({
-                subject: watchedSubject,
-                customerName: watchedCustomer,
-                companyName: watchedCompany,
-                address: watchedAddress,
-            });
-            form.setValue('letterBody', result.letterBody);
-            toast({ title: 'Success', description: 'AI generated letter body.' });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'AI Generation Failed', description: error.message });
-        }
-    });
-  };
-  
   const handleDownloadPdf = async () => {
     setIsDownloading(true);
     const html2pdf = (await import('html2pdf.js')).default;
-    const element = document.getElementById('quotation-content-root');
-    
-    if (element) {
-        const opt = {
-            margin: 0,
-            filename: `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 1.0 },
-            html2canvas: { 
-                scale: 3, 
-                useCORS: true, 
-                letterRendering: true,
-                windowWidth: 794, 
-                backgroundColor: '#ffffff'
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+    const element = document.getElementById('quotation-export-root');
+    if (!element) return;
 
-        try {
-            await html2pdf().from(element).set(opt).save();
-            toast({ title: 'Success', description: 'PDF generated successfully.' });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'PDF Generation Failed', description: error.message });
-        } finally {
-            setIsDownloading(false);
-        }
+    const opt = {
+      margin: 0,
+      filename: `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.pdf`,
+      image: { type: 'jpeg', quality: 1.0 },
+      html2canvas: { scale: 3, useCORS: true, letterRendering: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      await html2pdf().from(element).set(opt).save();
+      toast({ title: 'Success', description: 'PDF generated successfully.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -283,323 +254,274 @@ export function QuotationBuilder() {
     setIsDownloading(true);
     try {
         const { toPng } = await import('html-to-image');
-        const page = document.querySelector('.quotation-page') as HTMLElement;
+        const pages = document.querySelectorAll('.quotation-page');
         
-        if (!page) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Page 1 not found.' });
-            return;
+        for (let i = 0; i < pages.length; i++) {
+            const dataUrl = await toPng(pages[i] as HTMLElement, { quality: 1.0, pixelRatio: 3, backgroundColor: '#ffffff' });
+            const link = document.createElement('a');
+            link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_${i + 1}.png`;
+            link.href = dataUrl;
+            link.click();
         }
-
-        const dataUrl = await toPng(page, { 
-            quality: 1.0, 
-            pixelRatio: 3,
-            backgroundColor: '#ffffff',
-            cacheBust: true,
-            style: {
-                margin: '0',
-                boxShadow: 'none',
-                border: 'none',
-            }
-        });
-
-        const link = document.createElement('a');
-        link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_1.png`;
-        link.href = dataUrl;
-        link.click();
-        
-        toast({ title: 'Success', description: 'Page 1 HD PNG downloaded.' });
-    } catch (error: any) {
-        console.error("PNG Export Failed:", error);
-        toast({ variant: 'destructive', title: 'PNG Export Failed', description: error.message });
+        toast({ title: 'Success', description: 'All pages exported as PNG.' });
+    } catch (e: any) {
+        toast({ variant: 'destructive', title: 'PNG Export Failed', description: e.message });
     } finally {
         setIsDownloading(false);
     }
   };
 
-  const totals = useMemo(() => {
-    const items = watchedLineItems || [];
-    const subTotal = items.reduce((acc, item) => {
-      const qty = Number(item?.quantity) || 0;
-      const price = Number(item?.unitPrice) || 0;
-      return acc + (qty * price);
-    }, 0);
-    
-    const totalGst = subTotal * 0.18;
-    const grandTotal = subTotal + totalGst;
-    
-    return { subTotal, totalGst, grandTotal };
-  }, [watchedLineItems]);
-  
-  const grandTotalInWords = useMemo(() => numberToWords(totals.grandTotal), [totals.grandTotal]);
-
-  const QuotationHeader = () => {
-    return (
-      <div className="quotation-header flex justify-between items-start mb-10 pb-6 border-b border-gray-100 bg-white">
-          <div className="flex flex-col items-start gap-2">
-               <div className="h-[28mm] flex items-center bg-white overflow-hidden p-0">
-                 <img 
-                   src="/hp-logo.png" 
-                   alt="HP Logo" 
-                   className="h-full w-auto object-contain block"
-                   style={{ maxHeight: '28mm' }}
-                 />
-               </div>
-               <span className="text-[7pt] font-bold text-gray-400 tracking-[0.2em] uppercase mt-2">HP Connect Partner</span>
-          </div>
-          <div className="text-right flex flex-col items-end">
-              <h2 className="text-[14pt] font-bold text-gray-900 uppercase leading-tight tracking-tight">M/s DeeQasa-Tech</h2>
-              <p className="text-[8pt] text-gray-500 mt-1 font-medium italic">Smart. Secure. Sustainable. IT Solutions.</p>
-              <p className="text-[7pt] text-gray-400 mt-1 uppercase">GSTIN: 03ABCDE1234F1Z5</p>
-          </div>
+  const QuotationHeader = () => (
+    <div className="flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
+      <div className="flex flex-col items-start">
+        <img src="/hp-logo.png" alt="HP" className="h-[28mm] w-auto object-contain bg-white" />
+        <span className="text-[7pt] font-bold text-gray-400 tracking-widest uppercase mt-2">HP Connect Partner</span>
       </div>
-    );
-  };
+      <div className="text-right">
+        <h2 className="text-[14pt] font-bold text-gray-900 uppercase">M/s DeeQasa-Tech</h2>
+        <p className="text-[8pt] text-gray-500 italic">Smart. Secure. Sustainable. IT Solutions.</p>
+        <p className="text-[7pt] text-gray-400 uppercase mt-1">GSTIN: 03ABCDE1234F1Z5</p>
+      </div>
+    </div>
+  );
+
+  const BankDetails = () => (
+    <div className="space-y-3 mt-8 pt-6 border-t border-gray-100">
+      <h4 className="font-bold uppercase text-[7.5pt] tracking-widest text-gray-400">Company Bank Details:</h4>
+      <div className="grid grid-cols-2 gap-4 text-[9.5pt] text-gray-700 font-bold">
+        <p><span className="text-gray-400 font-medium mr-2">A/c Name:</span> DEE QASA</p>
+        <p><span className="text-gray-400 font-medium mr-2">Bank:</span> State Bank of India</p>
+        <p><span className="text-gray-400 font-medium mr-2">A/c No:</span> 44562745640</p>
+        <p><span className="text-gray-400 font-medium mr-2">IFSC:</span> SBIN0001443</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex flex-col xl:flex-row gap-8 p-4 sm:p-6 md:p-8 max-w-full mx-auto items-start min-h-screen bg-background font-body">
-      <Card className="w-full xl:max-w-md flex-shrink-0 no-print z-30 shadow-2xl border-primary/20 bg-card/50 backdrop-blur-md">
-          <div className="p-6">
-            <CardHeader className="p-0 mb-6">
-              <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2">
-                  <Sparkles size={24} /> Quotation Studio
-              </CardTitle>
-              <CardDescription>Draft official IT proposals (A4 Portrait).</CardDescription>
-            </CardHeader>
-            <Form {...form}>
-              <div className="space-y-6">
-                <div className="space-y-4">
-                    <h3 className="font-semibold text-lg mb-2 border-b border-primary/20 pb-2 flex items-center gap-2">
-                        <Check className="text-primary h-4 w-4" /> Customer Details
-                    </h3>
-                    <FormField control={form.control} name="customerName" render={({ field }) => (
-                        <FormItem><FormLabel>Attention To*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="companyName" render={({ field }) => (
-                        <FormItem><FormLabel>Organization*</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="address" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Address*</FormLabel>
-                            <FormControl><Textarea rows={2} {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                </div>
+    <div className="flex flex-col xl:flex-row gap-8 p-6 max-w-[1600px] mx-auto items-start bg-background">
+      {/* Editor Panel */}
+      <Card className="w-full xl:max-w-md no-print sticky top-20 z-30 shadow-xl border-primary/20">
+        <div className="p-6">
+          <CardHeader className="p-0 mb-6 border-b border-primary/10 pb-4">
+            <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2">
+              <Sparkles size={24} /> Quotation Studio
+            </CardTitle>
+            <CardDescription>Enterprise IT Proposals (A4 Portrait)</CardDescription>
+          </CardHeader>
+          
+          <Form {...form}>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                  <FileText size={16} /> Customer Details
+                </h3>
+                <FormField control={form.control} name="customerName" render={({ field }) => (
+                  <FormItem><FormLabel>Attention To</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                )} />
+                <FormField control={form.control} name="companyName" render={({ field }) => (
+                  <FormItem><FormLabel>Organization</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                )} />
+                <FormField control={form.control} name="address" render={({ field }) => (
+                  <FormItem><FormLabel>Full Address</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl></FormItem>
+                )} />
+              </div>
 
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b border-primary/20 pb-2">
-                         <h3 className="font-semibold text-lg flex items-center gap-2"><Sparkles size={16} /> Letter Content</h3>
-                         <Button type="button" variant="outline" size="sm" onClick={handleGenerateBody} disabled={isGenerating}>
-                             {isGenerating ? <LineLoader className="w-12 h-0.5" /> : <Sparkles size={14} className="mr-1" />} AI Write
-                         </Button>
-                    </div>
-                    <FormField control={form.control} name="subject" render={({ field }) => (
-                        <FormItem><FormLabel>Subject Line*</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={form.control} name="letterBody" render={({ field }) => (
-                        <FormItem><FormLabel>Letter Body*</FormLabel><FormControl><Textarea rows={6} {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Plus size={16} /> Item Master
+                </h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <Switch checked={isManualMode} onCheckedChange={setIsManualMode} />
+                  <Label>Manual Entry Mode</Label>
                 </div>
                 
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b border-primary/20 pb-2">
-                         <h3 className="font-semibold text-lg flex items-center gap-2"><Plus size={16} /> Item Master</h3>
-                         <div className="flex items-center gap-2">
-                             <Label htmlFor="manual-mode" className="text-xs">Manual</Label>
-                             <Switch id="manual-mode" checked={isManualMode} onCheckedChange={setIsManualMode} />
-                         </div>
+                {!isManualMode ? (
+                  <div className="space-y-3">
+                    <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-between h-11 bg-secondary/20">
+                          <span className="truncate">{selectedProduct?.model || "Search HP Products..."}</span>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command shouldFilter={false}>
+                          <CommandInput placeholder="Search SKU/Model..." value={searchQuery} onValueChange={setSearchQuery} />
+                          <CommandList>
+                            <CommandEmpty>No products found.</CommandEmpty>
+                            <CommandGroup>
+                              {filteredProducts.slice(0, 20).map((p) => (
+                                <CommandItem key={p.id} onSelect={() => { setSelectedProduct(p); setOpenCombobox(false); }}>
+                                  <div className="flex flex-col"><span className="font-bold">{p.model}</span><span className="text-[10px] opacity-60">{p.processor}</span></div>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>Add Selected</Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3 p-4 bg-secondary/20 rounded-lg border border-primary/10">
+                    <Input value={manualModel} onChange={e => setManualModel(e.target.value)} placeholder="Product Name" />
+                    <Textarea value={manualSpec} onChange={e => setManualSpec(e.target.value)} placeholder="Full Specifications" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input type="number" value={manualPrice} onChange={e => setManualPrice(Number(e.target.value))} placeholder="Unit Price" />
+                      <Input type="number" value={manualQty} onChange={e => setManualQty(Number(e.target.value))} placeholder="Quantity" />
                     </div>
-
-                    {!isManualMode ? (
-                        <div className="flex flex-col gap-3">
-                            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-full justify-between font-normal h-12 bg-secondary/20">
-                                        <span className="truncate">{selectedProduct ? getShortLabel(selectedProduct) : "Search HP Products..."}</span>
-                                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                                    <Command shouldFilter={false}>
-                                        <CommandInput placeholder="Search SKU..." value={searchQuery} onValueChange={setSearchQuery} />
-                                        <CommandList>
-                                            {isLoadingProducts && <div className="p-4"><LineLoader /></div>}
-                                            <CommandEmpty>No products found.</CommandEmpty>
-                                            <CommandGroup>
-                                                {filteredProducts.slice(0, 30).map((product) => (
-                                                <CommandItem key={product.id} onSelect={() => { setSelectedProduct(product); setOpenCombobox(false); }}>
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-xs">{product.model}</span>
-                                                        <span className="text-[10px] truncate">{getLongDescription(product)}</span>
-                                                    </div>
-                                                </CommandItem>
-                                                ))}
-                                            </CommandGroup>
-                                        </CommandList>
-                                    </Command>
-                                </PopoverContent>
-                            </Popover>
-                            <Button type="button" className="w-full" onClick={handleAddProduct} disabled={!selectedProduct}>Add Product</Button>
-                        </div>
-                    ) : (
-                        <div className="space-y-4 p-4 bg-secondary/20 rounded-lg border border-primary/10">
-                            <Input value={manualModel} onChange={(e) => setManualModel(e.target.value)} placeholder="Model Name*" />
-                            <Textarea value={manualSpec} onChange={(e) => setManualSpec(e.target.value)} placeholder="Specifications*" />
-                            <div className="grid grid-cols-2 gap-3">
-                                <Input type="number" value={manualPrice} onChange={(e) => setManualPrice(Number(e.target.value))} placeholder="Price" />
-                                <Input type="number" value={manualQty} onChange={(e) => setManualQty(Number(e.target.value))} placeholder="Qty" />
-                            </div>
-                            <Button type="button" className="w-full" onClick={handleAddManualProduct}>Add Manual Item</Button>
-                        </div>
-                    )}
-                </div>
-
-                <div className="space-y-3">
-                    {fields.map((field, index) => (
-                        <Card key={field.id} className="p-3 bg-secondary/30">
-                             <div className="flex justify-between">
-                                <p className="font-bold text-[10px] uppercase text-primary truncate">{field.product.model}</p>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => remove(index)}><Trash2 size={12}/></Button>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mt-2">
-                                <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
-                                    <FormItem><FormLabel className="text-[9px]">Qty</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
-                                )} />
-                                <FormField control={form.control} name={`lineItems.${index}.unitPrice`} render={({ field }) => (
-                                    <FormItem><FormLabel className="text-[9px]">Price (₹)</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
-                                )} />
-                            </div>
-                        </Card>
-                    ))}
-                </div>
+                    <Button type="button" className="w-full" onClick={handleAddManualProduct}>Add Manual Item</Button>
+                  </div>
+                )}
               </div>
-            </Form>
-          </div>
+
+              <div className="space-y-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="p-3 bg-secondary/40 rounded border border-border flex flex-col gap-2">
+                    <div className="flex justify-between items-start">
+                      <p className="font-bold text-[10px] uppercase text-primary truncate max-w-[200px]">{field.product.model}</p>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => remove(index)}><Trash2 size={12}/></Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
+                        <FormItem><FormLabel className="text-[9px]">Qty</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
+                      )} />
+                      <FormField control={form.control} name={`lineItems.${index}.unitPrice`} render={({ field }) => (
+                        <FormItem><FormLabel className="text-[9px]">Price (₹)</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
+                      )} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Form>
+        </div>
       </Card>
 
-      <div className="flex-1 w-full flex flex-col items-center overflow-x-auto pb-20">
-        <div className="sticky top-20 right-0 p-4 no-print z-20 w-full flex justify-end gap-3 max-w-[210mm]">
-            <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="bg-primary text-primary-foreground font-bold rounded-full shadow-lg hover:shadow-primary/50 transition-all">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><Download size={20} className="mr-2" /> PDF</>}
-            </Button>
-            <Button onClick={handleDownloadPng} size="lg" disabled={isDownloading} variant="outline" className="border-primary text-primary font-bold rounded-full shadow-lg hover:bg-primary/10 transition-all">
-                {isDownloading ? <LineLoader className="w-16 h-0.5" /> : <><ImageIcon size={20} className="mr-2" /> Page 1 PNG</>}
-            </Button>
+      {/* Preview Panel */}
+      <div className="flex-1 flex flex-col items-center">
+        <div className="sticky top-20 right-0 no-print z-20 w-full flex justify-end gap-3 mb-6 max-w-[210mm]">
+          <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="rounded-full shadow-lg">
+            {isDownloading ? <LineLoader className="w-12 h-0.5"/> : <><Download size={18} className="mr-2"/> Download PDF</>}
+          </Button>
+          <Button onClick={handleDownloadPng} size="lg" variant="outline" disabled={isDownloading} className="rounded-full shadow-lg border-primary text-primary">
+            {isDownloading ? <LineLoader className="w-12 h-0.5"/> : <><ImageIcon size={18} className="mr-2"/> Download PNGs</>}
+          </Button>
         </div>
-        
-        <div id="quotation-content-root" className="w-full flex flex-col items-center bg-white overflow-visible shadow-2xl">
-            <div className="quotation-page bg-white text-black relative">
-                <QuotationHeader />
 
-                <div className="text-[11.5pt] leading-relaxed space-y-8">
-                    <div className="flex justify-between items-start">
-                        <div className="text-left font-medium space-y-1">
-                            <p className="font-bold uppercase tracking-tight">To,</p>
-                            <p className="uppercase font-bold text-[12pt]">{watchedCustomer}</p>
-                            <p className="font-bold">{watchedCompany}</p>
-                            <p className="text-gray-600 italic">{watchedAddress}</p>
-                        </div>
-                        <div className="text-right font-bold space-y-1 text-gray-500 text-[9pt]">
-                            <p>Ref: DQT/2024/{format(new Date(), 'MM/yy')}</p>
-                            <p>Date: {format(new Date(), 'dd-MM-yyyy')}</p>
-                        </div>
-                    </div>
-
-                    <div className="font-bold text-left py-2 border-l-[3px] border-gray-100 pl-4 bg-gray-50/50">
-                        <p className="leading-tight"><span className="underline uppercase mr-2 text-gray-400 font-medium">Subject:</span> {watchedSubject}</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <p className="font-bold">Respected Sir/Madam,</p>
-                        <div className="justified-text whitespace-pre-wrap text-gray-800 leading-[1.6]">
-                            {form.watch('letterBody')}
-                        </div>
-                    </div>
-
-                    <table className="locked-table mb-8 mt-10">
-                        <thead>
-                            <tr className="uppercase bg-gray-50/80 text-[8pt] border-b border-gray-200">
-                                <th className="col-sr py-4 text-center">Sr.</th>
-                                <th className="col-desc py-4 text-left">Technical Specifications</th>
-                                <th className="col-qty py-4 text-center">Qty</th>
-                                <th className="col-price py-4 text-right">Unit Price (₹)</th>
-                                <th className="col-total py-4 text-right">Total (₹)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {watchedLineItems?.map((item, index) => {
-                                if (!item) return null;
-                                const unitPrice = parseFloat(String(item.unitPrice || 0)) || 0;
-                                const qty = parseFloat(String(item.quantity || 0)) || 0;
-                                const rowTotal = unitPrice * qty;
-                                
-                                return (
-                                    <tr key={index} className="border-b border-gray-50">
-                                        <td className="col-sr font-bold text-gray-300 pt-5 text-center">{index + 1}</td>
-                                        <td className="col-desc pt-5">
-                                            <p className="font-bold mb-2 uppercase leading-none text-gray-900 text-[11pt]">{item.product.model}</p>
-                                            <div className="text-[9.5pt] justified-text text-gray-500 leading-relaxed font-medium">{getLongDescription(item.product)}</div>
-                                        </td>
-                                        <td className="col-qty font-bold text-center pt-5">{qty}</td>
-                                        <td className="col-price text-right pt-5 text-gray-600 font-medium">{CURRENCY_FORMATTER.format(unitPrice)}</td>
-                                        <td className="col-total font-bold text-right pt-5 text-gray-900">{CURRENCY_FORMATTER.format(rowTotal)}</td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-
-                    <div className="keep-together pt-6">
-                        <div className="flex justify-end mb-8">
-                            <div className="w-[85mm] space-y-2 border-t-[2px] border-gray-900 pt-4">
-                                <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
-                                    <span>Sub Total</span>
-                                    <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
-                                </div>
-                                <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest">
-                                    <span>GST @ 18%</span>
-                                    <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
-                                </div>
-                                <div className="flex justify-between text-[14pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
-                                    <span className="tracking-tighter">GRAND TOTAL</span>
-                                    <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mb-10 p-5 bg-gray-50 rounded-lg border-l-[4px] border-gray-900">
-                            <p className="font-bold text-[7pt] uppercase tracking-[0.2em] text-gray-400 mb-2">Amount In Words:</p>
-                            <p className="italic text-[11.5pt] font-bold text-gray-900 leading-tight tracking-tight">{grandTotalInWords}</p>
-                        </div>
-
-                        <div className="space-y-4 pt-4">
-                            <h4 className="font-bold uppercase text-[8pt] tracking-[0.2em] text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
-                            <div className="justified-text space-y-2 text-[10.5pt] text-gray-700">
-                              <p>• <strong>Taxes:</strong> GST at the rate of 18% extra over quoted prices.</p>
-                              <p>• <strong>Delivery:</strong> 4 to 6 weeks from receipt of official Purchase Order.</p>
-                              <p>• <strong>Validity:</strong> 7 days from the date of issuance of this quotation.</p>
-                              <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty and technical support.</p>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-between items-end gap-12 pt-16">
-                            <div className="space-y-4">
-                                <p className="font-bold uppercase text-[7.5pt] tracking-[0.2em] text-gray-400">Company's Bank Details:</p>
-                                <div className="space-y-1.5 font-bold text-[9.5pt] text-gray-700">
-                                  <p><span className="text-gray-400 font-medium mr-2">A/c Name:</span> DEE QASA</p>
-                                  <p><span className="text-gray-400 font-medium mr-2">Bank:</span> State Bank of India - CC Limit</p>
-                                  <p><span className="text-gray-400 font-medium mr-2">A/c No:</span> 44562745640</p>
-                                  <p><span className="text-gray-400 font-medium mr-2">IFSC:</span> SBIN0001443</p>
-                                </div>
-                            </div>
-                            <div className="text-right space-y-16">
-                                 <p className="font-bold uppercase tracking-widest text-[10pt]">For M/s DeeQasa-Tech</p>
-                                 <div className="pt-2 font-bold text-center uppercase text-[9pt] border-t border-gray-200 px-12 text-gray-400">Authorized Signatory</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div id="quotation-export-root" className="w-full flex flex-col items-center">
+          {/* Page 1: Cover Letter */}
+          <div className="quotation-page">
+            <QuotationHeader />
+            <div className="flex justify-between items-start mb-10 text-[11pt]">
+              <div className="font-bold space-y-1">
+                <p>To,</p>
+                <p className="text-[12pt] uppercase">{watchedCustomer}</p>
+                <p>{watchedCompany}</p>
+                <p className="text-gray-500 italic">{watchedAddress}</p>
+              </div>
+              <div className="text-right text-gray-500 font-bold text-[9pt]">
+                <p>Ref: DQT/2024/{format(new Date(), 'MM/yy')}</p>
+                <p>Date: {format(new Date(), 'dd-MM-yyyy')}</p>
+              </div>
             </div>
+
+            <div className="font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8">
+              <p className="leading-tight"><span className="underline uppercase mr-2 text-gray-400 font-medium">Subject:</span> {watchedSubject}</p>
+            </div>
+
+            <div className="space-y-6 text-[11.5pt] justified-text text-gray-800">
+              <p className="font-bold">Respected Sir/Madam,</p>
+              <div className="whitespace-pre-wrap">{form.watch('letterBody')}</div>
+              <div className="pt-4 space-y-4">
+                <h4 className="font-bold uppercase text-[8pt] tracking-widest text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
+                <div className="grid grid-cols-1 gap-2 text-[10pt] text-gray-700">
+                  <p>• <strong>Taxes:</strong> GST at 18% extra over quoted prices.</p>
+                  <p>• <strong>Delivery:</strong> 4-6 weeks from official PO receipt.</p>
+                  <p>• <strong>Validity:</strong> 7 days from date of issuance.</p>
+                  <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty and technical support.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="absolute bottom-[20mm] left-[18mm] right-[18mm] flex justify-between items-end border-t border-gray-100 pt-4 no-print">
+               <p className="text-[8pt] text-gray-400 uppercase tracking-widest font-bold">Page 1 of 2</p>
+               <p className="text-[7pt] text-gray-300 italic">Computer generated - No signature required</p>
+            </div>
+          </div>
+
+          {/* Page 2: Table & Summary */}
+          <div className="quotation-page">
+            <QuotationHeader />
+            <h3 className="text-center font-bold text-[12pt] uppercase tracking-widest mb-6 border-y border-gray-900 py-2">Technical & Commercial Quotation</h3>
+            
+            <table className="quotation-table">
+              <thead>
+                <tr>
+                  <th className="col-sr">Sr.</th>
+                  <th>Specifications</th>
+                  <th className="col-qty">Qty</th>
+                  <th className="col-price">Unit Price (₹)</th>
+                  <th className="col-total">Total (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {watchedLineItems?.map((item, idx) => {
+                  const qty = parseFloat(String(item.quantity || 0));
+                  const price = parseFloat(String(item.unitPrice || 0));
+                  return (
+                    <tr key={idx}>
+                      <td className="text-center font-bold text-gray-400">{idx + 1}</td>
+                      <td>
+                        <p className="font-bold uppercase text-gray-900 text-[10pt] mb-1">{item.product.model}</p>
+                        <p className="text-[9pt] text-gray-500 leading-relaxed">{getLongDescription(item.product)}</p>
+                      </td>
+                      <td className="text-center font-bold">{qty}</td>
+                      <td className="text-right">{CURRENCY_FORMATTER.format(price)}</td>
+                      <td className="text-right font-bold text-gray-900">{CURRENCY_FORMATTER.format(qty * price)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            <div className="mt-8 flex justify-end">
+              <div className="w-[80mm] space-y-2 border-t-2 border-gray-900 pt-4">
+                <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase tracking-widest">
+                  <span>Sub Total</span>
+                  <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
+                </div>
+                <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase tracking-widest">
+                  <span>GST @ 18%</span>
+                  <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
+                </div>
+                <div className="flex justify-between text-[13pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
+                  <span className="tracking-tighter uppercase">Grand Total</span>
+                  <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border-l-4 border-gray-900">
+              <p className="font-bold text-[7pt] uppercase tracking-widest text-gray-400 mb-1">Amount In Words:</p>
+              <p className="italic text-[11pt] font-bold text-gray-900">{numberToWords(totals.grandTotal)}</p>
+            </div>
+
+            <BankDetails />
+
+            <div className="mt-16 flex justify-between items-end">
+               <div className="text-[8pt] text-gray-400 font-bold uppercase tracking-widest">Authorized Partner: HP Enterprise</div>
+               <div className="text-right space-y-12">
+                 <p className="font-bold uppercase tracking-widest text-[9.5pt]">For M/s DeeQasa-Tech</p>
+                 <div className="pt-2 font-bold uppercase text-[8.5pt] border-t border-gray-200 px-8 text-gray-400">Authorized Signatory</div>
+               </div>
+            </div>
+            
+            <div className="absolute bottom-[20mm] left-[18mm] right-[18mm] flex justify-between items-end border-t border-gray-100 pt-4 no-print">
+               <p className="text-[8pt] text-gray-400 uppercase tracking-widest font-bold">Page 2 of 2</p>
+               <p className="text-[7pt] text-gray-300 italic">This is a system generated document</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
