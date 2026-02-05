@@ -72,7 +72,11 @@ import { cn } from "@/lib/utils";
 const chartConfig = {
   revenue: {
     label: "Revenue",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--primary))",
+  },
+  funnels: {
+    label: "Funnels",
+    color: "hsl(var(--primary))",
   },
   won: {
     label: "Won",
@@ -118,6 +122,7 @@ type FunnelFormValues = z.infer<typeof funnelFormSchema>;
 export function FunnelAnalyzerDashboard() {
   const [data, setData] = useState<FunnelData[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, startRefreshTransition] = useTransition();
 
@@ -138,6 +143,10 @@ export function FunnelAnalyzerDashboard() {
       segment: '',
     },
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (itemToEdit) {
@@ -219,9 +228,8 @@ export function FunnelAnalyzerDashboard() {
     totalRevenue,
     wonRevenue,
     pipelineRevenue,
-    revenueByMonth,
-    pipelineRevenueByMonth,
-    funnelsByOwner,
+    revenueByMonthData,
+    funnelsByOwnerData,
     funnelsBySegment,
     winRatioBySegment
   } = useMemo(() => {
@@ -248,28 +256,23 @@ export function FunnelAnalyzerDashboard() {
       .reduce((sum, d) => sum + d.revenue * d.probability, 0);
     const totalRevenue = wonRevenue + pipelineRevenue;
 
-    const revenueByMonth = filteredData.reduce((acc, d) => {
+    const revenueByMonthMap = filteredData.reduce((acc, d) => {
         if (d.status === 'Won') {
             if (!acc[d.closureMonth]) acc[d.closureMonth] = 0;
             acc[d.closureMonth] += d.revenue;
         }
         return acc;
     }, {} as Record<string, number>);
-    
-    const pipelineRevenueByMonth = filteredData.reduce((acc, d) => {
-        if (d.status === 'Pipeline') {
-            const month = d.closureMonth || d.oppCloseMonth || 'Unknown';
-            if (!acc[month]) acc[month] = 0;
-            acc[month] += d.revenue * d.probability;
-        }
-        return acc;
-    }, {} as Record<string, number>);
 
-    const funnelsByOwner = filteredData.reduce((acc, d) => {
+    const revenueByMonthData = Object.entries(revenueByMonthMap).map(([name, value]) => ({ name, revenue: value }));
+    
+    const funnelsByOwnerMap = filteredData.reduce((acc, d) => {
         if (!acc[d.owner]) acc[d.owner] = 0;
         acc[d.owner]++;
         return acc;
     }, {} as Record<string, number>);
+
+    const funnelsByOwnerData = Object.entries(funnelsByOwnerMap).map(([name, value]) => ({ name, funnels: value }));
 
     const funnelsBySegment = filteredData.reduce((acc, d) => {
         if (!acc[d.segment]) acc[d.segment] = 0;
@@ -298,9 +301,8 @@ export function FunnelAnalyzerDashboard() {
       totalRevenue,
       wonRevenue,
       pipelineRevenue,
-      revenueByMonth,
-      pipelineRevenueByMonth,
-      funnelsByOwner,
+      revenueByMonthData,
+      funnelsByOwnerData,
       funnelsBySegment,
       winRatioBySegment
     };
@@ -323,9 +325,26 @@ export function FunnelAnalyzerDashboard() {
                 wonRevenueInr: wonRevenue * EXCHANGE_RATE_USD_TO_INR,
                 pipelineRevenueInr: pipelineRevenue * EXCHANGE_RATE_USD_TO_INR,
                 totalRevenueInr: totalRevenue * EXCHANGE_RATE_USD_TO_INR,
-                revenueByMonth,
-                pipelineRevenueByMonth,
-                funnelsByOwner,
+                revenueByMonth: filteredData.reduce((acc, d) => {
+                    if (d.status === 'Won') {
+                        if (!acc[d.closureMonth]) acc[d.closureMonth] = 0;
+                        acc[d.closureMonth] += d.revenue;
+                    }
+                    return acc;
+                }, {} as Record<string, number>),
+                pipelineRevenueByMonth: filteredData.reduce((acc, d) => {
+                    if (d.status === 'Pipeline') {
+                        const month = d.closureMonth || d.oppCloseMonth || 'Unknown';
+                        if (!acc[month]) acc[month] = 0;
+                        acc[month] += d.revenue * d.probability;
+                    }
+                    return acc;
+                }, {} as Record<string, number>),
+                funnelsByOwner: filteredData.reduce((acc, d) => {
+                    if (!acc[d.owner]) acc[d.owner] = 0;
+                    acc[d.owner]++;
+                    return acc;
+                }, {} as Record<string, number>),
                 funnelsBySegment,
                 winRatioBySegment,
                 fullFunnelData: filteredData,
@@ -376,8 +395,6 @@ export function FunnelAnalyzerDashboard() {
     { name: 'Lost', value: lostCount, fill: 'hsl(var(--chart-3))' },
     { name: 'Pipeline', value: pipelineCount, fill: 'hsl(var(--chart-4))' },
   ];
-
-  const ownerChartData = Object.entries(funnelsByOwner).map(([name, value]) => ({ name, funnels: value }));
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -461,187 +478,233 @@ export function FunnelAnalyzerDashboard() {
         </Card>
       </div>
 
-      <div className="space-y-8">
-        <div className="grid gap-8 md:grid-cols-2">
-            <Card>
-            <CardHeader>
-                <CardTitle>Funnel Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <ChartContainer config={{}} className="h-52 w-full">
-                    <ResponsiveContainer>
+      {isMounted && (
+        <div className="space-y-8">
+          <div className="grid gap-8 md:grid-cols-2">
+              <Card>
+              <CardHeader>
+                  <CardTitle>Funnel Status</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                  {statusData.length > 0 ? (
+                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
                         <PieChart>
                             <Tooltip content={<ChartTooltipContent hideLabel />} />
-                            <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={50} outerRadius={70} />
+                            <Pie 
+                                data={statusData} 
+                                dataKey="value" 
+                                nameKey="name" 
+                                innerRadius={60} 
+                                outerRadius={80} 
+                                paddingAngle={5}
+                            />
+                            <Legend />
                         </PieChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-            </CardContent>
-            </Card>
-            <Card>
-            <CardHeader>
-                <CardTitle>Funnels by Owner</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig} className="h-52 w-full">
-                   <ResponsiveContainer>
-                        <BarChart data={ownerChartData} layout="vertical" margin={{ left: 20 }}>
+                    </ChartContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground">No data available</div>
+                  )}
+              </CardContent>
+              </Card>
+              <Card>
+              <CardHeader>
+                  <CardTitle>Funnels by Owner</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                  {funnelsByOwnerData.length > 0 ? (
+                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                        <BarChart data={funnelsByOwnerData} layout="vertical" margin={{ left: 40, right: 20 }}>
+                            <CartesianGrid horizontal={false} strokeDasharray="3 3" />
                             <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" hide />
-                            <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
-                            <Bar dataKey="funnels" fill="hsl(var(--chart-1))" radius={4} />
+                            <YAxis 
+                                type="category" 
+                                dataKey="name" 
+                                width={100} 
+                                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} 
+                            />
+                            <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent />} />
+                            <Bar dataKey="funnels" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                         </BarChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-            </CardContent>
-            </Card>
-        </div>
-        <Card>
-            <CardHeader>
-                <CardTitle>Won Revenue by Month</CardTitle>
-            </CardHeader>
-            <CardContent>
-            <ChartContainer config={chartConfig} className="h-72 w-full">
-                    <ResponsiveContainer>
-                        <LineChart data={Object.entries(revenueByMonth).map(([name, value]) => ({ name, revenue: value }))}>
-                            <CartesianGrid vertical={false} />
-                            <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                            <YAxis tickFormatter={(value) => `$${(value as number / 1000).toFixed(0)}k`}/>
+                    </ChartContainer>
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground">No data available</div>
+                  )}
+              </CardContent>
+              </Card>
+          </div>
+          <Card>
+              <CardHeader>
+                  <CardTitle>Won Revenue by Month</CardTitle>
+              </CardHeader>
+              <CardContent className="h-[400px]">
+                {revenueByMonthData.length > 0 ? (
+                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                        <LineChart data={revenueByMonthData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                            <XAxis 
+                                dataKey="name" 
+                                tickLine={false} 
+                                axisLine={false} 
+                                tickMargin={10}
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            />
+                            <YAxis 
+                                tickFormatter={(value) => `$${(value as number / 1000).toFixed(0)}k`}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                            />
                             <Tooltip content={<ChartTooltipContent formatter={(value) => usdCurrencyFormatter.format(value as number)} />} />
                             <Legend />
-                            <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+                            <Line 
+                                type="monotone" 
+                                dataKey="revenue" 
+                                stroke="hsl(var(--primary))" 
+                                strokeWidth={3} 
+                                dot={{ r: 4, fill: 'hsl(var(--primary))' }} 
+                                activeDot={{ r: 6 }}
+                            />
                         </LineChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-            </CardContent>
-        </Card>
-
-        {/* AI Analysis Card */}
-        <Card className="flex flex-col mt-8">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><BrainCircuit size={20} className="text-primary"/> AI Funnel Intelligence</CardTitle>
-                <CardDescription>Automatic analysis of your current funnel.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col overflow-hidden">
-                {isAnalyzing ? (
-                    <div className="space-y-4 m-auto w-full p-4">
-                        <p className="text-sm text-center text-muted-foreground">Analyzing data...</p>
-                        <LineLoader />
-                        <div className="space-y-4 mt-4">
-                            <Skeleton className="h-8 w-3/4" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-5/6" />
-                        </div>
-                    </div>
-                ) : aiInsights ? (
-                    <ScrollArea className="h-full -mr-6">
-                        <div className="text-sm space-y-6 pr-6">
-                           <div>
-                                <h4 className="font-semibold text-foreground mb-2">Executive Summary</h4>
-                                <p className="text-muted-foreground">{aiInsights.executiveSummary}</p>
-                            </div>
-                            
-                            <Card className="bg-secondary/50">
-                                <CardHeader className="p-4">
-                                    <CardTitle className="text-base flex items-center gap-2"><DollarSign /> Revenue Forecast</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                    <p className="text-muted-foreground">{aiInsights.revenueForecast.forecast}</p>
-                                    <p className="text-xs text-primary font-bold mt-2">CONFIDENCE: {aiInsights.revenueForecast.confidence}%</p>
-                                </CardContent>
-                            </Card>
-
-                            <div>
-                                <h4 className="font-semibold text-foreground mb-2">Smart Alerts</h4>
-                                <div className="space-y-2">
-                                    {aiInsights.smartAlerts.map((alert, i) => (
-                                        <Alert key={i} variant={alert.priority === 'High' ? 'destructive' : 'default'} className={cn(alert.priority === 'Medium' && 'border-amber-500/50 text-amber-400 [&>svg]:text-amber-400')}>
-                                            <AlertTriangle className="h-4 w-4" />
-                                            <AlertTitle className="font-bold">{alert.title}</AlertTitle>
-                                            <AlertDescription>{alert.description}</AlertDescription>
-                                        </Alert>
-                                    ))}
-                                </div>
-                            </div>
-                             <div>
-                                <h4 className="font-semibold text-foreground mb-2">Top Opportunities</h4>
-                                <div className="space-y-2">
-                                    {aiInsights.topOpportunities.map((opp, i) => (
-                                        <Card key={i} className="bg-secondary/50">
-                                          <CardHeader className="p-4">
-                                            <CardTitle className="text-base flex items-center gap-2"><Lightbulb size={16}/>{opp.title}</CardTitle>
-                                            <CardDescription>{opp.description}</CardDescription>
-                                          </CardHeader>
-                                          <CardFooter className="p-4 pt-0">
-                                              <p className="text-xs font-semibold text-primary">NEXT ACTION: {opp.nextAction}</p>
-                                          </CardFooter>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <Accordion type="single" collapsible className="w-full">
-                                <AccordionItem value="leakage">
-                                    <AccordionTrigger className="font-semibold text-base"><Target size={16} className="mr-2"/>Funnel Leakage</AccordionTrigger>
-                                    <AccordionContent className="pt-2">
-                                        <h5 className="font-bold">{aiInsights.funnelLeakageAnalysis.primaryLeakagePoint}</h5>
-                                        <p className="text-muted-foreground">{aiInsights.funnelLeakageAnalysis.insight}</p>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="performance">
-                                    <AccordionTrigger className="font-semibold text-base"><TrendingUp size={16} className="mr-2"/>Owner Performance</AccordionTrigger>
-                                    <AccordionContent className="pt-2 space-y-4">
-                                      <div className="flex gap-4">
-                                        <Award className="text-green-400 mt-1"/>
-                                        <div>
-                                          <h5 className="font-bold text-green-400">Top Performer: {aiInsights.ownerPerformance.topPerformer.name}</h5>
-                                          <p className="text-muted-foreground">{aiInsights.ownerPerformance.topPerformer.reason}</p>
-                                        </div>
-                                      </div>
-                                      <div className="flex gap-4">
-                                        <UserX className="text-amber-400 mt-1"/>
-                                        <div>
-                                          <h5 className="font-bold text-amber-400">Needs Attention: {aiInsights.ownerPerformance.needsAttention.name}</h5>
-                                          <p className="text-muted-foreground">{aiInsights.ownerPerformance.needsAttention.reason}</p>
-                                        </div>
-                                      </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="lost-deals">
-                                    <AccordionTrigger className="font-semibold text-base"><TrendingDown size={16} className="mr-2"/>Lost Deal Intelligence</AccordionTrigger>
-                                    <AccordionContent className="pt-2">
-                                        <p className="text-muted-foreground">{aiInsights.lostDealIntelligence}</p>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-                        </div>
-                    </ScrollArea>
+                    </ChartContainer>
                 ) : (
-                    <div className="m-auto text-center text-muted-foreground p-4">
-                        <p>Click the button to generate AI-powered intelligence for the current data view.</p>
-                    </div>
+                    <div className="h-full flex items-center justify-center text-muted-foreground">No revenue data for the selected period</div>
                 )}
-            </CardContent>
-            <div className="p-6 pt-0 mt-auto">
-                <Button onClick={handleAnalyze} disabled={isAnalyzing || isRefreshing} className="w-full">
-                    {isAnalyzing ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : <BrainCircuit className="mr-2 h-4 w-4" />}
-                    {isAnalyzing ? "Analyzing..." : "Generate AI Intelligence"}
-                </Button>
-            </div>
-        </Card>
-      </div>
+              </CardContent>
+          </Card>
+
+          {/* AI Analysis Card */}
+          <Card className="flex flex-col mt-8">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><BrainCircuit size={20} className="text-primary"/> AI Funnel Intelligence</CardTitle>
+                  <CardDescription>Automatic analysis of your current funnel.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col overflow-hidden min-h-[400px]">
+                  {isAnalyzing ? (
+                      <div className="space-y-4 m-auto w-full p-4">
+                          <p className="text-sm text-center text-muted-foreground">Analyzing data...</p>
+                          <LineLoader />
+                          <div className="space-y-4 mt-4">
+                              <Skeleton className="h-8 w-3/4" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-5/6" />
+                          </div>
+                      </div>
+                  ) : aiInsights ? (
+                      <ScrollArea className="h-[600px] -mr-6">
+                          <div className="text-sm space-y-6 pr-6">
+                            <div>
+                                  <h4 className="font-semibold text-foreground mb-2">Executive Summary</h4>
+                                  <p className="text-muted-foreground leading-relaxed">{aiInsights.executiveSummary}</p>
+                              </div>
+                              
+                              <Card className="bg-secondary/50">
+                                  <CardHeader className="p-4">
+                                      <CardTitle className="text-base flex items-center gap-2 text-primary"><DollarSign size={18} /> Revenue Forecast</CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="p-4 pt-0">
+                                      <p className="text-muted-foreground leading-relaxed">{aiInsights.revenueForecast.forecast}</p>
+                                      <p className="text-xs text-primary font-bold mt-2 uppercase tracking-widest">Confidence: {aiInsights.revenueForecast.confidence}%</p>
+                                  </CardContent>
+                              </Card>
+
+                              <div>
+                                  <h4 className="font-semibold text-foreground mb-2">Smart Alerts</h4>
+                                  <div className="space-y-3">
+                                      {aiInsights.smartAlerts.map((alert, i) => (
+                                          <Alert key={i} variant={alert.priority === 'High' ? 'destructive' : 'default'} className={cn(alert.priority === 'Medium' && 'border-amber-500/50 text-amber-400 [&>svg]:text-amber-400')}>
+                                              <AlertTriangle className="h-4 w-4" />
+                                              <AlertTitle className="font-bold">{alert.title}</AlertTitle>
+                                              <AlertDescription>{alert.description}</AlertDescription>
+                                          </Alert>
+                                      ))}
+                                  </div>
+                              </div>
+                              <div>
+                                  <h4 className="font-semibold text-foreground mb-2">Top Opportunities</h4>
+                                  <div className="space-y-3">
+                                      {aiInsights.topOpportunities.map((opp, i) => (
+                                          <Card key={i} className="bg-secondary/30 border-primary/10">
+                                            <CardHeader className="p-4">
+                                              <CardTitle className="text-base flex items-center gap-2 text-emerald-400"><Lightbulb size={16}/>{opp.title}</CardTitle>
+                                              <CardDescription className="text-muted-foreground">{opp.description}</CardDescription>
+                                            </CardHeader>
+                                            <CardFooter className="p-4 pt-0">
+                                                <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                                                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-tighter">Next Action:</span>
+                                                  <span className="text-[11px] font-semibold text-emerald-300">{opp.nextAction}</span>
+                                                </div>
+                                            </CardFooter>
+                                          </Card>
+                                      ))}
+                                  </div>
+                              </div>
+
+                              <Accordion type="single" collapsible className="w-full">
+                                  <AccordionItem value="leakage" className="border-primary/10">
+                                      <AccordionTrigger className="font-semibold text-base hover:text-primary"><Target size={16} className="mr-2"/>Funnel Leakage Analysis</AccordionTrigger>
+                                      <AccordionContent className="pt-2">
+                                          <h5 className="font-bold text-destructive mb-1">Critical Segment: {aiInsights.funnelLeakageAnalysis.primaryLeakagePoint}</h5>
+                                          <p className="text-muted-foreground leading-relaxed">{aiInsights.funnelLeakageAnalysis.insight}</p>
+                                      </AccordionContent>
+                                  </AccordionItem>
+                                  <AccordionItem value="performance" className="border-primary/10">
+                                      <AccordionTrigger className="font-semibold text-base hover:text-primary"><TrendingUp size={16} className="mr-2"/>Strategic Performance Insights</AccordionTrigger>
+                                      <AccordionContent className="pt-2 space-y-4">
+                                        <div className="flex gap-4 p-3 rounded-lg bg-green-500/5 border border-green-500/10">
+                                          <Award className="text-green-400 mt-1 shrink-0"/>
+                                          <div>
+                                            <h5 className="font-bold text-green-400">Top Performer: {aiInsights.ownerPerformance.topPerformer.name}</h5>
+                                            <p className="text-muted-foreground text-xs leading-relaxed">{aiInsights.ownerPerformance.topPerformer.reason}</p>
+                                          </div>
+                                        </div>
+                                        <div className="flex gap-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                                          <UserX className="text-amber-400 mt-1 shrink-0"/>
+                                          <div>
+                                            <h5 className="font-bold text-amber-400">Action Required: {aiInsights.ownerPerformance.needsAttention.name}</h5>
+                                            <p className="text-muted-foreground text-xs leading-relaxed">{aiInsights.ownerPerformance.needsAttention.reason}</p>
+                                          </div>
+                                        </div>
+                                      </AccordionContent>
+                                  </AccordionItem>
+                                  <AccordionItem value="lost-deals" className="border-none">
+                                      <AccordionTrigger className="font-semibold text-base hover:text-primary"><TrendingDown size={16} className="mr-2"/>Lost Deal Intelligence</AccordionTrigger>
+                                      <AccordionContent className="pt-2">
+                                          <p className="text-muted-foreground leading-relaxed">{aiInsights.lostDealIntelligence}</p>
+                                      </AccordionContent>
+                                  </AccordionItem>
+                              </Accordion>
+                          </div>
+                      </ScrollArea>
+                  ) : (
+                      <div className="m-auto text-center text-muted-foreground p-8 border-2 border-dashed border-primary/10 rounded-xl">
+                          <Bot className="mx-auto h-12 w-12 text-primary/40 mb-4" />
+                          <h3 className="text-lg font-semibold text-foreground mb-2">Ready for Analysis</h3>
+                          <p className="max-w-xs mx-auto">Click the button below to generate AI-powered intelligence based on your current funnel data.</p>
+                      </div>
+                  )}
+              </CardContent>
+              <div className="p-6 pt-0 mt-auto">
+                  <Button onClick={handleAnalyze} disabled={isAnalyzing || isRefreshing} className="w-full font-bold shadow-lg shadow-primary/20">
+                      {isAnalyzing ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : <BrainCircuit className="mr-2 h-4 w-4" />}
+                      {isAnalyzing ? "Processing Funnel Intelligence..." : "Analyze Current Funnel"}
+                  </Button>
+              </div>
+          </Card>
+        </div>
+      )}
 
       {/* Data Table */}
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Funnel Details</CardTitle>
+          <CardTitle>Detailed Funnel Records</CardTitle>
+          <CardDescription>Click any row to view full account details or perform updates.</CardDescription>
         </CardHeader>
         <CardContent>
             <ScrollArea className="h-96">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                     <TableRow>
-                        <TableHead>Account</TableHead>
+                        <TableHead>Account Name</TableHead>
                         <TableHead>Owner</TableHead>
                         <TableHead>Segment</TableHead>
                         <TableHead>Status</TableHead>
@@ -650,23 +713,24 @@ export function FunnelAnalyzerDashboard() {
                     </TableHeader>
                     <TableBody>
                     {filteredData.length > 0 ? filteredData.map((item) => (
-                        <TableRow key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer">
-                        <TableCell className="font-medium">{item.accountName}</TableCell>
-                        <TableCell>{item.owner}</TableCell>
-                        <TableCell>{item.segment}</TableCell>
+                        <TableRow key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer hover:bg-primary/5 transition-colors">
+                        <TableCell className="font-bold text-primary/90">{item.accountName}</TableCell>
+                        <TableCell className="text-xs">{item.owner}</TableCell>
+                        <TableCell className="text-xs">{item.segment}</TableCell>
                         <TableCell>
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                                item.status === 'Won' ? 'bg-green-500/20 text-green-400' :
-                                item.status === 'Lost' ? 'bg-red-500/20 text-red-400' :
-                                'bg-blue-500/20 text-blue-400'
-                            }`}>{item.status}</span>
+                            <span className={cn(
+                                "px-2.5 py-0.5 text-[10px] font-bold rounded-full border",
+                                item.status === 'Won' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                item.status === 'Lost' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            )}>{item.status.toUpperCase()}</span>
                         </TableCell>
-                        <TableCell className="text-right">{usdCurrencyFormatter.format(item.revenue)}</TableCell>
+                        <TableCell className="text-right font-code text-xs">{usdCurrencyFormatter.format(item.revenue)}</TableCell>
                         </TableRow>
                     )) : (
                         <TableRow>
-                            <TableCell colSpan={5} className="h-24 text-center">
-                                No results found.
+                            <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                                No records match the current filter criteria.
                             </TableCell>
                         </TableRow>
                     )}
@@ -678,73 +742,78 @@ export function FunnelAnalyzerDashboard() {
       
       {/* Details Dialog */}
       <Dialog open={!!selectedItem} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md border-primary/20 bg-card/95 backdrop-blur-xl">
             {selectedItem && (
                 <>
                     <DialogHeader>
-                        <DialogTitle>{selectedItem.accountName}</DialogTitle>
-                        <DialogDescription>
-                            Details for funnel entry #{selectedItem.id}
+                        <DialogTitle className="text-2xl font-bold text-primary">{selectedItem.accountName}</DialogTitle>
+                        <DialogDescription className="font-code text-xs">
+                            ENTRY ID: {selectedItem.id} | ROW: {selectedItem.rowNumber}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4 text-sm">
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Product</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground flex items-center gap-2"><Target size={14}/> Product</span>
                             <span className="font-semibold text-right">{selectedItem.product}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Product Line</span>
-                            <span className="font-semibold text-right">{selectedItem.productLine || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between items-start">
-                            <span className="text-muted-foreground">Revenue</span>
+                        <div className="flex justify-between items-start border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Revenue Impact</span>
                             <div className="text-right">
-                                <p className="font-semibold">{usdCurrencyFormatter.format(selectedItem.revenue)}</p>
-                                <p className="text-xs text-muted-foreground">{inrCurrencyFormatter.format(selectedItem.revenue * EXCHANGE_RATE_USD_TO_INR)}</p>
+                                <p className="font-bold text-primary text-lg">{usdCurrencyFormatter.format(selectedItem.revenue)}</p>
+                                <p className="text-[10px] text-muted-foreground font-code uppercase">{inrCurrencyFormatter.format(selectedItem.revenue * EXCHANGE_RATE_USD_TO_INR)}</p>
                             </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Status</span>
-                            <span className={`font-semibold px-2 py-1 text-xs rounded-full ${
-                                selectedItem.status === 'Won' ? 'bg-green-500/20 text-green-400' :
-                                selectedItem.status === 'Lost' ? 'bg-red-500/20 text-red-400' :
-                                'bg-blue-500/20 text-blue-400'
-                            }`}>{selectedItem.status}</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Sales Funnel Status</span>
+                            <span className={cn(
+                                "font-bold px-3 py-1 text-xs rounded-full border",
+                                selectedItem.status === 'Won' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                                selectedItem.status === 'Lost' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                                'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                            )}>{selectedItem.status}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Probability</span>
-                            <span className="font-semibold">{Math.round(selectedItem.probability * 100)}%</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Deal Probability</span>
+                            <div className="flex items-center gap-3">
+                                <span className="font-bold">{Math.round(selectedItem.probability * 100)}%</span>
+                                <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-primary" 
+                                    style={{ width: `${selectedItem.probability * 100}%` }}
+                                  />
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Owner (BDM)</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Account Owner</span>
                             <span className="font-semibold">{selectedItem.owner}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Segment</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Market Segment</span>
                             <span className="font-semibold">{selectedItem.segment}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Region</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Assigned Region</span>
                             <span className="font-semibold">{selectedItem.region}</span>
                         </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Closure Month</span>
-                            <span className="font-semibold">{selectedItem.closureMonth}</span>
+                        <div className="flex justify-between items-center border-b border-primary/5 pb-2">
+                            <span className="text-muted-foreground">Target Closure</span>
+                            <span className="font-bold text-primary">{selectedItem.closureMonth}</span>
                         </div>
                         {selectedItem.lastModified && (
-                          <div className="flex justify-between items-center border-t border-border pt-4 mt-2">
-                              <span className="text-muted-foreground">Last Updated</span>
-                              <span className="font-semibold text-right">{new Date(selectedItem.lastModified).toLocaleString()}</span>
+                          <div className="flex justify-between items-center pt-2">
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Last Intelligence Update</span>
+                              <span className="text-[10px] font-code opacity-60">{new Date(selectedItem.lastModified).toLocaleString()}</span>
                           </div>
                         )}
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => {
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" className="w-full border-primary/30 hover:bg-primary/10" onClick={() => {
                             setItemToEdit(selectedItem);
                             setSelectedItem(null);
                         }}>
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit Account
+                            Update Record
                         </Button>
                     </DialogFooter>
                 </>
@@ -754,11 +823,11 @@ export function FunnelAnalyzerDashboard() {
 
       {/* Edit Dialog */}
       <Dialog open={!!itemToEdit} onOpenChange={(isOpen) => { if(!isOpen) setItemToEdit(null)}}>
-        <DialogContent>
+        <DialogContent className="border-primary/20 bg-card/95 backdrop-blur-xl">
           <DialogHeader>
-            <DialogTitle>Edit: {itemToEdit?.accountName}</DialogTitle>
-            <DialogDescription>
-              Update the details for this funnel entry. Click save when you're done.
+            <DialogTitle className="text-xl font-bold">Edit Record: {itemToEdit?.accountName}</DialogTitle>
+            <DialogDescription className="text-xs uppercase tracking-widest opacity-60">
+              Synchronizing updates with enterprise spreadsheet
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -768,57 +837,59 @@ export function FunnelAnalyzerDashboard() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Current Stage</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a status" />
+                        <SelectTrigger className="bg-background/50">
+                          <SelectValue placeholder="Select stage" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Pipeline">Pipeline</SelectItem>
-                        <SelectItem value="Won">Won</SelectItem>
-                        <SelectItem value="Lost">Lost</SelectItem>
+                        <SelectItem value="Pipeline">Active Pipeline</SelectItem>
+                        <SelectItem value="Won">Deal Won</SelectItem>
+                        <SelectItem value="Lost">Deal Lost</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="revenue"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Revenue (USD)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="50000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               <FormField
-                control={form.control}
-                name="probability"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Probability (%)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="50" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="revenue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Revenue (USD)</FormLabel>
+                      <FormControl>
+                        <Input type="number" className="bg-background/50 font-code" placeholder="0.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="probability"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Probability (%)</FormLabel>
+                      <FormControl>
+                        <Input type="number" className="bg-background/50 font-code" placeholder="50" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="owner"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Owner</FormLabel>
+                    <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Account Owner (BDM/ISR)</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input className="bg-background/50" placeholder="Full Name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -829,19 +900,19 @@ export function FunnelAnalyzerDashboard() {
                 name="segment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Segment</FormLabel>
+                    <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Business Segment</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enterprise" {...field} />
+                      <Input className="bg-background/50" placeholder="e.g. Enterprise, SME" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setItemToEdit(null)}>Cancel</Button>
-                <Button type="submit" disabled={isEditing}>
+              <DialogFooter className="pt-4 gap-2">
+                <Button type="button" variant="ghost" className="text-xs uppercase font-bold" onClick={() => setItemToEdit(null)}>Discard</Button>
+                <Button type="submit" className="font-bold shadow-lg shadow-primary/20" disabled={isEditing}>
                   {isEditing && <LineLoader className="h-0.5 w-4 mr-2" />}
-                  Save Changes
+                  Commit Changes
                 </Button>
               </DialogFooter>
             </form>
