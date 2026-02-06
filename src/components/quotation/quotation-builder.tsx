@@ -265,7 +265,7 @@ export function QuotationBuilder() {
   const PageFooter = ({ pageNum }: { pageNum: number }) => (
     <div className="print-footer">
       <p>Secure. Sustainable. Scalable. HP Enterprise Solutions.</p>
-      <p>Page {pageNum.toString().padStart(2, '0')}</p>
+      <p>Page {pageNum.toString().padStart(2, '0')} of 02</p>
     </div>
   );
 
