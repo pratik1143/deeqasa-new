@@ -24,7 +24,12 @@ import {
   BarChart3,
   ChevronRight,
   Eye,
-  FileText
+  FileText,
+  Package,
+  Calendar,
+  Building2,
+  MapPin,
+  ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { collection } from "firebase/firestore";
@@ -33,6 +38,14 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function DealIntelligencePage() {
     const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
@@ -41,6 +54,7 @@ export default function DealIntelligencePage() {
     const [report, setReport] = useState<DealIntelligenceOutput | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [selectedQuotationId, setSelectedQuotationId] = useState<string | null>(null);
+    const [viewingQuotation, setViewingQuotation] = useState<any | null>(null);
 
     const isLoading = isUserLoading || isProfileLoading;
 
@@ -440,14 +454,27 @@ export default function DealIntelligencePage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center justify-between group-hover:translate-x-1 transition-transform">
-                                                    <span className={cn(
-                                                        "text-[9px] font-black uppercase tracking-widest",
-                                                        isSelected ? "text-primary" : "text-white/20"
-                                                    )}>
-                                                        {isSelected ? "Currently Focused" : "Load into Matrix"}
-                                                    </span>
-                                                    <ChevronRight size={14} className={isSelected ? "text-primary" : "text-white/20"} />
+                                                <div className="flex items-center justify-between">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="h-8 text-[9px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 hover:text-primary p-0 px-2"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setViewingQuotation(q);
+                                                        }}
+                                                    >
+                                                        <Eye size={12} className="mr-2" /> View Specs
+                                                    </Button>
+                                                    <div className="flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                                                        <span className={cn(
+                                                            "text-[9px] font-black uppercase tracking-widest",
+                                                            isSelected ? "text-primary" : "text-white/20"
+                                                        )}>
+                                                            {isSelected ? "Focused" : "Load Matrix"}
+                                                        </span>
+                                                        <ChevronRight size={14} className={isSelected ? "text-primary" : "text-white/20"} />
+                                                    </div>
                                                 </div>
                                             </motion.div>
                                         );
@@ -458,6 +485,175 @@ export default function DealIntelligencePage() {
                     )}
                 </div>
             </main>
+
+            {/* TECHNICAL BREAKDOWN MODAL */}
+            <Dialog open={!!viewingQuotation} onOpenChange={(open) => !open && setViewingQuotation(null)}>
+                <DialogContent className="max-w-4xl bg-black/95 border-primary/20 p-0 overflow-hidden font-code text-white">
+                    {viewingQuotation && (() => {
+                        const client = JSON.parse(viewingQuotation.clientDetails || '{}');
+                        const products = JSON.parse(viewingQuotation.products || '[]');
+                        const pricing = JSON.parse(viewingQuotation.pricing || '[]');
+                        const totals = JSON.parse(viewingQuotation.totals || '{}');
+
+                        return (
+                            <div className="flex flex-col h-[85vh]">
+                                <div className="bg-primary/10 border-b border-primary/20 p-8 shrink-0 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-4 opacity-5"><ClipboardList size={120} /></div>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <Terminal size={16} className="text-primary" />
+                                                <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Deal Telemetry Data</span>
+                                            </div>
+                                            <DialogTitle className="text-3xl font-black uppercase tracking-tighter mb-2">
+                                                {viewingQuotation.quotationId}
+                                            </DialogTitle>
+                                            <DialogDescription className="text-white/40 text-xs font-bold uppercase tracking-widest max-w-xl line-clamp-1">
+                                                Subject: {viewingQuotation.subject}
+                                            </DialogDescription>
+                                        </div>
+                                        <Badge className="bg-primary text-black font-black uppercase tracking-widest px-4 py-1">
+                                            {viewingQuotation.status}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                <ScrollArea className="flex-1 p-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+                                        <div className="space-y-6">
+                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 border-b border-white/5 pb-2 flex items-center gap-2">
+                                                <Building2 size={12}/> Client Entity Details
+                                            </h4>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Organization</p>
+                                                    <p className="text-sm font-bold uppercase">{client.companyName || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Attention To</p>
+                                                    <p className="text-sm font-bold uppercase">{client.name || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Address Matrix</p>
+                                                    <div className="flex items-start gap-2 text-white/60">
+                                                        <MapPin size={14} className="mt-0.5 shrink-0" />
+                                                        <p className="text-xs font-medium leading-relaxed italic">{client.address || 'N/A'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 border-b border-white/5 pb-2 flex items-center gap-2">
+                                                <Calendar size={12}/> Temporal Stamps
+                                            </h4>
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <div>
+                                                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Generation Date</p>
+                                                    <p className="text-sm font-mono font-bold">
+                                                        {new Date(viewingQuotation.createdAt).toLocaleDateString('en-IN')}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Generation Time</p>
+                                                    <p className="text-sm font-mono font-bold">
+                                                        {new Date(viewingQuotation.createdAt).toLocaleTimeString('en-IN')}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Agent Controller</p>
+                                                    <p className="text-xs font-bold text-white/40 uppercase">DEEQASA ADMIN</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 border-b border-white/5 pb-2 flex items-center gap-2">
+                                            <Package size={12}/> Technical Bill of Materials
+                                        </h4>
+                                        <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/5">
+                                            <Table>
+                                                <TableHeader className="bg-white/5">
+                                                    <TableRow className="border-white/10">
+                                                        <TableHead className="text-[9px] font-black text-white/40 uppercase">Item Description</TableHead>
+                                                        <TableHead className="text-[9px] font-black text-white/40 uppercase">SKU Identity</TableHead>
+                                                        <TableHead className="text-center text-[9px] font-black text-white/40 uppercase">Qty</TableHead>
+                                                        <TableHead className="text-right text-[9px] font-black text-white/40 uppercase">Unit (₹)</TableHead>
+                                                        <TableHead className="text-right text-[9px] font-black text-white/40 uppercase">Impact (₹)</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {products.map((p: any, i: number) => (
+                                                        <TableRow key={i} className="border-white/5 hover:bg-white/5 transition-colors">
+                                                            <TableCell className="text-[11px] font-bold text-white uppercase">{p.model}</TableCell>
+                                                            <TableCell className="text-[10px] font-mono text-white/40">{p.sku}</TableCell>
+                                                            <TableCell className="text-center text-[11px] font-bold">{p.quantity}</TableCell>
+                                                            <TableCell className="text-right text-[11px] font-mono">
+                                                                {pricing[i]?.unitPrice?.toLocaleString('en-IN')}
+                                                            </TableCell>
+                                                            <TableCell className="text-right text-[11px] font-mono font-black text-primary">
+                                                                {(p.quantity * (pricing[i]?.unitPrice || 0)).toLocaleString('en-IN')}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </ScrollArea>
+
+                                <div className="bg-white/5 border-t border-white/10 p-8 shrink-0">
+                                    <div className="flex flex-col md:flex-row justify-between items-end gap-8">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-emerald-500/50">
+                                                <Activity size={12}/>
+                                                <span className="text-[8px] font-black uppercase tracking-widest">Pricing Matrix Verified</span>
+                                            </div>
+                                            <p className="text-[10px] text-white/20 italic max-w-sm">"Financial integrity locked. All pricing values converted to INR standard for local compliance."</p>
+                                        </div>
+                                        
+                                        <div className="w-full md:w-80 bg-black/40 p-6 rounded-2xl border border-white/10 space-y-3 shadow-2xl">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-white/40">
+                                                <span>Sub-Total Impact</span>
+                                                <span>₹{totals.subTotal?.toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-white/40 border-b border-white/10 pb-3">
+                                                <span>Tax Component (18%)</span>
+                                                <span>₹{totals.totalGst?.toLocaleString('en-IN')}</span>
+                                            </div>
+                                            <div className="flex justify-between items-end pt-2">
+                                                <span className="text-[10px] font-black uppercase text-primary tracking-widest mb-1">Grand Valuation</span>
+                                                <span className="text-2xl font-black text-white font-mono tracking-tighter">
+                                                    ₹{totals.grandTotal?.toLocaleString('en-IN')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-8 flex justify-end gap-4">
+                                        <Button 
+                                            variant="outline" 
+                                            className="border-white/10 hover:bg-white/5 uppercase font-black tracking-widest text-[10px] h-12 px-8"
+                                            onClick={() => setViewingQuotation(null)}
+                                        >
+                                            Close Terminal
+                                        </Button>
+                                        <Button 
+                                            className="bg-primary text-black font-black uppercase tracking-widest text-[10px] h-12 px-10 shadow-[0_0_20px_rgba(0,224,255,0.3)]"
+                                            onClick={() => {
+                                                setSelectedQuotationId(viewingQuotation.quotationId);
+                                                setViewingQuotation(null);
+                                            }}
+                                        >
+                                            Focus AI Analysis
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
