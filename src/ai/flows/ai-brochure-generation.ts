@@ -17,19 +17,22 @@ export type BrochureInput = z.infer<typeof BrochureInputSchema>;
 const ProductMarketingSchema = z.object({
   sku: z.string(),
   // Page 1 Content
-  headline: z.string().describe('A short, professional headline (e.g., "Empowering the Modern Hybrid Workforce").'),
-  executiveSummary: z.string().describe('A 2-3 sentence business-focused summary of the product value.'),
+  headline: z.string().describe('A high-impact enterprise headline (e.g., "Performance Without Compromise").'),
+  executiveSummary: z.string().describe('A 2-3 sentence business-focused summary of the product value proposition.'),
   highlights: z.array(z.string()).describe('6-8 key technical or business highlights for Page 1.'),
   
   // Page 2 Content
-  technicalOverview: z.string().describe('A deeper technical explanation of the architecture and performance.'),
-  useCases: z.array(z.string()).describe('Detailed business or enterprise use cases.'),
+  technicalOverview: z.string().describe('A detailed technical explanation of the architecture, cooling, and performance.'),
+  useCases: z.array(z.string()).describe('Specific enterprise use cases (e.g., "Financial Modeling", "CAD Design", "Mission-Critical Apps").'),
   businessValue: z.object({
     reliability: z.string().describe('Statement on uptime and reliability.'),
-    security: z.string().describe('Statement on HP Wolf Security and data protection.'),
+    security: z.string().describe('Statement on HP Wolf Security and enterprise data protection.'),
     sustainability: z.string().describe('Statement on energy efficiency and eco-friendly materials.'),
   }),
-  trustStatement: z.string().describe('A formal closing statement on HP Partner excellence.'),
+  trustStatement: z.string().describe('A formal closing statement on HP Partner excellence and OEM support.'),
+  
+  // Image metadata
+  imageSearchQueries: z.array(z.string()).describe('Exactly 3 specific Google search queries for official HP product images of this EXACT model (e.g., "HP Z1 G11 Tower front view official").'),
 });
 
 const BrochureOutputSchema = z.object({
@@ -41,7 +44,7 @@ const brochurePrompt = ai.definePrompt({
   name: 'generateBrochureContent',
   input: { schema: BrochureInputSchema },
   output: { schema: BrochureOutputSchema },
-  prompt: `You are an expert enterprise marketing strategist for HP Commercial and Enterprise products.
+  prompt: `You are a senior enterprise marketing strategist for HP Commercial and Enterprise products.
   Your task is to generate professional, sales-ready content for a 2-PAGE brochure for each of the following products.
   
   Products:
@@ -51,16 +54,19 @@ const brochurePrompt = ai.definePrompt({
 
   Guidelines for 2-Page Layout:
   Page 1:
-  - Tone: Visionary, authoritative, and concise.
-  - Headline: Focus on the "Future of Work" or "Enterprise Excellence".
-  - Executive Summary: Address the C-level executive's pain points.
-  - Highlights: Focus on the high-level configuration specs.
+  - Tone: Authoritative, visionary, and concise.
+  - Headline: Focus on "Powering Productivity" or "Strategic Computing".
+  - Executive Summary: Address C-level pain points regarding security and scalability.
+  - Highlights: Focus on the specific hardware build configuration.
 
   Page 2:
-  - Technical Overview: Explain the performance benefits of this specific build.
+  - Technical Overview: Explain why this specific configuration (CPU/RAM/SSD) is optimal.
   - Use Cases: Tailor for Corporate, Education, or Government sectors.
   - Business Value: Emphasize HP Wolf Security, EPEAT certification, and 24/7 reliability.
-  - Trust Statement: Focus on HP's industry-leading standards and partner support.
+  - Trust Statement: Focus on HP's industry-leading standards and local partner support.
+
+  Image Verification:
+  - Generate 3 precise search queries to find official HP assets for these specific models.
 
   No placeholders. Generate full, professional text for every field.`,
 });
