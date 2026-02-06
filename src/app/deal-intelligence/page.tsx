@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUserWithRole } from "@/firebase";
+import { useUserWithRole, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
@@ -18,47 +18,55 @@ import {
   Activity, 
   Cpu, 
   Terminal,
-  ChevronRight,
   RefreshCw,
   AlertTriangle,
   Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { query, collection, where, orderBy, limit } from "firebase/firestore";
 import { analyzeDealIntelligence, type DealIntelligenceOutput } from "@/ai/flows/ai-deal-intelligence";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function DealIntelligencePage() {
     const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
+    const firestore = useFirestore();
     const router = useRouter();
     const [report, setReport] = useState<DealIntelligenceOutput | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [dealData, setDealData] = useState<any>(null);
 
-    useEffect(() => {
-        const storedData = typeof window !== 'undefined' ? localStorage.getItem('current_quotation_analysis') : null;
-        if (storedData) {
-            try {
-                setDealData(JSON.parse(storedData));
-            } catch (e) {
-                console.error("Failed to parse deal data", e);
-            }
-        }
-    }, []);
+    const activeQuotationQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return query(
+            collection(firestore, 'quotations'),
+            where('status', '==', 'ACTIVE'),
+            where('createdBy', '==', user.uid),
+            orderBy('createdAt', 'desc'),
+            limit(1)
+        );
+    }, [firestore, user]);
+
+    const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
+    const activeQuotation = quotations?.[0] || null;
 
     const runAnalysis = async () => {
-        if (!dealData || !dealData.lineItems) return;
+        if (!activeQuotation) return;
         setIsAnalyzing(true);
         try {
+            const client = JSON.parse(activeQuotation.clientDetails);
+            const products = JSON.parse(activeQuotation.products);
+            const pricing = JSON.parse(activeQuotation.pricing);
+            const totals = JSON.parse(activeQuotation.totals);
+
             const result = await analyzeDealIntelligence({
-                customerName: dealData.customerName || 'Unknown',
-                companyName: dealData.companyName || 'Unknown',
-                totalAmount: dealData.totalAmount || 0,
-                subject: dealData.subject || 'Enterprise Quotation',
-                products: dealData.lineItems.map((item: any) => ({
-                    model: item.product?.model || 'Item',
+                customerName: client.name || 'Unknown',
+                companyName: client.companyName || 'Unknown',
+                totalAmount: totals.grandTotal || 0,
+                subject: activeQuotation.subject || 'Enterprise Quotation',
+                products: products.map((item: any, idx: number) => ({
+                    model: item.model || 'Item',
                     quantity: item.quantity || 1,
-                    unitPrice: item.unitPrice || 0
+                    unitPrice: pricing[idx]?.unitPrice || 0
                 }))
             });
             setReport(result);
@@ -70,12 +78,12 @@ export default function DealIntelligencePage() {
     };
 
     useEffect(() => {
-        if (dealData && !report && !isAnalyzing) {
+        if (activeQuotation && !report && !isAnalyzing) {
             runAnalysis();
         }
-    }, [dealData]);
+    }, [activeQuotation]);
 
-    const isLoading = isUserLoading || isProfileLoading;
+    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
 
     if (isLoading) return <CenteredLoader text="Authenticating Uplink..." />;
     if (!user) { router.push('/login'); return null; }
@@ -106,7 +114,6 @@ export default function DealIntelligencePage() {
             <main className="flex-1 pt-24 pb-12 relative overflow-hidden">
                 <div className="fixed inset-0 command-grid pointer-events-none opacity-20" />
                 <div className="scanline" />
-                <div className="fixed top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(0,224,255,0.02)_0%,transparent_70%)] pointer-events-none" />
 
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
@@ -119,22 +126,24 @@ export default function DealIntelligencePage() {
                                 Deal Intelligence <span className="text-white/10">|</span> <span className="text-white/40 font-light">Report v4.0.1</span>
                             </h1>
                         </div>
-                        <Button 
-                            variant="outline" 
-                            onClick={runAnalysis}
-                            disabled={isAnalyzing}
-                            className="h-12 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-bold text-xs tracking-widest px-8"
-                        >
-                            {isAnalyzing ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
-                            Recalibrate Analysis
-                        </Button>
+                        {activeQuotation && (
+                            <Button 
+                                variant="outline" 
+                                onClick={runAnalysis}
+                                disabled={isAnalyzing}
+                                className="h-12 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-bold text-xs tracking-widest px-8"
+                            >
+                                {isAnalyzing ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
+                                Recalibrate Analysis
+                            </Button>
+                        )}
                     </div>
 
-                    {!dealData ? (
+                    {!activeQuotation ? (
                         <div className="h-[60vh] flex flex-col items-center justify-center text-center">
                             <ShieldAlert size={64} className="text-white/10 mb-6" />
                             <h2 className="text-xl font-bold text-white uppercase tracking-widest">No Active Quotation Data</h2>
-                            <p className="text-white/30 text-sm mt-2 max-w-sm">Please generate a quotation in the Quotation Studio first to run a deal intelligence report.</p>
+                            <p className="text-white/30 text-sm mt-2 max-w-sm">Please save a quotation in the Studio first to run a deal intelligence report.</p>
                             <Button className="mt-8 bg-primary text-black font-bold uppercase tracking-widest px-8" onClick={() => router.push('/quotation-builder')}>
                                 Return to Studio
                             </Button>
@@ -192,21 +201,7 @@ export default function DealIntelligencePage() {
                                             <span className="text-2xl font-black text-primary">{report.winProbability || 0}%</span>
                                         </div>
                                         <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                            <motion.div 
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${report.winProbability || 0}%` }}
-                                                className="h-full bg-primary shadow-[0_0_15px_rgba(0,224,255,0.5)]"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="p-3 bg-white/5 rounded-lg border border-white/5">
-                                                <div className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Target Org</div>
-                                                <div className="text-[10px] font-bold text-white truncate uppercase">{dealData.companyName || 'N/A'}</div>
-                                            </div>
-                                            <div className="p-3 bg-white/5 rounded-lg border border-white/5">
-                                                <div className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Valuation</div>
-                                                <div className="text-[10px] font-bold text-white truncate uppercase">₹{((dealData.totalAmount || 0) / 100000).toFixed(2)}L</div>
-                                            </div>
+                                            <motion.div initial={{ width: 0 }} animate={{ width: `${report.winProbability || 0}%` }} className="h-full bg-primary shadow-[0_0_15px_rgba(0,224,255,0.5)]" />
                                         </div>
                                     </div>
                                 </IntelligenceModule>
@@ -231,9 +226,6 @@ export default function DealIntelligencePage() {
                                             <p className="text-[11px] text-primary leading-relaxed font-bold italic">
                                                 {report.discountIntelligence || "Pricing parameters within safe margins."}
                                             </p>
-                                        </div>
-                                        <div className="mt-4 flex items-center gap-2 text-[9px] font-black text-white/30 uppercase tracking-widest">
-                                            <Zap size={10} className="text-primary"/> Margin Protection Active
                                         </div>
                                     </IntelligenceModule>
                                 </div>
@@ -260,10 +252,6 @@ export default function DealIntelligencePage() {
                                                 <span className="text-xs font-bold text-primary font-mono">{report.followUpStrategy?.suggestedDate || 'TBD'}</span>
                                             </div>
                                             <div className="bg-black/40 p-4 rounded-xl border border-white/5">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <MessageSquare size={12} className="text-primary/60"/>
-                                                    <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Script Draft</span>
-                                                </div>
                                                 <p className="text-[10px] text-white/60 leading-relaxed font-serif italic">
                                                     "{report.followUpStrategy?.message || 'Ready for client dispatch.'}"
                                                 </p>
@@ -277,12 +265,6 @@ export default function DealIntelligencePage() {
                                                 <p className="text-[11px] text-white/70 leading-relaxed font-medium italic">
                                                     {report.buyingSignals || "Analyzing historical organizational patterns."}
                                                 </p>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-primary/40 w-2/3" />
-                                                </div>
-                                                <span className="text-[8px] font-bold text-white/20 uppercase whitespace-nowrap">Velocity Index</span>
                                             </div>
                                         </div>
                                     </IntelligenceModule>

@@ -25,6 +25,8 @@ import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { generateBrochureContent, type BrochureOutput } from '@/ai/flows/ai-brochure-generation';
 import { storeBrochureLog } from '@/ai/flows/store-brochure-data';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
+import { useFirestore, useUser } from '@/firebase';
+import { collection, doc, writeBatch, query, where, getDocs } from 'firebase/firestore';
 import { 
   ChevronsUpDown, 
   Plus, 
@@ -47,7 +49,8 @@ import {
   History,
   Globe,
   Leaf,
-  Wrench
+  Wrench,
+  Save
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -110,9 +113,12 @@ const STEPS = [
 export function QuotationBuilder() {
   const { toast } = useToast();
   const router = useRouter();
+  const firestore = useFirestore();
+  const { user } = useUser();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -125,11 +131,6 @@ export function QuotationBuilder() {
   const [isPriceOverridden, setIsPriceOverridden] = useState(false);
 
   const [isManualMode, setIsManualMode] = useState(false);
-  const [manualModel, setManualModel] = useState('');
-  const [manualSpec, setManualSpec] = useState('');
-  const [manualPrice, setManualPrice] = useState<number>(0);
-  const [manualQty, setManualQty] = useState<number>(1);
-
   const [marketingData, setMarketingData] = useState<BrochureOutput | null>(null);
   const [isGeneratingBrochure, setIsGeneratingBrochure] = useState(false);
   const [isGeneratingBody, startGeneratingBody] = useTransition();
@@ -177,12 +178,6 @@ export function QuotationBuilder() {
     }
   }, [selectedProduct]);
 
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery) return products;
-    const q = searchQuery.toLowerCase();
-    return products.filter(p => p.id.toLowerCase().includes(q) || p.model.toLowerCase().includes(q) || p.processor.toLowerCase().includes(q));
-  }, [products, searchQuery]);
-
   const totals = useMemo(() => {
     const items = watchedLineItems || [];
     const subTotal = items.reduce((acc, item) => {
@@ -195,92 +190,75 @@ export function QuotationBuilder() {
     return { subTotal, totalGst, grandTotal };
   }, [watchedLineItems]);
 
-  const handleAddProduct = () => {
-    if (selectedProduct) {
-      append({ 
-        product: selectedProduct, 
-        quantity: pendingQuantity, 
-        unitPrice: pendingPrice 
+  const saveQuotationToFirestore = async () => {
+    if (!user || !firestore || !watchedLineItems?.length) return null;
+    
+    setIsSaving(true);
+    const quotationId = `DQT-${Date.now()}`;
+    const batch = writeBatch(firestore);
+
+    try {
+      // 1. Mark previous ACTIVE deals as ARCHIVED
+      const q = query(
+        collection(firestore, 'quotations'),
+        where('createdBy', '==', user.uid),
+        where('status', '==', 'ACTIVE')
+      );
+      const snapshot = await getDocs(q);
+      snapshot.forEach(doc => {
+        batch.update(doc.ref, { status: 'ARCHIVED' });
       });
-      setSelectedProduct(null);
-      setSearchQuery('');
-      setPendingQuantity(1);
-      setPendingPrice(0);
-      setIsPriceOverridden(false);
-      toast({ title: 'Item Added', description: `${selectedProduct.model} added to quotation.` });
+
+      // 2. Save new quotation
+      const newDocRef = doc(collection(firestore, 'quotations'), quotationId);
+      batch.set(newDocRef, {
+        quotationId,
+        clientDetails: JSON.stringify({ name: watchedCustomer, companyName: watchedCompany, address: watchedAddress }),
+        products: JSON.stringify(watchedLineItems.map(i => ({ model: i.product.model, sku: i.product.id, quantity: i.quantity }))),
+        pricing: JSON.stringify(watchedLineItems.map(i => ({ unitPrice: i.unitPrice }))),
+        totals: JSON.stringify(totals),
+        createdAt: new Date().toISOString(),
+        createdBy: user.uid,
+        status: 'ACTIVE',
+        subject: watchedSubject
+      });
+
+      await batch.commit();
+      toast({ title: "Quotation Saved", description: "Ready for Intelligence synthesis." });
+      return quotationId;
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: "Save Failed", description: e.message });
+      return null;
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleAddManualProduct = () => {
-      if (!manualModel) return;
-      const customProduct: Product = {
-          id: `MAN-${Date.now()}`,
-          model: manualModel, plant: '-', chassis: '-', processor: manualSpec || '-', memory: '-', hdd: '-', hdd2: '-', gfx: '-', os: '-', odd: '-', wlan: '-', warranty: '-', name: manualModel, price: Number(manualPrice) || 0, gstRate: 18,
-      };
-      append({ product: customProduct, quantity: Number(manualQty) || 1, unitPrice: Number(manualPrice) || 0 });
-      setManualModel(''); setManualSpec(''); setManualPrice(0); setManualQty(1);
-      toast({ title: 'Custom Item Added', description: manualModel });
+  const handleAddProduct = () => {
+    if (selectedProduct) {
+      append({ product: selectedProduct, quantity: pendingQuantity, unitPrice: pendingPrice });
+      setSelectedProduct(null);
+      setSearchQuery('');
+      toast({ title: 'Item Added', description: `${selectedProduct.model} added.` });
+    }
   };
 
   const handleAiGenerateBody = () => {
-    if (!watchedSubject) {
-      toast({ variant: 'destructive', title: 'Subject Required', description: 'Please enter a subject line first.' });
-      return;
-    }
+    if (!watchedSubject) return;
     startGeneratingBody(async () => {
       try {
         const result = await generateLetterBody({ subject: watchedSubject, customerName: watchedCustomer, companyName: watchedCompany, address: watchedAddress });
         form.setValue('letterBody', result.letterBody);
-        toast({ title: 'Content Refined', description: 'Professional letter body generated using AI Intelligence.' });
       } catch (error: any) {
-        toast({ variant: 'destructive', title: 'AI Generation Failed', description: error.message });
+        toast({ variant: 'destructive', title: 'Generation Failed', description: error.message });
       }
     });
   };
 
-  const handleGenerateBrochure = async () => {
-    if (!watchedLineItems?.length) {
-      toast({ variant: 'destructive', title: 'No Products', description: 'Add products to the quotation first.' });
-      return;
-    }
-    setIsGeneratingBrochure(true);
-    try {
-      const distinctProducts = Array.from(new Set(watchedLineItems.map(item => item.product.id)))
-        .map(id => watchedLineItems.find(item => item.product.id === id)!.product);
-
-      const brochureData = await generateBrochureContent({ products: distinctProducts });
-      setMarketingData(brochureData);
-      
-      await storeBrochureLog({
-        customerName: watchedCustomer,
-        companyName: watchedCompany,
-        products: distinctProducts.map(p => p.model),
-        quotationRef: `DQT/2024/${format(new Date(), 'MM/yy')}`
-      });
-
-      setActiveTab("brochure");
-      toast({ title: 'Brochure Generated', description: 'Enterprise marketing materials are ready for export.' });
-    } catch (e: any) {
-      toast({ variant: 'destructive', title: 'Generation Failed', description: e.message });
-    } finally {
-      setIsGeneratingBrochure(false);
-    }
-  };
-
-  const handleRunIntelligence = () => {
-    if (!watchedLineItems?.length) return;
-    const analysisPayload = {
-        customerName: watchedCustomer,
-        companyName: watchedCompany,
-        subject: watchedSubject,
-        totalAmount: totals.grandTotal,
-        lineItems: watchedLineItems,
-    };
-    localStorage.setItem('current_quotation_analysis', JSON.stringify(analysisPayload));
-    router.push('/deal-intelligence');
-  };
-
   const handleDownloadPdf = async (rootId: string, filename: string) => {
+    const savedId = await saveQuotationToFirestore();
+    if (!savedId) return;
+
     setIsDownloading(true);
     const html2pdf = (await import('html2pdf.js')).default;
     const element = document.getElementById(rootId);
@@ -290,49 +268,14 @@ export function QuotationBuilder() {
       margin: 0, 
       filename, 
       image: { type: 'jpeg', quality: 1.0 }, 
-      html2canvas: { scale: 3, useCORS: true, letterRendering: true, logging: false }, 
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
-      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      html2canvas: { scale: 3, useCORS: true }, 
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     try {
       await html2pdf().from(element).set(opt).save();
-      toast({ title: 'Export Complete', description: 'A4 Document saved successfully.' });
-    } catch (e: any) {
-      toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
     } finally { setIsDownloading(false); }
   };
-
-  const handleDownloadPng = async (rootId: string, filename: string) => {
-    setIsDownloading(true);
-    try {
-      const { toPng } = await import('html-to-image');
-      const element = document.getElementById(rootId);
-      if (!element) return;
-      
-      const dataUrl = await toPng(element, { quality: 1.0, pixelRatio: 2 });
-      const link = document.createElement('a');
-      link.download = `${filename}.png`;
-      link.href = dataUrl;
-      link.click();
-      toast({ title: 'Export Complete', description: 'HD PNG Image saved successfully.' });
-    } catch (e: any) {
-      toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
-    } finally { setIsDownloading(false); }
-  };
-
-  const QuotationHeader = () => (
-    <div className="flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
-      <div className="flex items-center">
-        <img src="/hp-logo.png" alt="HP Partner" className="h-[18mm] w-auto object-contain" />
-      </div>
-      <div className="text-right">
-        <h2 className="text-[14pt] font-bold text-gray-900 uppercase tracking-tighter">DEEQASA</h2>
-        <p className="text-[8pt] text-gray-400 font-bold uppercase tracking-widest mt-1">Authorized HP Solutions Partner</p>
-        <p className="text-[7pt] text-gray-300 font-mono mt-0.5">EST. 2024 | SECURE INFRASTRUCTURE</p>
-      </div>
-    </div>
-  );
 
   return (
     <div className="flex flex-col lg:flex-row gap-0 min-h-[calc(100vh-80px)] bg-black overflow-hidden font-body">
@@ -383,22 +326,17 @@ export function QuotationBuilder() {
           <Form {...form}>
             <AnimatePresence mode="wait">
               {currentStep === 'customer' && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: 10 }}
-                  className="space-y-6"
-                >
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <FormField control={form.control} name="customerName" render={({ field }) => (
                     <FormItem onFocus={() => setActiveField('customerName')} onBlur={() => setActiveField(null)}>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Attention To</FormLabel>
-                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="e.g. The Head of Department" {...field} /></FormControl>
+                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="The Head of Department" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="companyName" render={({ field }) => (
                     <FormItem onFocus={() => setActiveField('companyName')} onBlur={() => setActiveField(null)}>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Organization</FormLabel>
-                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="e.g. Panjab University" {...field} /></FormControl>
+                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="Panjab University" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="address" render={({ field }) => (
@@ -411,12 +349,7 @@ export function QuotationBuilder() {
               )}
 
               {currentStep === 'letter' && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: 10 }}
-                  className="space-y-6"
-                >
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <FormField control={form.control} name="subject" render={({ field }) => (
                     <FormItem onFocus={() => setActiveField('subject')} onBlur={() => setActiveField(null)}>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Subject Line</FormLabel>
@@ -427,153 +360,57 @@ export function QuotationBuilder() {
                     <FormItem onFocus={() => setActiveField('letterBody')} onBlur={() => setActiveField(null)}>
                       <div className="flex justify-between items-center mb-1">
                         <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Body Text</FormLabel>
-                        <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20 transition-all group" onClick={handleAiGenerateBody} disabled={isGeneratingBody}>
-                          {isGeneratingBody ? <Loader2 className="w-3 h-3 animate-spin text-primary" /> : <><Sparkles size={10} className="mr-1 text-primary group-hover:scale-110 transition-transform"/> Magic Refine</>}
+                        <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20" onClick={handleAiGenerateBody} disabled={isGeneratingBody}>
+                          {isGeneratingBody ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Sparkles size={10} className="mr-1"/> Magic Refine</>}
                         </Button>
                       </div>
-                      <FormControl>
-                        <div className="relative">
-                          <Textarea rows={10} className="bg-white/5 border-white/10 focus:ring-primary/30 text-[11px] leading-relaxed" {...field} />
-                          {isGeneratingBody && <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-md" />}
-                        </div>
-                      </FormControl>
+                      <FormControl><Textarea rows={10} className="bg-white/5 border-white/10 text-[11px]" {...field} /></FormControl>
                     </FormItem>
                   )} />
                 </motion.div>
               )}
 
               {currentStep === 'items' && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: 10 }}
-                  className="space-y-6"
-                >
-                  <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10 mb-4">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-white/50">Manual Mode</Label>
-                    <Switch checked={isManualMode} onCheckedChange={setIsManualMode} />
-                  </div>
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
+                  <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-between h-12 bg-white/5 border-white/10 text-white/60">
+                        <span>{selectedProduct?.model || "Search Product Master..."}</span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-card border-white/10">
+                      <Command shouldFilter={false}>
+                        <CommandInput placeholder="Type SKU or model..." value={searchQuery} onValueChange={setSearchQuery} />
+                        <CommandList>
+                          <CommandEmpty>No SKUs found.</CommandEmpty>
+                          <CommandGroup>
+                            {products.filter(p => p.model.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10).map((p) => (
+                              <CommandItem key={p.id} onSelect={() => { setSelectedProduct(p); setOpenCombobox(false); }} className="p-3">
+                                <div><p className="font-bold text-sm text-white">{p.model}</p></div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
 
-                  {!isManualMode ? (
-                    <div className="space-y-4">
-                      <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-between h-12 bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10">
-                            <span className="truncate">{selectedProduct?.model || "Search Product Master..."}</span>
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-card border-white/10 shadow-2xl" align="start">
-                          <Command shouldFilter={false}>
-                            <CommandInput placeholder="Type SKU or model..." value={searchQuery} onValueChange={setSearchQuery} className="h-11 border-none bg-transparent" />
-                            <CommandList>
-                              <CommandEmpty className="py-6 text-[11px] text-muted-foreground text-center">No enterprise SKU found.</CommandEmpty>
-                              <CommandGroup>
-                                {filteredProducts.slice(0, 15).map((p) => (
-                                  <CommandItem key={p.id} onSelect={() => { setSelectedProduct(p); setOpenCombobox(false); }} className="p-3 cursor-pointer hover:bg-primary/10">
-                                    <div className="flex flex-col gap-0.5">
-                                      <span className="font-bold text-[13px] text-white">{p.model}</span>
-                                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">{p.processor}</span>
-                                    </div>
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
-
-                      <AnimatePresence>
-                        {selectedProduct && (
-                          <motion.div 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-4 overflow-hidden"
-                          >
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Item Configuration</h4>
-                              <CheckCircle2 className="h-4 w-4 text-primary/40" />
-                            </div>
-                            
-                            <div className="space-y-3">
-                              <div className="flex flex-col gap-1.5">
-                                <div className="flex justify-between items-center">
-                                  <Label className="text-[10px] font-bold uppercase text-white/50">Unit Price (₹)</Label>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Manual Override</span>
-                                    <Switch 
-                                      checked={isPriceOverridden} 
-                                      onCheckedChange={setIsPriceOverridden}
-                                      className="scale-75"
-                                    />
-                                  </div>
-                                </div>
-                                <Input 
-                                  type="number" 
-                                  value={pendingPrice} 
-                                  onChange={e => setPendingPrice(Number(e.target.value))}
-                                  disabled={!isPriceOverridden}
-                                  className={cn(
-                                    "bg-black/40 h-10 font-bold font-mono transition-all",
-                                    isPriceOverridden ? "border-primary/50 text-white" : "border-white/5 text-white/30"
-                                  )}
-                                />
-                                {!isPriceOverridden && (
-                                  <p className="text-[9px] text-muted-foreground italic px-1">Using master data price. Toggle override to edit.</p>
-                                )}
-                              </div>
-
-                              <div className="flex flex-col gap-1.5">
-                                <Label className="text-[10px] font-bold uppercase text-white/50">Quantity</Label>
-                                <div className="flex items-center gap-3">
-                                  <Input 
-                                    type="number" 
-                                    min={1}
-                                    value={pendingQuantity} 
-                                    onChange={e => setPendingQuantity(Number(e.target.value))}
-                                    className="bg-black/40 h-10 font-bold border-white/5"
-                                  />
-                                  <div className="flex-1 text-[10px] font-bold text-primary/60 text-right uppercase tracking-tighter">
-                                    Line Total: ₹{(pendingPrice * pendingQuantity).toLocaleString('en-IN')}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <Button 
-                              type="button" 
-                              className="w-full h-11 font-bold text-xs bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" 
-                              onClick={handleAddProduct}
-                            >
-                              <Plus className="mr-2 h-4 w-4" /> Add to Proposal
-                            </Button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <div className="space-y-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                      <Input value={manualModel} onChange={e => setManualModel(e.target.value)} placeholder="Product/Service Model" className="bg-transparent" />
-                      <Textarea value={manualSpec} onChange={e => setManualSpec(e.target.value)} placeholder="Full Technical Description" className="bg-transparent text-[11px]" />
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input type="number" value={manualPrice} onChange={e => setManualPrice(Number(e.target.value))} placeholder="Unit Price (₹)" className="bg-transparent" />
-                        <Input type="number" value={manualQty} onChange={e => setManualQty(Number(e.target.value))} placeholder="Quantity" className="bg-transparent" />
-                      </div>
-                      <Button type="button" variant="secondary" className="w-full h-11 font-bold text-xs" onClick={handleAddManualProduct}>Add Custom Entry</Button>
+                  {selectedProduct && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-4">
+                      <Label className="text-[10px] font-bold uppercase text-white/50">Unit Price (₹)</Label>
+                      <Input type="number" value={pendingPrice} onChange={e => setPendingPrice(Number(e.target.value))} className="bg-black/40 h-10 font-bold font-mono" />
+                      <Label className="text-[10px] font-bold uppercase text-white/50">Quantity</Label>
+                      <Input type="number" value={pendingQuantity} onChange={e => setPendingQuantity(Number(e.target.value))} className="bg-black/40 h-10 font-bold" />
+                      <Button className="w-full h-11 bg-primary text-black font-bold" onClick={handleAddProduct}><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
                     </div>
                   )}
 
-                  <div className="pt-4 border-t border-white/5 space-y-3">
+                  <div className="space-y-3">
                     {fields.map((field, index) => (
-                      <div key={field.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10 group animate-in fade-in slide-in-from-left-2">
-                        <div className="flex-1 truncate pr-4">
-                          <p className="text-[11px] font-bold text-white truncate">{field.product.model}</p>
-                          <p className="text-[9px] text-muted-foreground uppercase">{field.quantity} Units @ ₹{field.unitPrice.toLocaleString('en-IN')}</p>
-                        </div>
-                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive/40 hover:text-destructive hover:bg-destructive/10" onClick={() => remove(index)}>
-                          <Trash2 size={14} />
-                        </Button>
+                      <div key={field.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+                        <div className="flex-1 truncate"><p className="text-[11px] font-bold text-white truncate">{field.product.model}</p></div>
+                        <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive/40" onClick={() => remove(index)}><Trash2 size={14} /></Button>
                       </div>
                     ))}
                   </div>
@@ -581,382 +418,106 @@ export function QuotationBuilder() {
               )}
 
               {currentStep === 'summary' && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: 10 }}
-                  className="space-y-6"
-                >
-                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
-                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Quotation Total</h4>
-                        <ShieldCheck className="h-4 w-4 text-emerald-500/50" />
-                     </div>
-                     <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-white/60"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
-                        <div className="flex justify-between text-xs text-white/60"><span>GST (18%)</span><span>₹{totals.totalGst.toLocaleString('en-IN')}</span></div>
-                        <div className="pt-2 border-t border-white/10 flex justify-between items-center">
-                          <span className="text-[10px] font-bold uppercase text-white">Grand Total</span>
-                          <span className="text-lg font-bold text-primary font-mono tracking-tighter">₹{totals.grandTotal.toLocaleString('en-IN')}</span>
-                        </div>
-                     </div>
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-2">
+                    <div className="flex justify-between text-xs text-white/60"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
+                    <div className="flex justify-between text-lg font-bold text-primary font-mono tracking-tighter pt-2 border-t border-white/10"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
                   </div>
-
-                  <div className="space-y-3">
-                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center px-4">AI Intelligence Modules</p>
-                     
-                     <Button 
-                        variant="outline" 
-                        className="w-full h-12 gap-2 border-primary/30 text-primary hover:bg-primary/10 font-bold text-xs group shadow-[0_0_15px_rgba(0,224,255,0.1)]" 
-                        onClick={handleRunIntelligence} 
-                        disabled={!watchedLineItems?.length}
-                     >
-                        <BrainCircuit size={16} className="group-hover:scale-110 transition-transform text-primary"/>
-                        Run Intelligence Report
-                     </Button>
-
-                     <Button variant="outline" className="w-full h-12 gap-2 border-white/10 text-white/60 hover:bg-white/5 font-bold text-xs group" onClick={handleGenerateBrochure} disabled={isGeneratingBrochure || !watchedLineItems?.length}>
-                        {isGeneratingBrochure ? <Loader2 className="w-4 h-4 animate-spin" /> : <><BookOpen size={16} className="group-hover:scale-110 transition-transform"/> Compile AI Brochure</>}
-                     </Button>
+                  <Button variant="outline" className="w-full h-12 gap-2 border-primary/30 text-primary" onClick={saveQuotationToFirestore} disabled={isSaving || !watchedLineItems?.length}>
+                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save size={16}/> Save & Sync Deal</>}
+                  </Button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" className="h-12 text-[10px] font-bold uppercase" onClick={() => router.push('/deal-intelligence')} disabled={!watchedLineItems?.length}><BrainCircuit size={14} className="mr-2"/> AI Logic</Button>
+                    <Button variant="outline" className="h-12 text-[10px] font-bold uppercase" onClick={() => router.push('/follow-up')} disabled={!watchedLineItems?.length}><Calendar size={14} className="mr-2"/> Follow-Up</Button>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </Form>
         </ScrollArea>
-
-        <div className="p-6 border-t border-white/5 bg-black/40">
-           <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Proposal Engine v4.0.1
-           </div>
-        </div>
       </div>
 
       {/* Preview Panel */}
       <div className="flex-1 bg-black flex flex-col relative z-10 overflow-hidden">
         <div className="h-20 bg-card/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 shrink-0 no-print">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white/5 rounded-full p-1 border border-white/10">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white/5 rounded-full p-1">
             <TabsList className="bg-transparent">
-              <TabsTrigger value="quotation" className="rounded-full px-4 h-8 text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
-                <FileText size={12} className="mr-2" /> Proposal Pack
-              </TabsTrigger>
-              <TabsTrigger value="brochure" disabled={!marketingData} className="rounded-full px-4 h-8 text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
-                <BookOpen size={12} className="mr-2" /> AI Brochure
-              </TabsTrigger>
+              <TabsTrigger value="quotation" className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">Proposal</TabsTrigger>
+              <TabsTrigger value="brochure" disabled={!marketingData} className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">AI Brochure</TabsTrigger>
             </TabsList>
           </Tabs>
-
-          <div className="flex gap-3">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Proposal_DEEQASA.pdf' : 'Brochure_DEEQASA.pdf')} size="sm" className="rounded-full h-9 px-5 bg-white text-black hover:bg-white/90 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
-                    {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export A4 PDF</>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-card border-white/10 text-white text-[10px] uppercase font-bold">Print-Ready Vector Document</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button onClick={() => handleDownloadPng(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Proposal' : 'Brochure')} size="sm" variant="outline" className="rounded-full h-9 px-5 border-white/10 text-white/70 hover:text-white hover:bg-white/5 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
-                    {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ImageIcon size={14} className="mr-2"/> Export HD PNG</>}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-card border-white/10 text-white text-[10px] uppercase font-bold">High-Resolution Image Sequence</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Proposal.pdf')} size="sm" className="rounded-full h-9 bg-white text-black hover:bg-white/90 font-bold" disabled={isDownloading}>
+            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export A4 PDF</>}
+          </Button>
         </div>
 
-        <ScrollArea className="flex-1 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]">
-          <div className="py-20 px-4 min-w-[210mm] flex flex-col items-center">
-            <AnimatePresence mode="wait">
-              {activeTab === 'quotation' ? (
-                <motion.div 
-                  key="quotation"
-                  initial={{ opacity: 0, y: 40, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -40, scale: 0.98 }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  id="quotation-export-root" 
-                  className="document-canvas"
-                >
-                  {/* Page 1: Cover Letter */}
-                  <div className="quotation-page">
-                    <QuotationHeader />
-                    <div className="flex justify-between items-start mb-10 text-[11pt]">
-                      <div className={cn("font-bold space-y-0.5 transition-all duration-300", (activeField === 'customerName' || activeField === 'companyName' || activeField === 'address') && "highlight-sync")}>
-                        <p className="text-[#1F2A37]">To,</p>
-                        <p className="text-[12pt] uppercase tracking-tight text-[#1F2A37]">{watchedCustomer}</p>
-                        <p className="font-medium text-[#4B5563]">{watchedCompany}</p>
-                        <p className="text-gray-500 italic font-normal">{watchedAddress}</p>
-                      </div>
-                      <div className="text-right text-gray-500 font-bold text-[9pt] uppercase tracking-widest border-t-2 border-gray-100 pt-2">
-                        <p>REF: DQT/2024/{format(new Date(), 'MM/yy')}</p>
-                        <p>DATE: {format(new Date(), 'dd-MM-yyyy')}</p>
-                      </div>
-                    </div>
-                    
-                    <div className={cn("font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8 transition-all duration-500", activeField === 'subject' && "highlight-sync")}>
-                      <p className="leading-tight text-[#111827]"><span className="underline uppercase mr-3 text-gray-400 font-medium tracking-[0.2em] text-[8pt]">Subject:</span> {watchedSubject}</p>
-                    </div>
-
-                    <div className="space-y-6 text-[11.5pt] justified-text text-[#1F2A37]">
-                      <p className="font-bold">Respected Sir/Madam,</p>
-                      <div className={cn("whitespace-pre-wrap leading-[1.7] transition-all duration-500", activeField === 'letterBody' && "highlight-sync")}>
-                        {watchedLetterBody}
-                      </div>
-                      
-                      <div className="pt-8 space-y-4">
-                        <h4 className="font-bold uppercase text-[8.5pt] tracking-[0.3em] text-gray-400 border-b border-gray-100 pb-2">Primary Terms:</h4>
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[10pt] text-[#4B5563] italic">
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Delivery:</strong> Within 4-6 business weeks.</p>
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Warranty:</strong> 3-Year Onsite OEM Support.</p>
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Quote Validity:</strong> 7 working days.</p>
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Support:</strong> Local Chandigarh technical hub.</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-auto pt-10 flex justify-between items-end border-t border-gray-50">
-                       <div className="opacity-20 flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full border border-black flex items-center justify-center font-bold text-[10px]">1</div>
-                          <span className="text-[7pt] font-bold uppercase tracking-widest">Executive Proposal</span>
-                       </div>
-                       <div className="text-right">
-                          <div className="h-10 w-40 border-b border-gray-300 mb-2"></div>
-                          <p className="text-[8pt] font-black uppercase text-[#111827]">Authorized Signature</p>
-                       </div>
+        <ScrollArea className="flex-1">
+          <div className="py-20 flex flex-col items-center">
+            {activeTab === 'quotation' ? (
+              <div id="quotation-export-root" className="document-canvas">
+                <div className="quotation-page">
+                  <div className="flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
+                    <img src="/hp-logo.png" alt="HP" className="h-[18mm] w-auto" />
+                    <div className="text-right">
+                      <h2 className="text-[14pt] font-bold uppercase">DEEQASA</h2>
+                      <p className="text-[8pt] text-gray-400 font-bold uppercase">Authorized Partner</p>
                     </div>
                   </div>
-
-                  {/* Page 2: Technical Compliance Statement */}
-                  <div className="quotation-page">
-                    <QuotationHeader />
-                    <div className="text-center mb-8">
-                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">Technical Compliance</h3>
+                  <div className="mb-10 text-[11pt] space-y-1">
+                    <p className="font-bold">To,</p>
+                    <p className="text-[12pt] uppercase">{watchedCustomer}</p>
+                    <p className="font-medium text-gray-600">{watchedCompany}</p>
+                    <p className="text-gray-500 italic">{watchedAddress}</p>
+                  </div>
+                  <div className="font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8">
+                    <p className="text-[#111827]"><span className="underline uppercase mr-3 text-gray-400 text-[8pt]">Subject:</span> {watchedSubject}</p>
+                  </div>
+                  <div className="space-y-6 text-[11.5pt] justified-text">
+                    <p className="font-bold">Respected Sir/Madam,</p>
+                    <div className="whitespace-pre-wrap leading-[1.7]">{watchedLetterBody}</div>
+                  </div>
+                  <div className="mt-auto pt-10 flex justify-between items-end border-t border-gray-50">
+                    <p className="text-[7pt] font-bold uppercase tracking-widest text-gray-300">Proposal Page 01</p>
+                    <div className="text-right">
+                      <div className="h-10 w-40 border-b border-gray-300 mb-2"></div>
+                      <p className="text-[8pt] font-black uppercase">Authorized Signature</p>
                     </div>
-                    
-                    <p className="text-[10pt] text-gray-600 mb-6 italic leading-relaxed">
-                      This document certifies that the proposed solutions meet or exceed the following technical requirements as per project specifications.
-                    </p>
-
-                    <div className="space-y-8">
+                  </div>
+                </div>
+                {/* Simplified dynamic pages for pack */}
+                <div className="quotation-page">
+                  <h3 className="text-center font-black text-xl mb-10 uppercase tracking-widest">Commercial Schedule</h3>
+                  <table className="quotation-table">
+                    <thead><tr><th>Sr.</th><th>Configuration</th><th>Qty</th><th>Unit (₹)</th><th>Total (₹)</th></tr></thead>
+                    <tbody>
                       {watchedLineItems?.map((item, idx) => (
-                        <div key={idx} className="border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-                          <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                            <h4 className="text-[10pt] font-black uppercase text-[#111827] tracking-tight">Requirement {idx + 1}: {item.product.model}</h4>
-                            <span className="text-[7pt] font-bold uppercase text-emerald-600 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded">Compliant</span>
-                          </div>
-                          <div className="p-4 grid grid-cols-1 gap-2">
-                            <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-50 last:border-0">
-                              <span className="text-[8pt] font-bold text-gray-400 uppercase">Configuration</span>
-                              <span className="col-span-2 text-[9pt] text-[#1F2A37] font-serif italic">{getLongDescription(item.product)}</span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-50 last:border-0">
-                              <span className="text-[8pt] font-bold text-gray-400 uppercase">Platform</span>
-                              <span className="col-span-2 text-[9pt] text-[#1F2A37] font-medium uppercase">{item.product.chassis || 'Enterprise Standard'}</span>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-50 last:border-0">
-                              <span className="text-[8pt] font-bold text-gray-400 uppercase">OS & Security</span>
-                              <span className="col-span-2 text-[9pt] text-[#1F2A37] font-medium uppercase">{item.product.os || 'Verified Pro'}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
-                       <p className="text-[7pt] font-black uppercase tracking-[0.3em]">Technical Integrity Verified.</p>
-                       <p className="text-[7pt] font-black uppercase">Page 02 of 04</p>
-                    </div>
-                  </div>
-
-                  {/* Page 3: Commercial Schedule */}
-                  <div className="quotation-page">
-                    <QuotationHeader />
-                    <div className="text-center mb-8">
-                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">Commercial Summary</h3>
-                    </div>
-
-                    <table className="quotation-table">
-                      <thead>
-                        <tr>
-                          <th style={{ width: '40px' }}>Sr.</th>
-                          <th style={{ textAlign: 'left', paddingLeft: '15px' }}>Solution Item & Configuration</th>
-                          <th style={{ width: '60px' }}>Qty</th>
-                          <th style={{ width: '100px' }}>Unit (₹)</th>
-                          <th style={{ width: '120px' }}>Total (₹)</th>
+                        <tr key={idx}>
+                          <td className="text-center">{idx + 1}</td>
+                          <td className="p-2"><strong>{item.product.model}</strong><br/><span className="text-[8pt] italic text-gray-500">{item.product.processor}</span></td>
+                          <td className="text-center">{item.quantity}</td>
+                          <td className="text-right">{item.unitPrice.toLocaleString('en-IN')}</td>
+                          <td className="text-right font-bold">{(item.quantity * item.unitPrice).toLocaleString('en-IN')}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {watchedLineItems?.map((item, idx) => (
-                          <tr key={idx}>
-                            <td className="text-center font-bold text-gray-300">{idx + 1}</td>
-                            <td style={{ padding: '10px 15px' }}>
-                              <p className="font-black uppercase text-[#111827] text-[10pt] mb-1 tracking-tight">{item.product.model}</p>
-                              <p className="text-[8pt] text-[#6B7280] leading-relaxed font-serif italic line-clamp-1">{item.product.processor}</p>
-                            </td>
-                            <td className="text-center font-bold text-[11pt] text-[#111827]">{item.quantity}</td>
-                            <td className="text-right text-[10pt] font-mono text-[#4B5563]">{item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                            <td className="text-right font-black text-[#111827] text-[11pt] font-mono">{ (item.quantity * item.unitPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 }) }</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    <div className="mt-10 flex justify-end">
-                      <div className="w-[85mm] space-y-2.5 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                        <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
-                        <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>GST (18%)</span><span>₹{totals.totalGst.toLocaleString('en-IN')}</span></div>
-                        <div className="flex justify-between text-[14pt] font-black text-[#111827] border-t-2 border-gray-200 pt-4 mt-2 uppercase tracking-tighter"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
-                      </div>
-                    </div>
-
-                    <div className="mt-8 p-6 border border-gray-100 rounded-2xl bg-white shadow-sm flex items-start gap-6">
-                      <div className="shrink-0 p-3 bg-gray-50 rounded-xl text-gray-400"><CheckCircle2 size={32} /></div>
-                      <div className="flex-1">
-                        <p className="text-[7pt] font-bold uppercase tracking-[0.3em] text-gray-400 mb-1">Total Valuation In Words:</p>
-                        <p className="italic text-[11pt] font-serif leading-tight text-[#4A4A4A]">{numberToWords(totals.grandTotal)}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-8 p-6 border border-gray-100 rounded-2xl bg-gray-50/30">
-                       <div className="flex items-center gap-3 mb-4">
-                          <Building2 size={16} className="text-gray-400" />
-                          <h4 className="text-[8.5pt] font-black uppercase tracking-[0.3em] text-gray-400">Company Bank Details</h4>
-                       </div>
-                       <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-                          <div className="flex flex-col">
-                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">Account Holder Name</span>
-                             <span className="text-[9.5pt] font-bold text-[#1F2A37]">DEE QASA</span>
-                          </div>
-                          <div className="flex flex-col">
-                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">Bank Name</span>
-                             <span className="text-[9.5pt] font-bold text-[#1F2A37]">ICICI BANK</span>
-                          </div>
-                          <div className="flex flex-col">
-                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">Account Number</span>
-                             <span className="text-[9.5pt] font-bold text-[#1F2A37] font-mono">103205001866</span>
-                          </div>
-                          <div className="flex flex-col">
-                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">IFSC Code</span>
-                             <span className="text-[9.5pt] font-bold text-[#1F2A37] font-mono">ICIC0003669</span>
-                          </div>
-                       </div>
-                    </div>
-
-                    <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
-                       <p className="text-[7pt] font-black uppercase tracking-[0.3em]">Smart. Secure. Sustainable.</p>
-                       <p className="text-[7pt] font-black uppercase">Page 03 of 04</p>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="mt-10 flex justify-end">
+                    <div className="w-[85mm] bg-gray-50 p-6 rounded-xl border border-gray-100 space-y-2">
+                      <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
+                      <div className="flex justify-between text-lg font-black pt-4 border-t-2 border-gray-200 uppercase"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
                     </div>
                   </div>
-
-                  {/* Page 4: OEM Trust & Authorization */}
-                  <div className="quotation-page">
-                    <QuotationHeader />
-                    <div className="text-center mb-12">
-                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">OEM Support & Trust</h3>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-10">
-                      <div className="space-y-10">
-                        <div className="flex gap-6">
-                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><Award size={24}/></div>
-                          <div>
-                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Authorized HP Partner</h4>
-                            <p className="text-[9pt] text-gray-500 leading-relaxed">DEEQASA is a certified solutions partner for HP Global Enterprise, ensuring 100% genuine products, direct OEM support, and factory-verified logistics.</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-6">
-                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><History size={24}/></div>
-                          <div>
-                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Lifecycle Assurance</h4>
-                            <p className="text-[9pt] text-gray-500 leading-relaxed">All enterprise products listed carry official onsite warranties. Our Chandigarh hub provides 24/7 technical escalation for critical infrastructure needs.</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-10">
-                        <div className="flex gap-6">
-                          <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0"><Leaf size={24}/></div>
-                          <div>
-                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Sustainable IT</h4>
-                            <p className="text-[9pt] text-gray-500 leading-relaxed">Our proposed hardware adheres to EPEAT Gold and Energy Star standards, supporting your organization's sustainability goals and carbon-footprint reduction.</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-6">
-                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><Wrench size={24}/></div>
-                          <div>
-                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Technical Support</h4>
-                            <p className="text-[9pt] text-gray-500 leading-relaxed">Includes professional installation, driver configuration, and post-deployment health checks by HP-certified technicians.</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-16 bg-gray-900 text-white p-10 rounded-3xl relative overflow-hidden flex items-center justify-between">
-                      <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 blur-[80px] -mr-24 -mt-24"></div>
-                      <div className="relative z-10 max-w-[70%]">
-                        <h3 className="text-[16pt] font-black mb-3 tracking-tighter leading-tight uppercase">Strategic Commitment.</h3>
-                        <p className="text-[9pt] text-gray-400 font-medium italic mb-4">
-                          "We don't just supply hardware; we deploy intelligent infrastructure that powers innovation. Our partnership with HP ensures your organization stays ahead of technical plateaus."
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="h-0.5 w-10 bg-primary"></div>
-                          <span className="text-[7pt] font-bold uppercase tracking-[0.2em] text-primary">Certified HP Infrastructure Team</span>
-                        </div>
-                      </div>
-                      <div className="relative z-10 opacity-30">
-                        <Globe size={80} className="text-white" />
-                      </div>
-                    </div>
-
-                    <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
-                       <p className="text-[7pt] font-black uppercase tracking-[0.3em]">End of Proposal Pack.</p>
-                       <p className="text-[7pt] font-black uppercase">Document ID: DQT-PRO-4.0</p>
-                       <p className="text-[7pt] font-black uppercase">Page 04 of 04</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key="brochure"
-                  initial={{ opacity: 0, y: 40, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -40, scale: 0.98 }}
-                  transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <BrochurePreview 
-                    products={Array.from(new Set(watchedLineItems.map(i => i.product.id))).map(id => watchedLineItems.find(i => i.product.id === id)!.product)} 
-                    marketingData={marketingData!} 
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                </div>
+              </div>
+            ) : (
+              <BrochurePreview 
+                products={Array.from(new Set(watchedLineItems.map(i => i.product.id))).map(id => watchedLineItems.find(i => i.product.id === id)!.product)} 
+                marketingData={marketingData!} 
+              />
+            )}
           </div>
         </ScrollArea>
       </div>
-
-      <AnimatePresence>
-        {!watchedLineItems?.length && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-8 left-[calc(420px+((100vw-420px)/2))] -translate-x-1/2 z-50 pointer-events-none no-print"
-          >
-            <div className="bg-primary/20 backdrop-blur-xl border border-primary/30 px-6 py-3 rounded-full flex items-center gap-3 shadow-[0_0_30px_rgba(0,224,255,0.3)]">
-               <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-               <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Add products to begin proposal generation</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

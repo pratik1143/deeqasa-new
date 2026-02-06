@@ -12,3 +12,4 @@ import '@/ai/flows/ai-quotation-letter-generation.ts';
 import '@/ai/flows/ai-brochure-generation.ts';
 import '@/ai/flows/store-brochure-data.ts';
 import '@/ai/flows/ai-deal-intelligence.ts';
+import '@/ai/flows/ai-follow-up-generation.ts';
