@@ -1,56 +1,53 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Checks if the user is authenticated.
-     */
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    /**
-     * @description Checks if the user is the system admin by email.
-     */
-    function isAdmin() {
-      return isSignedIn() && request.auth.token.email == "deeqasa@admin.in";
-    }
-
-    // --- COLLECTION RULES ---
-
-    /**
-     * @description Rules for the User collection.
-     * Users can access their own profile, or admin can access all.
-     */
+    // =========================
+    // USERS COLLECTION
+    // =========================
     match /users/{userId} {
-      allow read, create, update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      /**
+       * @description Users can access their own profile. Admin has full access.
+       */
+      allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == "deeqasa@admin.in");
     }
 
-    /**
-     * @description Rules for the Quotation collection.
-     * Enforces admin overrides and user-ownership filters.
-     */
+    // =========================
+    // QUOTATIONS COLLECTION
+    // =========================
     match /quotations/{quotationId} {
-      
-      /**
-       * @description Allow read (get and list) if the user is an admin or the creator.
-       * Firestore query filters must match this ownership check.
-       */
-      allow read: if isSignedIn() && (isAdmin() || resource.data.createdBy == request.auth.uid);
 
       /**
-       * @description Allow creation if the user is an admin or is correctly identifying themselves as creator.
+       * @description 🔹 ADMIN: full access (read, write, list)
        */
-      allow create: if isSignedIn() && (isAdmin() || request.resource.data.createdBy == request.auth.uid);
+      allow read, write: if request.auth != null
+        && request.auth.token.email == "deeqasa@admin.in";
 
       /**
-       * @description Allow updates and deletions only by the owner or admin.
+       * @description 🔹 NORMAL USER: only own quotation
+       * 'read' covers both 'get' and 'list' operations.
        */
-      allow update, delete: if isSignedIn() && (isAdmin() || resource.data.createdBy == request.auth.uid);
+      allow read: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
+
+      /**
+       * @description Allow creation if the user is correctly identifying themselves as creator.
+       */
+      allow create: if request.auth != null
+        && request.resource.data.createdBy == request.auth.uid;
+        
+      /**
+       * @description Allow updates and deletions only by the owner.
+       */
+      allow update, delete: if request.auth != null
+        && resource.data.createdBy == request.auth.uid;
     }
 
-    // --- DEFAULT DENY ---
-    match /{path=**} {
+    // =========================
+    // DEFAULT DENY (SECURITY)
+    // =========================
+    match /{document=**} {
       allow read, write: if false;
     }
   }

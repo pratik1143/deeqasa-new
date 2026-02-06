@@ -97,7 +97,7 @@
       "schema": {
         "$ref": "#/backend/entities/Quotation"
       },
-      "description": "Stores individual quotation records. Admin (deeqasa@admin.in) has full access."
+      "description": "Stores individual quotation records. Admin (deeqasa@admin.in) has full access. Users can access their own based on 'createdBy' field."
     },
     "/users/{userId}": {
       "schema": {
