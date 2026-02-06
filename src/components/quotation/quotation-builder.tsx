@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useTransition, useRef } from 'react';
+import { useState, useEffect, useMemo, useTransition } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,13 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -33,15 +32,14 @@ import {
   Download, 
   Image as ImageIcon, 
   FileText, 
-  Wand2, 
   BookOpen,
   User,
   Layout,
   Package,
   CheckCircle2,
   ShieldCheck,
-  ChevronRight,
-  Loader2
+  Loader2,
+  Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -61,13 +59,6 @@ const FormSchema = z.object({
   })).min(1, 'Please add at least one product.'),
 });
 type FormValues = z.infer<typeof FormSchema>;
-
-const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-});
 
 function numberToWords(num: number): string {
     const roundedNum = Math.round(num * 100) / 100;
@@ -510,7 +501,6 @@ export function QuotationBuilder() {
                      <Button variant="outline" className="w-full h-12 gap-2 border-primary/30 text-primary hover:bg-primary/10 font-bold text-xs group" onClick={handleGenerateBrochure} disabled={isGeneratingBrochure || !watchedLineItems?.length}>
                         {isGeneratingBrochure ? <Loader2 className="w-4 h-4 animate-spin" /> : <><BookOpen size={16} className="group-hover:scale-110 transition-transform"/> Compile 3-Page Product Brochure</>}
                      </Button>
-                     <p className="text-[8px] text-muted-foreground/60 text-center italic">Requires high-speed connection for AI processing.</p>
                   </div>
                 </motion.div>
               )}
@@ -586,9 +576,9 @@ export function QuotationBuilder() {
                     <QuotationHeader />
                     <div className="flex justify-between items-start mb-10 text-[11pt]">
                       <div className={cn("font-bold space-y-0.5 transition-all duration-300", (activeField === 'customerName' || activeField === 'companyName' || activeField === 'address') && "highlight-sync")}>
-                        <p>To,</p>
-                        <p className="text-[12pt] uppercase tracking-tight">{watchedCustomer}</p>
-                        <p className="font-medium text-gray-800">{watchedCompany}</p>
+                        <p className="text-[#1F2A37]">To,</p>
+                        <p className="text-[12pt] uppercase tracking-tight text-[#1F2A37]">{watchedCustomer}</p>
+                        <p className="font-medium text-[#4B5563]">{watchedCompany}</p>
                         <p className="text-gray-500 italic font-normal">{watchedAddress}</p>
                       </div>
                       <div className="text-right text-gray-500 font-bold text-[9pt] uppercase tracking-widest border-t-2 border-gray-100 pt-2">
@@ -598,10 +588,10 @@ export function QuotationBuilder() {
                     </div>
                     
                     <div className={cn("font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8 transition-all duration-500", activeField === 'subject' && "highlight-sync")}>
-                      <p className="leading-tight"><span className="underline uppercase mr-3 text-gray-400 font-medium tracking-[0.2em] text-[8pt]">Subject:</span> {watchedSubject}</p>
+                      <p className="leading-tight text-[#111827]"><span className="underline uppercase mr-3 text-gray-400 font-medium tracking-[0.2em] text-[8pt]">Subject:</span> {watchedSubject}</p>
                     </div>
 
-                    <div className="space-y-6 text-[11.5pt] justified-text text-gray-800">
+                    <div className="space-y-6 text-[11.5pt] justified-text text-[#1F2A37]">
                       <p className="font-bold">Respected Sir/Madam,</p>
                       <div className={cn("whitespace-pre-wrap leading-[1.7] transition-all duration-500", activeField === 'letterBody' && "highlight-sync")}>
                         {watchedLetterBody}
@@ -609,11 +599,11 @@ export function QuotationBuilder() {
                       
                       <div className="pt-8 space-y-4">
                         <h4 className="font-bold uppercase text-[8.5pt] tracking-[0.3em] text-gray-400 border-b border-gray-100 pb-2">Technical & Commercial Terms:</h4>
-                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[10pt] text-gray-700 italic">
-                          <p>• <strong className="not-italic text-gray-900 uppercase text-[8pt]">Taxes:</strong> GST @ 18% as per statutory norms.</p>
-                          <p>• <strong className="not-italic text-gray-900 uppercase text-[8pt]">Logistics:</strong> 4-6 Weeks turnaround time.</p>
-                          <p>• <strong className="not-italic text-gray-900 uppercase text-[8pt]">Validity:</strong> Active for 7 business days.</p>
-                          <p>• <strong className="not-italic text-gray-900 uppercase text-[8pt]">Service:</strong> On-site professional support.</p>
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[10pt] text-[#4B5563] italic">
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Taxes:</strong> GST @ 18% as per statutory norms.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Logistics:</strong> 4-6 Weeks turnaround time.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Validity:</strong> Active for 7 business days.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Service:</strong> On-site professional support.</p>
                         </div>
                       </div>
                     </div>
@@ -625,7 +615,7 @@ export function QuotationBuilder() {
                        </div>
                        <div className="text-right">
                           <div className="h-10 w-40 border-b border-gray-300 mb-2"></div>
-                          <p className="text-[8pt] font-black uppercase">Authorized Signature</p>
+                          <p className="text-[8pt] font-black uppercase text-[#111827]">Authorized Signature</p>
                        </div>
                     </div>
                   </div>
@@ -634,7 +624,7 @@ export function QuotationBuilder() {
                   <div className="quotation-page">
                     <QuotationHeader />
                     <div className="text-center mb-8">
-                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em]">Commercial Schedule</h3>
+                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">Commercial Schedule</h3>
                     </div>
 
                     <table className="quotation-table">
@@ -652,33 +642,59 @@ export function QuotationBuilder() {
                           <tr key={idx}>
                             <td className="text-center font-bold text-gray-300">{idx + 1}</td>
                             <td style={{ padding: '10px 15px' }}>
-                              <p className="font-black uppercase text-gray-900 text-[10pt] mb-1 tracking-tight">{item.product.model}</p>
-                              <p className="text-[8.5pt] text-gray-500 leading-relaxed font-serif italic">{getLongDescription(item.product)}</p>
+                              <p className="font-black uppercase text-[#111827] text-[10pt] mb-1 tracking-tight">{item.product.model}</p>
+                              <p className="text-[8.5pt] text-[#6B7280] leading-relaxed font-serif italic">{getLongDescription(item.product)}</p>
                             </td>
-                            <td className="text-center font-bold text-[11pt]">{item.quantity}</td>
-                            <td className="text-right text-[10pt] font-mono">{item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                            <td className="text-right font-black text-gray-900 text-[11pt] font-mono">{ (item.quantity * item.unitPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 }) }</td>
+                            <td className="text-center font-bold text-[11pt] text-[#111827]">{item.quantity}</td>
+                            <td className="text-right text-[10pt] font-mono text-[#4B5563]">{item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                            <td className="text-right font-black text-[#111827] text-[11pt] font-mono">{ (item.quantity * item.unitPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 }) }</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
 
                     <div className="mt-10 flex justify-end">
-                      <div className="w-[85mm] space-y-2.5 bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                      <div className="w-[85mm] space-y-2.5 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                         <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>Net Base Amount</span><span>{totals.subTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
                         <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>Applied GST (18%)</span><span>{totals.totalGst.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
-                        <div className="flex justify-between text-[14pt] font-black text-gray-900 border-t-2 border-gray-200 pt-4 mt-2 uppercase tracking-tighter"><span>Grand Total</span><span>{totals.grandTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
+                        <div className="flex justify-between text-[14pt] font-black text-[#111827] border-t-2 border-gray-200 pt-4 mt-2 uppercase tracking-tighter"><span>Grand Total</span><span>{totals.grandTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
                       </div>
                     </div>
 
-                    <div className="mt-8 p-6 bg-gray-900 text-white rounded-2xl flex items-center gap-6">
-                      <div className="shrink-0 p-3 bg-white/10 rounded-xl">
-                        <CheckCircle2 size={32} className="text-primary" />
+                    <div className="mt-8 p-6 border border-gray-100 rounded-2xl flex items-start gap-6 bg-white shadow-sm">
+                      <div className="shrink-0 p-3 bg-gray-50 rounded-xl text-[#4B5563]">
+                        <CheckCircle2 size={32} />
                       </div>
                       <div className="flex-1">
-                        <p className="text-[7pt] font-bold uppercase tracking-[0.3em] text-white/50 mb-1">Total Valuation In Words:</p>
-                        <p className="italic text-[12pt] font-serif leading-tight">{numberToWords(totals.grandTotal)}</p>
+                        <p className="text-[7pt] font-bold uppercase tracking-[0.3em] text-gray-400 mb-1">Total Valuation In Words:</p>
+                        <p className="italic text-[11pt] font-serif leading-tight text-[#4A4A4A]">{numberToWords(totals.grandTotal)}</p>
                       </div>
+                    </div>
+
+                    {/* Bank Details Section */}
+                    <div className="mt-8 p-6 border border-gray-100 rounded-2xl bg-gray-50/30">
+                       <div className="flex items-center gap-3 mb-4">
+                          <Building2 size={16} className="text-gray-400" />
+                          <h4 className="text-[8.5pt] font-black uppercase tracking-[0.3em] text-gray-400">Company Bank Details</h4>
+                       </div>
+                       <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                          <div className="flex flex-col">
+                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">Account Holder Name</span>
+                             <span className="text-[9.5pt] font-bold text-[#1F2A37]">DEE QASA</span>
+                          </div>
+                          <div className="flex flex-col">
+                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">Bank Name</span>
+                             <span className="text-[9.5pt] font-bold text-[#1F2A37]">ICICI BANK</span>
+                          </div>
+                          <div className="flex flex-col">
+                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">Account Number</span>
+                             <span className="text-[9.5pt] font-bold text-[#1F2A37] font-mono">103205001866</span>
+                          </div>
+                          <div className="flex flex-col">
+                             <span className="text-[6.5pt] font-bold text-gray-400 uppercase tracking-widest mb-1">IFSC Code</span>
+                             <span className="text-[9.5pt] font-bold text-[#1F2A37] font-mono">ICIC0003669</span>
+                          </div>
+                       </div>
                     </div>
 
                     <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
