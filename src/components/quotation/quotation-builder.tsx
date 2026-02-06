@@ -42,7 +42,12 @@ import {
   Loader2,
   Building2,
   ArrowRight,
-  BrainCircuit
+  BrainCircuit,
+  Award,
+  History,
+  Globe,
+  Leaf,
+  Wrench
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -344,7 +349,6 @@ export function QuotationBuilder() {
             </div>
           </div>
 
-          {/* Stepper */}
           <div className="relative mb-10 pl-2">
             <div className="absolute left-4 top-0 bottom-0 w-px bg-white/5" />
             <div className="space-y-6">
@@ -612,7 +616,7 @@ export function QuotationBuilder() {
                      </Button>
 
                      <Button variant="outline" className="w-full h-12 gap-2 border-white/10 text-white/60 hover:bg-white/5 font-bold text-xs group" onClick={handleGenerateBrochure} disabled={isGeneratingBrochure || !watchedLineItems?.length}>
-                        {isGeneratingBrochure ? <Loader2 className="w-4 h-4 animate-spin" /> : <><BookOpen size={16} className="group-hover:scale-110 transition-transform"/> Compile 3-Page Brochure</>}
+                        {isGeneratingBrochure ? <Loader2 className="w-4 h-4 animate-spin" /> : <><BookOpen size={16} className="group-hover:scale-110 transition-transform"/> Compile AI Brochure</>}
                      </Button>
                   </div>
                 </motion.div>
@@ -621,23 +625,21 @@ export function QuotationBuilder() {
           </Form>
         </ScrollArea>
 
-        {/* Footer Brand */}
         <div className="p-6 border-t border-white/5 bg-black/40">
            <div className="flex items-center gap-2 text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Infrastructure Engine v4.0.1
+              Proposal Engine v4.0.1
            </div>
         </div>
       </div>
 
       {/* Preview Panel */}
       <div className="flex-1 bg-black flex flex-col relative z-10 overflow-hidden">
-        {/* Document Action Bar */}
         <div className="h-20 bg-card/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 shrink-0 no-print">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white/5 rounded-full p-1 border border-white/10">
             <TabsList className="bg-transparent">
               <TabsTrigger value="quotation" className="rounded-full px-4 h-8 text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
-                <FileText size={12} className="mr-2" /> Quotation
+                <FileText size={12} className="mr-2" /> Proposal Pack
               </TabsTrigger>
               <TabsTrigger value="brochure" disabled={!marketingData} className="rounded-full px-4 h-8 text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-white">
                 <BookOpen size={12} className="mr-2" /> AI Brochure
@@ -649,7 +651,7 @@ export function QuotationBuilder() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Quotation_DEEQASA.pdf' : 'Brochure_DEEQASA.pdf')} size="sm" className="rounded-full h-9 px-5 bg-white text-black hover:bg-white/90 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
+                  <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Proposal_DEEQASA.pdf' : 'Brochure_DEEQASA.pdf')} size="sm" className="rounded-full h-9 px-5 bg-white text-black hover:bg-white/90 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
                     {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export A4 PDF</>}
                   </Button>
                 </TooltipTrigger>
@@ -660,7 +662,7 @@ export function QuotationBuilder() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={() => handleDownloadPng(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Quotation' : 'Brochure')} size="sm" variant="outline" className="rounded-full h-9 px-5 border-white/10 text-white/70 hover:text-white hover:bg-white/5 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
+                  <Button onClick={() => handleDownloadPng(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Proposal' : 'Brochure')} size="sm" variant="outline" className="rounded-full h-9 px-5 border-white/10 text-white/70 hover:text-white hover:bg-white/5 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
                     {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ImageIcon size={14} className="mr-2"/> Export HD PNG</>}
                   </Button>
                 </TooltipTrigger>
@@ -670,7 +672,6 @@ export function QuotationBuilder() {
           </div>
         </div>
 
-        {/* Canvas Area */}
         <ScrollArea className="flex-1 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]">
           <div className="py-20 px-4 min-w-[210mm] flex flex-col items-center">
             <AnimatePresence mode="wait">
@@ -711,12 +712,12 @@ export function QuotationBuilder() {
                       </div>
                       
                       <div className="pt-8 space-y-4">
-                        <h4 className="font-bold uppercase text-[8.5pt] tracking-[0.3em] text-gray-400 border-b border-gray-100 pb-2">Technical & Commercial Terms:</h4>
+                        <h4 className="font-bold uppercase text-[8.5pt] tracking-[0.3em] text-gray-400 border-b border-gray-100 pb-2">Primary Terms:</h4>
                         <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[10pt] text-[#4B5563] italic">
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Taxes:</strong> GST @ 18% as per statutory norms.</p>
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Logistics:</strong> 4-6 Weeks turnaround time.</p>
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Validity:</strong> Active for 7 business days.</p>
-                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Service:</strong> On-site professional support.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Delivery:</strong> Within 4-6 business weeks.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Warranty:</strong> 3-Year Onsite OEM Support.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Quote Validity:</strong> 7 working days.</p>
+                          <p>• <strong className="not-italic text-[#111827] uppercase text-[8pt]">Support:</strong> Local Chandigarh technical hub.</p>
                         </div>
                       </div>
                     </div>
@@ -724,7 +725,7 @@ export function QuotationBuilder() {
                     <div className="mt-auto pt-10 flex justify-between items-end border-t border-gray-50">
                        <div className="opacity-20 flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full border border-black flex items-center justify-center font-bold text-[10px]">1</div>
-                          <span className="text-[7pt] font-bold uppercase tracking-widest">Formal Proposal</span>
+                          <span className="text-[7pt] font-bold uppercase tracking-widest">Executive Proposal</span>
                        </div>
                        <div className="text-right">
                           <div className="h-10 w-40 border-b border-gray-300 mb-2"></div>
@@ -733,21 +734,63 @@ export function QuotationBuilder() {
                     </div>
                   </div>
 
-                  {/* Page 2: Commercial Schedule */}
+                  {/* Page 2: Technical Compliance Statement */}
                   <div className="quotation-page">
                     <QuotationHeader />
                     <div className="text-center mb-8">
-                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">Commercial Schedule</h3>
+                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">Technical Compliance</h3>
+                    </div>
+                    
+                    <p className="text-[10pt] text-gray-600 mb-6 italic leading-relaxed">
+                      This document certifies that the proposed solutions meet or exceed the following technical requirements as per project specifications.
+                    </p>
+
+                    <div className="space-y-8">
+                      {watchedLineItems?.map((item, idx) => (
+                        <div key={idx} className="border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                          <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <h4 className="text-[10pt] font-black uppercase text-[#111827] tracking-tight">Requirement {idx + 1}: {item.product.model}</h4>
+                            <span className="text-[7pt] font-bold uppercase text-emerald-600 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded">Compliant</span>
+                          </div>
+                          <div className="p-4 grid grid-cols-1 gap-2">
+                            <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-50 last:border-0">
+                              <span className="text-[8pt] font-bold text-gray-400 uppercase">Configuration</span>
+                              <span className="col-span-2 text-[9pt] text-[#1F2A37] font-serif italic">{getLongDescription(item.product)}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-50 last:border-0">
+                              <span className="text-[8pt] font-bold text-gray-400 uppercase">Platform</span>
+                              <span className="col-span-2 text-[9pt] text-[#1F2A37] font-medium uppercase">{item.product.chassis || 'Enterprise Standard'}</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-50 last:border-0">
+                              <span className="text-[8pt] font-bold text-gray-400 uppercase">OS & Security</span>
+                              <span className="col-span-2 text-[9pt] text-[#1F2A37] font-medium uppercase">{item.product.os || 'Verified Pro'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
+                       <p className="text-[7pt] font-black uppercase tracking-[0.3em]">Technical Integrity Verified.</p>
+                       <p className="text-[7pt] font-black uppercase">Page 02 of 04</p>
+                    </div>
+                  </div>
+
+                  {/* Page 3: Commercial Schedule */}
+                  <div className="quotation-page">
+                    <QuotationHeader />
+                    <div className="text-center mb-8">
+                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">Commercial Summary</h3>
                     </div>
 
                     <table className="quotation-table">
                       <thead>
                         <tr>
                           <th style={{ width: '40px' }}>Sr.</th>
-                          <th style={{ textAlign: 'left', paddingLeft: '15px' }}>Technical Configuration / SKU Details</th>
+                          <th style={{ textAlign: 'left', paddingLeft: '15px' }}>Solution Item & Configuration</th>
                           <th style={{ width: '60px' }}>Qty</th>
                           <th style={{ width: '100px' }}>Unit (₹)</th>
-                          <th style={{ width: '120px' }}>Total Amount (₹)</th>
+                          <th style={{ width: '120px' }}>Total (₹)</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -756,7 +799,7 @@ export function QuotationBuilder() {
                             <td className="text-center font-bold text-gray-300">{idx + 1}</td>
                             <td style={{ padding: '10px 15px' }}>
                               <p className="font-black uppercase text-[#111827] text-[10pt] mb-1 tracking-tight">{item.product.model}</p>
-                              <p className="text-[8.5pt] text-[#6B7280] length-relaxed font-serif italic">{getLongDescription(item.product)}</p>
+                              <p className="text-[8pt] text-[#6B7280] leading-relaxed font-serif italic line-clamp-1">{item.product.processor}</p>
                             </td>
                             <td className="text-center font-bold text-[11pt] text-[#111827]">{item.quantity}</td>
                             <td className="text-right text-[10pt] font-mono text-[#4B5563]">{item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
@@ -768,23 +811,20 @@ export function QuotationBuilder() {
 
                     <div className="mt-10 flex justify-end">
                       <div className="w-[85mm] space-y-2.5 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                        <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>Net Base Amount</span><span>{totals.subTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
-                        <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>Applied GST (18%)</span><span>{totals.totalGst.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
-                        <div className="flex justify-between text-[14pt] font-black text-[#111827] border-t-2 border-gray-200 pt-4 mt-2 uppercase tracking-tighter"><span>Grand Total</span><span>{totals.grandTotal.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</span></div>
+                        <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
+                        <div className="flex justify-between text-[8.5pt] font-bold text-gray-400 uppercase tracking-widest"><span>GST (18%)</span><span>₹{totals.totalGst.toLocaleString('en-IN')}</span></div>
+                        <div className="flex justify-between text-[14pt] font-black text-[#111827] border-t-2 border-gray-200 pt-4 mt-2 uppercase tracking-tighter"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
                       </div>
                     </div>
 
-                    <div className="mt-8 p-6 border border-gray-100 rounded-2xl flex items-start gap-6 bg-white shadow-sm">
-                      <div className="shrink-0 p-3 bg-gray-50 rounded-xl text-[#4B5563]">
-                        <CheckCircle2 size={32} />
-                      </div>
+                    <div className="mt-8 p-6 border border-gray-100 rounded-2xl bg-white shadow-sm flex items-start gap-6">
+                      <div className="shrink-0 p-3 bg-gray-50 rounded-xl text-gray-400"><CheckCircle2 size={32} /></div>
                       <div className="flex-1">
                         <p className="text-[7pt] font-bold uppercase tracking-[0.3em] text-gray-400 mb-1">Total Valuation In Words:</p>
                         <p className="italic text-[11pt] font-serif leading-tight text-[#4A4A4A]">{numberToWords(totals.grandTotal)}</p>
                       </div>
                     </div>
 
-                    {/* Bank Details Section */}
                     <div className="mt-8 p-6 border border-gray-100 rounded-2xl bg-gray-50/30">
                        <div className="flex items-center gap-3 mb-4">
                           <Building2 size={16} className="text-gray-400" />
@@ -812,8 +852,74 @@ export function QuotationBuilder() {
 
                     <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
                        <p className="text-[7pt] font-black uppercase tracking-[0.3em]">Smart. Secure. Sustainable.</p>
-                       <p className="text-[7pt] font-black uppercase">Document Reference: DQT/2024/SEC-01</p>
-                       <p className="text-[7pt] font-black uppercase">Page 02 of 02</p>
+                       <p className="text-[7pt] font-black uppercase">Page 03 of 04</p>
+                    </div>
+                  </div>
+
+                  {/* Page 4: OEM Trust & Authorization */}
+                  <div className="quotation-page">
+                    <QuotationHeader />
+                    <div className="text-center mb-12">
+                       <h3 className="inline-block px-8 py-2 border-2 border-gray-900 font-black text-[11pt] uppercase tracking-[0.4em] text-[#111827]">OEM Support & Trust</h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-10">
+                      <div className="space-y-10">
+                        <div className="flex gap-6">
+                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><Award size={24}/></div>
+                          <div>
+                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Authorized HP Partner</h4>
+                            <p className="text-[9pt] text-gray-500 leading-relaxed">DEEQASA is a certified solutions partner for HP Global Enterprise, ensuring 100% genuine products, direct OEM support, and factory-verified logistics.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-6">
+                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><History size={24}/></div>
+                          <div>
+                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Lifecycle Assurance</h4>
+                            <p className="text-[9pt] text-gray-500 leading-relaxed">All enterprise products listed carry official onsite warranties. Our Chandigarh hub provides 24/7 technical escalation for critical infrastructure needs.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-10">
+                        <div className="flex gap-6">
+                          <div className="h-12 w-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0"><Leaf size={24}/></div>
+                          <div>
+                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Sustainable IT</h4>
+                            <p className="text-[9pt] text-gray-500 leading-relaxed">Our proposed hardware adheres to EPEAT Gold and Energy Star standards, supporting your organization's sustainability goals and carbon-footprint reduction.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-6">
+                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0"><Wrench size={24}/></div>
+                          <div>
+                            <h4 className="text-[10pt] font-black uppercase text-[#111827] mb-2 tracking-tight">Technical Support</h4>
+                            <p className="text-[9pt] text-gray-500 leading-relaxed">Includes professional installation, driver configuration, and post-deployment health checks by HP-certified technicians.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-16 bg-gray-900 text-white p-10 rounded-3xl relative overflow-hidden flex items-center justify-between">
+                      <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 blur-[80px] -mr-24 -mt-24"></div>
+                      <div className="relative z-10 max-w-[70%]">
+                        <h3 className="text-[16pt] font-black mb-3 tracking-tighter leading-tight uppercase">Strategic Commitment.</h3>
+                        <p className="text-[9pt] text-gray-400 font-medium italic mb-4">
+                          "We don't just supply hardware; we deploy intelligent infrastructure that powers innovation. Our partnership with HP ensures your organization stays ahead of technical plateaus."
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <div className="h-0.5 w-10 bg-primary"></div>
+                          <span className="text-[7pt] font-bold uppercase tracking-[0.2em] text-primary">Certified HP Infrastructure Team</span>
+                        </div>
+                      </div>
+                      <div className="relative z-10 opacity-30">
+                        <Globe size={80} className="text-white" />
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-8 flex justify-between items-center opacity-30">
+                       <p className="text-[7pt] font-black uppercase tracking-[0.3em]">End of Proposal Pack.</p>
+                       <p className="text-[7pt] font-black uppercase">Document ID: DQT-PRO-4.0</p>
+                       <p className="text-[7pt] font-black uppercase">Page 04 of 04</p>
                     </div>
                   </div>
                 </motion.div>
