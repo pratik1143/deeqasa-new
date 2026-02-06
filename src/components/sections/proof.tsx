@@ -49,31 +49,32 @@ export function Proof() {
         Your browser does not support the video tag.
       </video>
       
-      <div className="absolute inset-0 bg-white/20 -z-10" />
+      {/* Dark Overlay for Proof Section */}
+      <div className="absolute inset-0 bg-black/40 -z-10" />
 
       <motion.div
-        className="relative z-10 flex flex-col items-center text-center p-4 bg-white/40 backdrop-blur-sm rounded-3xl"
+        className="relative z-10 flex flex-col items-center text-center p-8 bg-black/40 backdrop-blur-md rounded-3xl border border-white/10"
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={containerVariants}
       >
         <motion.h2
           variants={itemVariants}
-          className="text-5xl md:text-7xl font-bold tracking-tighter text-foreground font-headline"
+          className="text-5xl md:text-7xl font-bold tracking-tighter text-white font-headline"
         >
           Poly Studio
         </motion.h2>
         
         <motion.p
           variants={itemVariants}
-          className="mt-4 max-w-2xl text-lg text-muted-foreground"
+          className="mt-4 max-w-2xl text-lg text-white/70"
         >
           High-Quality Enterprise Video Collaboration Solution
         </motion.p>
         
         <motion.p
             variants={itemVariants}
-            className="mt-6 max-w-xl text-md text-foreground/80 font-medium"
+            className="mt-6 max-w-xl text-md text-white/80 font-medium"
         >
             Crystal-clear audio, intelligent cameras, and seamless collaboration built for modern meeting rooms and hybrid work.
         </motion.p>
@@ -90,7 +91,7 @@ export function Proof() {
               Explore Poly Studio
             </a>
           </Button>
-          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6 bg-white/50 backdrop-blur-sm">
+          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6 border-white/20 hover:bg-white/5">
             View Specifications
           </Button>
         </motion.div>

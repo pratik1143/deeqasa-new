@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,6 @@ export function Hero() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Show main content quickly
     const timer = setTimeout(() => setShow(true), 200); 
     return () => clearTimeout(timer);
   }, []);
@@ -41,6 +39,9 @@ export function Hero() {
   return (
     <section className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden font-code">
       <HeroVideoBackground />
+      
+      {/* Dark Overlay for Hero */}
+      <div className="absolute inset-0 bg-black/60 z-10" />
       
       <div className="relative z-20 flex flex-col items-center justify-center text-center p-4 w-full">
         <div className="w-full">

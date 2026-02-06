@@ -68,7 +68,7 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in">
       <div className={cn("animated-snake-wrapper rounded-lg", isPending && "is-thinking")}>
         <Card className="w-[90vw] max-w-2xl h-[80vh] flex flex-col bg-card/95 backdrop-blur-xl border-border shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between border-b border-border">
@@ -110,11 +110,11 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
               <RadioGroup defaultValue="generate" onValueChange={(value: AiAction) => setAiAction(value)} className="flex gap-4">
                   <div className="flex items-center space-x-2">
                       <RadioGroupItem value="generate" id="r1" />
-                      <Label htmlFor="r1" className="flex items-center gap-2 cursor-pointer"><Wand2 size={16}/> Generate Solutions</Label>
+                      <Label htmlFor="r1" className="flex items-center gap-2 cursor-pointer text-white/70"><Wand2 size={16}/> Generate Solutions</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                       <RadioGroupItem value="summarize" id="r2" />
-                      <Label htmlFor="r2" className="flex items-center gap-2 cursor-pointer"><FileText size={16}/> Summarize Document</Label>
+                      <Label htmlFor="r2" className="flex items-center gap-2 cursor-pointer text-white/70"><FileText size={16}/> Summarize Document</Label>
                   </div>
               </RadioGroup>
               <form onSubmit={handleSubmit} className="w-full flex items-center gap-2">
@@ -122,7 +122,7 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder={getPlaceholder()}
-                      className="flex-1 resize-none bg-background border-border"
+                      className="flex-1 resize-none bg-background border-border text-white"
                       rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
