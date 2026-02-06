@@ -3,52 +3,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // =========================
-    // USERS COLLECTION
-    // =========================
-    match /users/{userId} {
-      /**
-       * @description Users can access their own profile. Admin has full access.
-       */
-      allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == "deeqasa@admin.in");
-    }
-
-    // =========================
-    // QUOTATIONS COLLECTION
-    // =========================
-    match /quotations/{quotationId} {
-
-      /**
-       * @description 🔹 ADMIN: full access (read, write, list)
-       */
-      allow read, write, list: if request.auth != null
-        && request.auth.token.email == "deeqasa@admin.in";
-
-      /**
-       * @description 🔹 NORMAL USER: only own quotation
-       * Explicitly allow 'list' for owner-filtered queries.
-       */
-      allow get, list: if request.auth != null
-        && resource.data.createdBy == request.auth.uid;
-
-      /**
-       * @description Allow creation if the user is correctly identifying themselves as creator.
-       */
-      allow create: if request.auth != null
-        && request.resource.data.createdBy == request.auth.uid;
-        
-      /**
-       * @description Allow updates and deletions only by the owner.
-       */
-      allow update, delete: if request.auth != null
-        && resource.data.createdBy == request.auth.uid;
-    }
-
-    // =========================
-    // DEFAULT DENY (SECURITY)
-    // =========================
+    /**
+     * @description 🛡️ ADMIN-ONLY ACCESS CONTROL
+     * This application is a single-tenant administrative system.
+     * Only the authorized administrator email has access to system data.
+     */
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if request.auth != null 
+        && request.auth.token.email == "deeqasa@admin.in";
     }
   }
 }

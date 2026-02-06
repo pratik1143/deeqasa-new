@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserWithRole, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
-  Calendar, 
   MessageSquare, 
   Phone, 
   Mail, 
@@ -19,7 +18,6 @@ import {
   ShieldCheck,
   Terminal,
   Activity,
-  ArrowRight,
   RefreshCw,
   Send
 } from "lucide-react";
@@ -37,12 +35,20 @@ export default function FollowUpPage() {
     const [plan, setPlan] = useState<FollowUpOutput | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
 
+    const isLoading = isUserLoading || isProfileLoading;
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/login');
+        }
+    }, [user, isLoading, router]);
+
     const activeQuotationQuery = useMemoFirebase(() => {
         if (!firestore || !user) return null;
+        // Admin-only model: Fetch latest globally
         return query(
             collection(firestore, 'quotations'),
             where('status', '==', 'ACTIVE'),
-            where('createdBy', '==', user.uid),
             orderBy('createdAt', 'desc'),
             limit(1)
         );
@@ -50,14 +56,6 @@ export default function FollowUpPage() {
 
     const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
     const activeQuotation = quotations?.[0] || null;
-
-    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
-
-    useEffect(() => {
-        if (!isLoading && !user) {
-            router.push('/login');
-        }
-    }, [user, isLoading, router]);
 
     const runAnalysis = async () => {
         if (!activeQuotation) return;
@@ -84,8 +82,8 @@ export default function FollowUpPage() {
         }
     }, [activeQuotation]);
 
-    if (isLoading) return <CenteredLoader text="Syncing Follow-Up Matrix..." />;
-    if (!user) return <CenteredLoader text="Redirecting to login..." />;
+    if (isLoading || isQuotationLoading) return <CenteredLoader text="Syncing Follow-Up Matrix..." />;
+    if (!user) return null;
     if (!profile || profile.role !== 'admin') return <AccessDenied />;
 
     return (

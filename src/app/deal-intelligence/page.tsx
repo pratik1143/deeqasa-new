@@ -6,7 +6,7 @@ import { useUserWithRole, useFirestore, useMemoFirebase, useCollection } from "@
 import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   BrainCircuit, 
   Target, 
@@ -14,7 +14,6 @@ import {
   TrendingUp, 
   Zap, 
   Calendar, 
-  MessageSquare, 
   Activity, 
   Cpu, 
   Terminal,
@@ -26,7 +25,6 @@ import { Button } from "@/components/ui/button";
 import { query, collection, where, orderBy, limit } from "firebase/firestore";
 import { analyzeDealIntelligence, type DealIntelligenceOutput } from "@/ai/flows/ai-deal-intelligence";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function DealIntelligencePage() {
     const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
@@ -35,12 +33,20 @@ export default function DealIntelligencePage() {
     const [report, setReport] = useState<DealIntelligenceOutput | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+    const isLoading = isUserLoading || isProfileLoading;
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/login');
+        }
+    }, [user, isLoading, router]);
+
     const activeQuotationQuery = useMemoFirebase(() => {
         if (!firestore || !user) return null;
+        // Admin-only model: Fetch latest active record globally
         return query(
             collection(firestore, 'quotations'),
             where('status', '==', 'ACTIVE'),
-            where('createdBy', '==', user.uid),
             orderBy('createdAt', 'desc'),
             limit(1)
         );
@@ -48,14 +54,6 @@ export default function DealIntelligencePage() {
 
     const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
     const activeQuotation = quotations?.[0] || null;
-
-    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
-
-    useEffect(() => {
-        if (!isLoading && !user) {
-            router.push('/login');
-        }
-    }, [user, isLoading, router]);
 
     const runAnalysis = async () => {
         if (!activeQuotation) return;
@@ -91,8 +89,8 @@ export default function DealIntelligencePage() {
         }
     }, [activeQuotation]);
 
-    if (isLoading) return <CenteredLoader text="Authenticating Uplink..." />;
-    if (!user) return <CenteredLoader text="Redirecting to login..." />;
+    if (isLoading || isQuotationLoading) return <CenteredLoader text="Authenticating Uplink..." />;
+    if (!user) return null;
     if (!profile || profile.role !== 'admin') return <AccessDenied />;
 
     const IntelligenceModule = ({ title, icon: Icon, children, className }: any) => (

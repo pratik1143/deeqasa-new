@@ -175,9 +175,9 @@ export function QuotationBuilder() {
     const batch = writeBatch(firestore);
 
     try {
+      // Admin-only model: Manage global status
       const q = query(
         collection(firestore, 'quotations'),
-        where('createdBy', '==', user.uid),
         where('status', '==', 'ACTIVE')
       );
       const snapshot = await getDocs(q);
