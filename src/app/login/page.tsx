@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -57,43 +58,44 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Video */}
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-black">
+      {/* Background Video - Positioned at z-0 */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover -z-10"
+        className="absolute top-0 left-0 w-full h-full object-cover z-0"
       >
         <source src="/bg-video.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-black/70 -z-10" />
+      {/* Dark Overlay - Positioned at z-10 */}
+      <div className="absolute inset-0 bg-black/70 z-10" />
 
-      {/* Top Accent Line */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
+      {/* Top Accent Line - Positioned at z-20 */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-primary z-20" />
       
-      <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8 text-center">
+      {/* Main Content - Positioned at z-20 */}
+      <div className="w-full max-w-[400px] relative z-20 flex flex-col items-center gap-8 text-center">
         <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block">
-            <span className="text-3xl font-black tracking-[0.3em] text-white uppercase">
+            <span className="text-4xl font-black tracking-[0.4em] text-white uppercase drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
               DEEQASA
             </span>
         </Link>
         
-        <Card className="w-full border-white/10 shadow-2xl bg-black/60 backdrop-blur-xl">
+        <Card className="w-full border-white/10 shadow-2xl bg-black/40 backdrop-blur-2xl">
           <CardHeader className="text-center pt-8">
             <CardTitle className="text-2xl font-bold tracking-tight text-white">Admin Portal</CardTitle>
-            <CardDescription className="text-muted-foreground font-medium">
+            <CardDescription className="text-white/50 font-medium">
               Enterprise Identity Verification
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-8 px-8">
             <form onSubmit={handleLogin} className="space-y-6 text-left">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Corporate Email</Label>
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-white/60">Corporate Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -107,7 +109,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Security Credential</Label>
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-white/60">Security Credential</Label>
                 <Input
                   id="password"
                   type="password"
@@ -133,14 +135,14 @@ export default function LoginPage() {
             )}
             
             <div className="mt-8 pt-6 border-t border-white/5 text-center">
-              <Link href="/" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
+              <Link href="/" className="text-xs font-bold text-white/40 hover:text-primary transition-colors uppercase tracking-widest">
                 &larr; Return to Infrastructure Site
               </Link>
             </div>
           </CardContent>
         </Card>
         
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
+        <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">
           Secure Terminal v4.0.1
         </p>
       </div>
