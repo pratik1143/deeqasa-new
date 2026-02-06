@@ -18,7 +18,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  ResponsiveContainer,
   Cell,
 } from "recharts";
 import {
@@ -53,7 +52,6 @@ import {
   AlertTriangle, 
   Lightbulb, 
   TrendingUp, 
-  TrendingDown, 
   Target, 
   Award, 
   UserX, 
@@ -77,12 +75,10 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LineLoader } from "../ui/line-loader";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
@@ -512,7 +508,7 @@ export function FunnelAnalyzerDashboard() {
                           <div className="text-[10px] font-bold text-primary uppercase">Stable</div>
                         </div>
                       </div>
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ChartContainer config={chartConfig} className="h-full w-full">
                         <PieChart>
                             <Tooltip content={<ChartTooltipContent hideLabel className="bg-black/90 border-primary/20 text-[10px]" />} />
                             <Pie 
@@ -530,7 +526,7 @@ export function FunnelAnalyzerDashboard() {
                             </Pie>
                             <Legend verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '20px', textTransform: 'uppercase', letterSpacing: '1px' }} />
                         </PieChart>
-                      </ResponsiveContainer>
+                      </ChartContainer>
                   </CardContent>
                 </Card>
 
@@ -544,7 +540,7 @@ export function FunnelAnalyzerDashboard() {
                       </div>
                   </CardHeader>
                   <CardContent className="h-[350px] p-6 pt-10">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <ChartContainer config={chartConfig} className="h-full w-full">
                         <BarChart data={funnelsByOwnerData} layout="vertical" margin={{ left: 20, right: 40 }}>
                             <CartesianGrid horizontal={false} stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
                             <XAxis type="number" hide />
@@ -552,7 +548,7 @@ export function FunnelAnalyzerDashboard() {
                                 type="category" 
                                 dataKey="name" 
                                 width={100} 
-                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }} 
+                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeights: 'bold' }} 
                                 axisLine={false}
                                 tickLine={false}
                             />
@@ -568,7 +564,7 @@ export function FunnelAnalyzerDashboard() {
                               ))}
                             </Bar>
                         </BarChart>
-                      </ResponsiveContainer>
+                      </ChartContainer>
                   </CardContent>
                 </Card>
             </div>
@@ -586,7 +582,7 @@ export function FunnelAnalyzerDashboard() {
                     </div>
                 </CardHeader>
                 <CardContent className="h-[400px] p-8">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ChartContainer config={chartConfig} className="h-full w-full">
                         <LineChart data={revenueByMonthData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                             <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
                             <XAxis 
@@ -594,13 +590,13 @@ export function FunnelAnalyzerDashboard() {
                                 tickLine={false} 
                                 axisLine={false} 
                                 tickMargin={15}
-                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }}
+                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeights: 'bold' }}
                             />
                             <YAxis 
                                 tickFormatter={(v) => `$${(v as number / 1000).toFixed(0)}k`}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: 'bold' }}
+                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeights: 'bold' }}
                             />
                             <Tooltip content={<ChartTooltipContent formatter={(v) => usdCurrencyFormatter.format(v as number)} />} />
                             <Line 
@@ -613,7 +609,7 @@ export function FunnelAnalyzerDashboard() {
                                 animationDuration={2000}
                             />
                         </LineChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
@@ -634,7 +630,9 @@ export function FunnelAnalyzerDashboard() {
                               <p className="text-[10px] font-black text-primary tracking-[0.5em] uppercase">Synthesizing Intelligence Matrix...</p>
                             </div>
                             <div className="space-y-4">
-                              <LineLoader className="h-[2px]" />
+                              <div className="h-[2px] bg-primary/20 overflow-hidden relative rounded-full">
+                                <div className="absolute inset-0 w-full h-full bg-primary animate-line-loader" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)', backgroundSize: '200% 100%' }} />
+                              </div>
                               <div className="grid grid-cols-3 gap-2">
                                 <Skeleton className="h-1 w-full bg-white/5" />
                                 <Skeleton className="h-1 w-full bg-primary/20" />
