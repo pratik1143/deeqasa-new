@@ -1,115 +1,90 @@
-/**
- * Core Philosophy: This ruleset is designed for a public-facing website that collects anonymous data and a private admin dashboard. The security goals are:
- * 1. Allow the public to read specific data (AI assistant state).
- * 2. Allow anonymous write-only submission of data (visits, feedback).
- * 3. Secure the admin dashboard by restricting access to authenticated users with an "admin" role.
- * 4. Protect user profile data, allowing users only to read their own information.
- *
- * Data Structure: Data is organized into top-level collections.
- * - /ai_assistant: Publicly readable state information.
- * - /website_visits: Write-only collection for anonymous traffic.
- * - /users: Stores user profiles and roles, critical for RBAC.
- *
- * Key Security Decisions:
- * - Role-Based Access Control (RBAC): The `/users/{userId}` collection contains a `role` field. This is the source of truth for authorization.
- * - User Profile Security: Users can only read their own profile document (`/users/{userId}`). No client is allowed to write to the `users` collection to prevent privilege escalation. Roles must be assigned via the Firebase Console or a trusted backend.
- * - Public Read-Only Data: The `/ai_assistant` collection is readable by anyone.
- * - Anonymous Write-Once Collections: `/website_visits` and its subcollections are "write-only" for anonymous clients to protect privacy.
- * - Default Deny: All operations that are not explicitly granted are denied.
- */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    //-------------------------------------------------------------------------
-    // Helper Functions
-    //-------------------------------------------------------------------------
+    /**
+     * CORE PHILOSOPHY
+     * This ruleset implements a strict user-ownership model designed for a high-performance quotation 
+     * and AI analysis system. It prioritizes authorization security while maintaining flexibility 
+     * for data payloads during the prototyping phase.
+     *
+     * DATA STRUCTURE
+     * - /quotations/{quotationId}: Top-level collection containing all quotation records.
+     * 
+     * KEY SECURITY DECISIONS
+     * - Authorization Independence: Every quotation document explicitly stores a 'createdBy' field. 
+     *   This allows the security rules to verify ownership instantly without performing 
+     *   additional cross-document lookups (get() calls), ensuring low latency for AI queries.
+     * - Ownership-Based Access: Users are restricted to viewing and managing only the quotations 
+     *   they created. Global listing of quotations is strictly prohibited.
+     * - Relational Integrity: The 'createdBy' field is enforced as immutable. Once a quotation 
+     *   is created, its ownership cannot be transferred to another user.
+     * - Prototyping Flexibility: While ownership is strictly enforced, the specific schema of 
+     *   the 'clientDetails', 'products', and 'pricing' maps is not validated at the rules level 
+     *   to allow for rapid UI/UX iteration.
+     */
+
+    // --- GLOBAL HELPER FUNCTIONS ---
 
     /**
-     * Checks if a user is signed in.
+     * @description Checks if the request is from an authenticated user.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * Verifies that the parent website_visits document exists.
+     * @description Checks if the provided UID matches the authenticated user's UID.
+     * @param userId The UID to verify against the current session.
      */
-    function isParentVisitExists(visitId) {
-      return exists(/databases/$(database)/documents/website_visits/$(visitId));
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * Ensures that the feedback document contains a 'visitId' field
-     * that matches the parent document's ID in the path.
+     * @description Verifies ownership of an existing document before modification or deletion.
+     * @param userId The UID stored in the existing document's ownership field.
      */
-    function feedbackLinksToParentVisit(visitId) {
-      return request.resource.data.visitId == visitId;
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
     }
 
-
-    //-------------------------------------------------------------------------
-    // Collection Rules
-    //-------------------------------------------------------------------------
+    // --- COLLECTION RULES ---
 
     /**
-     * @description Controls access to user profile data, including roles.
-     * @path /users/{userId}
-     * @allow (read) A user can only read their own profile.
-     * @deny (list, create, update, delete) No client can list users or modify any user profile. This is a critical security measure to prevent users from changing their own roles.
-     * @principle Enforces strict data ownership and prevents privilege escalation.
+     * @description Rules for the Quotation collection. Enforces that users can only create, 
+     * read, update, or delete quotations where they are the designated creator.
+     * @path /quotations/{quotationId}
+     * @allow (create) if authenticated and request.resource.data.createdBy matches auth.uid.
+     * @deny (list) if the user attempts to query quotations created by others.
+     * @principle Ownership-based access control with enforced relational integrity.
      */
-    match /users/{userId} {
-      allow get: if isSignedIn() && request.auth.uid == userId;
-      allow list: if false;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
-    }
-    
-    /**
-     * @description Controls access to the AI assistant's public state.
-     * @path /ai_assistant/{assistantId}
-     * @allow (get, list) Any user, signed-in or not, can read the AI's state.
-     * @deny (create, update, delete) No user can modify the AI's state from the client.
-     * @principle Makes application state data public while preventing client-side modification.
-     */
-    match /ai_assistant/{assistantId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+    match /quotations/{quotationId} {
+      
+      // Allow user to retrieve a specific quotation if they are the creator.
+      allow get: if isOwner(resource.data.createdBy);
+
+      // Allow user to list/query quotations they created. 
+      // This supports the AI Intelligence query: status == 'ACTIVE' && createdBy == UID.
+      allow list: if isOwner(resource.data.createdBy);
+
+      // Ensure that when a quotation is created, the 'createdBy' field 
+      // correctly identifies the authenticated user.
+      allow create: if isSignedIn() 
+                    && request.resource.data.createdBy == request.auth.uid;
+
+      // Allow updates only by the owner and prevent transferring the document to another user.
+      allow update: if isExistingOwner(resource.data.createdBy) 
+                    && request.resource.data.createdBy == resource.data.createdBy;
+
+      // Allow deletion only by the owner.
+      allow delete: if isExistingOwner(resource.data.createdBy);
     }
 
-    /**
-     * @description Manages anonymous website visit data.
-     * @path /website_visits/{visitId}
-     * @allow (create) Any client can create a new website visit document.
-     * @deny (get, list, update, delete) No client can read, modify, or delete visit data to protect privacy and data integrity.
-     * @principle Implements a "write-only" log for anonymous data submission.
-     */
-    match /website_visits/{visitId} {
-      allow get: if false;
-      allow list: if false;
-      allow create: if true;
-      allow update: if false;
-      allow delete: if false;
-
-      /**
-       * @description Manages anonymous CTO feedback associated with a website visit.
-       * @path /website_visits/{visitId}/cto_feedback/{feedbackId}
-       * @allow (create) An anonymous user can submit feedback, but only if the parent visit exists and the feedback's internal visitId matches the path.
-       * @deny (get, list, update, delete) No client can read, modify, or delete submitted feedback.
-       * @principle Enforces relational integrity and a secure "write-only" model for subcollections.
-       */
-      match /cto_feedback/{feedbackId} {
-        allow get: if false;
-        allow list: if false;
-        allow create: if isParentVisitExists(visitId) && feedbackLinksToParentVisit(visitId);
-        allow update: if false;
-        allow delete: if false;
-      }
+    // --- DEFAULT DENY ---
+    // Explicitly deny access to any other paths not defined above.
+    match /{path=**} {
+      allow read, write: if false;
     }
   }
 }
