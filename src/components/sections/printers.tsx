@@ -49,41 +49,25 @@ export function Printers() {
         Your browser does not support the video tag.
       </video>
 
-      {/* Dark Overlay for Printers Section */}
-      <div className="absolute inset-0 bg-black/40 -z-10" />
+      {/* Dark Overlays removed for maximum visibility */}
 
       <motion.div
-        className="relative z-10 flex flex-col items-center text-center p-8 container mx-auto bg-black/40 backdrop-blur-md rounded-3xl border border-white/10"
+        className="relative z-10 flex flex-col items-center text-center p-8 container mx-auto rounded-3xl"
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={containerVariants}
       >
         <motion.h2
           variants={itemVariants}
-          className="text-5xl md:text-7xl font-bold tracking-tighter text-white font-headline"
+          className="text-5xl md:text-8xl font-bold tracking-tighter text-white font-headline drop-shadow-2xl"
         >
           Enterprise Printers
         </motion.h2>
-        
-        <motion.p
-          variants={itemVariants}
-          className="mt-4 max-w-2xl text-lg text-white/70"
-        >
-          High-Performance, Secure & Reliable Printing Solutions
-        </motion.p>
-        
-        <motion.p
-            variants={itemVariants}
-            className="mt-6 max-w-xl text-md text-white/80 font-medium"
-        >
-            Fast, secure, and cost-efficient printers designed for
-            modern enterprises, high-volume workloads, and hybrid offices.
-        </motion.p>
 
         <motion.div variants={itemVariants} className="mt-8 flex flex-wrap justify-center gap-3">
-            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary"><Zap className="mr-2 h-3 w-3"/>High-Speed Printing</Badge>
-            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary"><ShieldCheck className="mr-2 h-3 w-3"/>Enterprise Security</Badge>
-            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary"><ChevronsDown className="mr-2 h-3 w-3" />Low Cost per Page</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/20 text-white backdrop-blur-sm"><Zap className="mr-2 h-3 w-3"/>High-Speed Printing</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/20 text-white backdrop-blur-sm"><ShieldCheck className="mr-2 h-3 w-3"/>Enterprise Security</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/20 text-white backdrop-blur-sm"><ChevronsDown className="mr-2 h-3 w-3" />Low Cost per Page</Badge>
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-12 flex gap-4">
@@ -92,7 +76,7 @@ export function Printers() {
               Explore Printers
             </a>
           </Button>
-          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6 border-white/20 hover:bg-white/5">
+          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6 border-white/20 hover:bg-white/5 text-white">
             View Specifications
           </Button>
         </motion.div>

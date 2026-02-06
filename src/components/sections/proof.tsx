@@ -49,40 +49,25 @@ export function Proof() {
         Your browser does not support the video tag.
       </video>
       
-      {/* Dark Overlay for Proof Section */}
-      <div className="absolute inset-0 bg-black/40 -z-10" />
+      {/* Dark Overlays removed as requested for maximum visibility */}
 
       <motion.div
-        className="relative z-10 flex flex-col items-center text-center p-8 bg-black/40 backdrop-blur-md rounded-3xl border border-white/10"
+        className="relative z-10 flex flex-col items-center text-center p-8 rounded-3xl"
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={containerVariants}
       >
         <motion.h2
           variants={itemVariants}
-          className="text-5xl md:text-7xl font-bold tracking-tighter text-white font-headline"
+          className="text-5xl md:text-8xl font-bold tracking-tighter text-white font-headline drop-shadow-2xl"
         >
           Poly Studio
         </motion.h2>
-        
-        <motion.p
-          variants={itemVariants}
-          className="mt-4 max-w-2xl text-lg text-white/70"
-        >
-          High-Quality Enterprise Video Collaboration Solution
-        </motion.p>
-        
-        <motion.p
-            variants={itemVariants}
-            className="mt-6 max-w-xl text-md text-white/80 font-medium"
-        >
-            Crystal-clear audio, intelligent cameras, and seamless collaboration built for modern meeting rooms and hybrid work.
-        </motion.p>
 
         <motion.div variants={itemVariants} className="mt-8 flex flex-wrap justify-center gap-3">
-            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary"><MicOff className="mr-2 h-3 w-3"/>AI Noise Cancellation</Badge>
-            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary"><Camera className="mr-2 h-3 w-3"/>4K Camera</Badge>
-            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-primary"><ShieldCheck className="mr-2 h-3 w-3"/>Enterprise Ready</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/20 text-white backdrop-blur-sm"><MicOff className="mr-2 h-3 w-3"/>AI Noise Cancellation</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/20 text-white backdrop-blur-sm"><Camera className="mr-2 h-3 w-3"/>4K Camera</Badge>
+            <Badge variant="secondary" className="border-primary/20 bg-primary/20 text-white backdrop-blur-sm"><ShieldCheck className="mr-2 h-3 w-3"/>Enterprise Ready</Badge>
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-12 flex gap-4">
@@ -91,7 +76,7 @@ export function Proof() {
               Explore Poly Studio
             </a>
           </Button>
-          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6 border-white/20 hover:bg-white/5">
+          <Button size="lg" variant="outline" className="font-headline font-bold text-lg rounded-full px-8 py-6 border-white/20 hover:bg-white/5 text-white">
             View Specifications
           </Button>
         </motion.div>
