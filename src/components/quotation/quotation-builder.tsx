@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
@@ -265,6 +266,24 @@ export function QuotationBuilder() {
     try {
       await html2pdf().from(element).set(opt).save();
       toast({ title: 'Export Complete', description: 'A4 Document saved successfully.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
+    } finally { setIsDownloading(false); }
+  };
+
+  const handleDownloadPng = async (rootId: string, filename: string) => {
+    setIsDownloading(true);
+    try {
+      const { toPng } = await import('html-to-image');
+      const element = document.getElementById(rootId);
+      if (!element) return;
+      
+      const dataUrl = await toPng(element, { quality: 1.0, pixelRatio: 2 });
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = dataUrl;
+      link.click();
+      toast({ title: 'Export Complete', description: 'HD PNG Image saved successfully.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
     } finally { setIsDownloading(false); }
@@ -538,7 +557,7 @@ export function QuotationBuilder() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button onClick={() => handleDownloadPng(activeTab === 'quotation' ? 'quotation-page' : 'brochure-page', activeTab === 'quotation' ? 'Quotation' : 'Brochure')} size="sm" variant="outline" className="rounded-full h-9 px-5 border-white/10 text-white/70 hover:text-white hover:bg-white/5 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
+                  <Button onClick={() => handleDownloadPng(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Quotation' : 'Brochure')} size="sm" variant="outline" className="rounded-full h-9 px-5 border-white/10 text-white/70 hover:text-white hover:bg-white/5 font-bold transition-all hover:scale-105 active:scale-95" disabled={isDownloading}>
                     {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ImageIcon size={14} className="mr-2"/> Export HD PNG</>}
                   </Button>
                 </TooltipTrigger>
