@@ -1,10 +1,10 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth, useUser, useFirestore } from '@/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,12 +13,16 @@ import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Lock, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, ArrowRight, UserPlus, LogIn } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function LoginPage() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +34,7 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!email || !password) {
@@ -41,11 +45,29 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      if (mode === 'login') {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Automatically create admin profile for the prototype
+        await setDoc(doc(firestore, 'users', userCredential.user.uid), {
+          email: email,
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        });
+      }
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
-      setError('Authentication failed. Invalid identity credentials.');
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Authentication failed. Invalid identity credentials.');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError('Identity already exists. Please use login protocol.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Security key is too weak. Minimum 6 characters required.');
+      } else {
+        setError('System error during authentication. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -57,21 +79,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-black font-body">
-      {/* Background Video Layer */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-80"
-      >
-        <source src="/bg-video.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
-      {/* Depth Layering Overlays */}
-      <div className="absolute inset-0 bg-black/60 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 z-10" />
+      {/* Background Layer */}
+      <div className="absolute inset-0 bg-black z-0" />
+      <div className="absolute inset-0 command-grid opacity-20 pointer-events-none" />
       
       {/* Top Professional Accent */}
       <motion.div 
@@ -82,7 +92,7 @@ export default function LoginPage() {
       />
       
       {/* Main Content Container */}
-      <div className="w-full max-w-[420px] relative z-20 flex flex-col items-center gap-10">
+      <div className="w-full max-w-[420px] relative z-20 flex flex-col items-center gap-8">
         
         {/* Branding Header */}
         <motion.div
@@ -101,11 +111,23 @@ export default function LoginPage() {
           </Link>
         </motion.div>
 
-        {/* Glassmorphic Login Card */}
+        {/* Auth Mode Selector */}
+        <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 rounded-full h-12 p-1">
+            <TabsTrigger value="login" className="rounded-full text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-black">
+              Authorize
+            </TabsTrigger>
+            <TabsTrigger value="register" className="rounded-full text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-black">
+              Register
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Login Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
           className="w-full"
         >
           <Card className="w-full border-white/10 shadow-2xl bg-black/40 backdrop-blur-xl ring-1 ring-white/5 overflow-hidden">
@@ -116,17 +138,19 @@ export default function LoginPage() {
                   transition={{ duration: 6, repeat: Infinity }}
                   className="p-2 rounded-full bg-primary/10 border border-primary/20"
                 >
-                  <Lock className="w-4 h-4 text-primary" />
+                  {mode === 'login' ? <Lock className="w-4 h-4 text-primary" /> : <UserPlus className="w-4 h-4 text-primary" />}
                 </motion.div>
               </div>
-              <CardTitle className="text-xl font-bold tracking-tight text-white">Admin Authentication</CardTitle>
+              <CardTitle className="text-xl font-bold tracking-tight text-white uppercase tracking-[0.1em]">
+                {mode === 'login' ? 'System Authorization' : 'New Identity Request'}
+              </CardTitle>
               <CardDescription className="text-white/40 text-xs font-medium uppercase tracking-widest">
-                Identity & Access Management
+                {mode === 'login' ? 'Identity & Access Management' : 'Admin Infrastructure Access'}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="pb-8 px-8">
-              <form onSubmit={handleLogin} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2 group">
                   <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-widest text-white/50 group-focus-within:text-primary transition-colors">Corporate Identity</Label>
                   <div className="relative">
@@ -160,14 +184,14 @@ export default function LoginPage() {
                 <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
                   <Button 
                     type="submit" 
-                    className="w-full h-12 font-bold text-sm bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/10 transition-all flex items-center justify-center gap-2 group" 
+                    className="w-full h-12 font-bold text-xs uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/10 transition-all flex items-center justify-center gap-2 group" 
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <div className="w-full px-4"><LineLoader className="h-0.5 bg-white/20" /></div>
                     ) : (
                       <>
-                        Authorize Session
+                        {mode === 'login' ? 'Authorize Session' : 'Request Access'}
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
@@ -183,7 +207,7 @@ export default function LoginPage() {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-6 p-3 bg-destructive/10 border border-destructive/20 rounded-md"
                   >
-                    <p className="text-destructive text-center text-xs font-bold uppercase tracking-tighter">{error}</p>
+                    <p className="text-destructive text-center text-[10px] font-bold uppercase tracking-tight">{error}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -194,7 +218,7 @@ export default function LoginPage() {
                   End-to-End Encrypted Session
                 </div>
                 <Link href="/" className="text-[10px] font-bold text-white/40 hover:text-primary transition-colors uppercase tracking-widest border-b border-transparent hover:border-primary/30 pb-1">
-                  &larr; Return to Infrastructure Site
+                  &larr; Return to Portal
                 </Link>
               </div>
             </CardContent>
