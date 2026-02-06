@@ -43,7 +43,7 @@
 
 /* 
    ==========================================================================
-   STRICT A4 PRINT ARCHITECTURE
+   STRICT A4 PRINT ARCHITECTURE (LOCKED)
    ==========================================================================
 */
 
@@ -56,7 +56,8 @@
   align-items: center;
 }
 
-.quotation-page, .brochure-page {
+/* The A4 Page Wrapper */
+.a4-page {
   width: 210mm !important;
   height: 297mm !important;
   min-height: 297mm !important;
@@ -64,51 +65,71 @@
   margin: 0 auto 40px auto !important;
   background: white !important;
   color: black !important;
-  padding: 20mm !important; /* Strict 20mm margin requirement */
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+  padding: 15mm !important; /* Strict 15mm margin */
   box-sizing: border-box !important;
-  font-family: 'Inter', 'Times New Roman', serif !important;
-  position: relative !important;
-  overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+  font-family: 'Inter', sans-serif !important;
+  position: relative !important;
+  overflow: hidden !important;
   page-break-after: always !important;
 }
 
+/* The 180mm Content Wrapper (210mm - 15mm - 15mm) */
+.a4-content {
+  width: 180mm !important;
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
 .print-header {
-  height: 25mm;
-  width: 100%;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 10mm;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
+  height: 20mm !important;
+  width: 180mm !important;
+  border-bottom: 1px solid #eee !important;
+  margin-bottom: 8mm !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
 }
 
 .print-footer {
-  height: 15mm;
-  width: 100%;
-  border-top: 1px solid #eee;
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  font-size: 8pt;
-  color: #9ca3af;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  height: 12mm !important;
+  width: 180mm !important;
+  border-top: 1px solid #eee !important;
+  margin-top: auto !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  font-size: 8pt !important;
+  color: #9ca3af !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
 }
 
-.print-body {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+/* Layout Utilities */
+.no-break {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
 }
 
+.page-break {
+  page-break-before: always !important;
+  break-before: page !important;
+}
+
+.justified-text {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  line-height: 1.6 !important;
+}
+
+/* Table Architecture */
 .quotation-table {
   width: 100% !important;
   border-collapse: collapse !important;
@@ -124,7 +145,6 @@
   font-weight: 800 !important;
   text-transform: uppercase !important;
   text-align: center !important;
-  color: #374151 !important;
 }
 
 .quotation-table td {
@@ -132,23 +152,17 @@
   padding: 8pt 6pt !important;
   font-size: 9.5pt !important;
   line-height: 1.4 !important;
-  vertical-align: top !important;
-}
-
-.justified-text {
-  text-align: justify !important;
-  text-justify: inter-word !important;
-  line-height: 1.6 !important;
 }
 
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0 !important;
+    margin: 0 !important; /* Managed by .a4-page padding */
   }
   
   body {
     margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
   }
 
@@ -159,12 +173,11 @@
     background: white !important;
   }
 
-  .quotation-page, .brochure-page {
+  .a4-page {
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     page-break-after: always !important;
-    break-inside: avoid !important;
   }
 }
 

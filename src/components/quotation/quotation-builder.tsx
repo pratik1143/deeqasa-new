@@ -175,15 +175,9 @@ export function QuotationBuilder() {
     const batch = writeBatch(firestore);
 
     try {
-      // Admin-only model: Manage global status
-      const q = query(
-        collection(firestore, 'quotations'),
-        where('status', '==', 'ACTIVE')
-      );
+      const q = query(collection(firestore, 'quotations'), where('status', '==', 'ACTIVE'));
       const snapshot = await getDocs(q);
-      snapshot.forEach(doc => {
-        batch.update(doc.ref, { status: 'ARCHIVED' });
-      });
+      snapshot.forEach(doc => batch.update(doc.ref, { status: 'ARCHIVED' }));
 
       const newDocRef = doc(collection(firestore, 'quotations'), quotationId);
       batch.set(newDocRef, {
@@ -207,27 +201,6 @@ export function QuotationBuilder() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleAddProduct = () => {
-    if (selectedProduct) {
-      append({ product: selectedProduct, quantity: pendingQuantity, unitPrice: pendingPrice });
-      setSelectedProduct(null);
-      setSearchQuery('');
-      toast({ title: 'Item Added', description: `${selectedProduct.model} added.` });
-    }
-  };
-
-  const handleAiGenerateBody = () => {
-    if (!watchedSubject) return;
-    startGeneratingBody(async () => {
-      try {
-        const result = await generateLetterBody({ subject: watchedSubject, customerName: watchedCustomer, companyName: watchedCompany, address: watchedAddress });
-        form.setValue('letterBody', result.letterBody);
-      } catch (error: any) {
-        toast({ variant: 'destructive', title: 'Generation Failed', description: error.message });
-      }
-    });
   };
 
   const handleDownloadPdf = async (rootId: string, filename: string) => {
@@ -254,10 +227,10 @@ export function QuotationBuilder() {
 
   const PageHeader = () => (
     <div className="print-header">
-      <img src={HP_LOGO_URL} alt="HP" className="h-[12mm] w-auto" />
+      <img src={HP_LOGO_URL} alt="HP" className="h-[10mm] w-auto" />
       <div className="text-right">
-        <h2 className="text-[12pt] font-black uppercase tracking-tight">DEEQASA</h2>
-        <p className="text-[7pt] text-primary font-bold uppercase tracking-[0.2em]">HP Authorized Enterprise Partner</p>
+        <h2 className="text-[11pt] font-black uppercase tracking-tighter">DEEQASA</h2>
+        <p className="text-[6pt] text-primary font-bold uppercase tracking-[0.2em]">HP Authorized Enterprise Partner</p>
       </div>
     </div>
   );
@@ -352,7 +325,20 @@ export function QuotationBuilder() {
                     <FormItem>
                       <div className="flex justify-between items-center mb-1">
                         <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Body Text</FormLabel>
-                        <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20" onClick={handleAiGenerateBody} disabled={isGeneratingBody}>
+                        <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20" onClick={() => {
+                          const subject = form.getValues('subject');
+                          const customer = form.getValues('customerName');
+                          const company = form.getValues('companyName');
+                          const address = form.getValues('address');
+                          startGeneratingBody(async () => {
+                            try {
+                              const res = await generateLetterBody({ subject, customerName: customer, companyName: company, address });
+                              form.setValue('letterBody', res.letterBody);
+                            } catch (e: any) {
+                              toast({ variant: 'destructive', title: 'Generation Failed', description: e.message });
+                            }
+                          });
+                        }} disabled={isGeneratingBody}>
                           {isGeneratingBody ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Sparkles size={10} className="mr-1"/> Magic Refine</>}
                         </Button>
                       </div>
@@ -394,7 +380,12 @@ export function QuotationBuilder() {
                       <Input type="number" value={pendingPrice} onChange={e => setPendingPrice(Number(e.target.value))} className="bg-black/40 h-10 font-bold font-mono" />
                       <Label className="text-[10px] font-bold uppercase text-white/50">Quantity</Label>
                       <Input type="number" value={pendingQuantity} onChange={e => setPendingQuantity(Number(e.target.value))} className="bg-black/40 h-10 font-bold" />
-                      <Button className="w-full h-11 bg-primary text-black font-bold" onClick={handleAddProduct}><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
+                      <Button className="w-full h-11 bg-primary text-black font-bold" onClick={() => {
+                        append({ product: selectedProduct, quantity: pendingQuantity, unitPrice: pendingPrice });
+                        setSelectedProduct(null);
+                        setSearchQuery('');
+                        toast({ title: 'Item Added', description: `${selectedProduct.model} added.` });
+                      }}><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
                     </div>
                   )}
 
@@ -448,36 +439,36 @@ export function QuotationBuilder() {
             {activeTab === 'quotation' ? (
               <div id="quotation-export-root" className="document-canvas">
                 {/* PAGE 1: EXECUTIVE COVER LETTER */}
-                <div className="quotation-page">
+                <div className="a4-page">
                   <PageHeader />
-                  <div className="print-body">
-                    <div className="mb-10 text-[11pt] space-y-1">
+                  <div className="a4-content">
+                    <div className="mb-8 text-[10.5pt] space-y-1">
                       <p className="font-bold">To,</p>
-                      <p className="text-[12pt] font-black uppercase">{watchedCustomer}</p>
+                      <p className="text-[11.5pt] font-black uppercase">{watchedCustomer}</p>
                       <p className="font-bold text-gray-700">{watchedCompany}</p>
-                      <p className="text-gray-500 italic">{watchedAddress}</p>
+                      <p className="text-gray-500 italic text-[9pt]">{watchedAddress}</p>
                     </div>
-                    <div className="font-bold bg-gray-50 p-6 border-l-[6pt] border-gray-900 mb-10">
-                      <p className="text-[11pt] leading-tight"><span className="underline uppercase mr-3 text-gray-400 text-[8pt] font-black">Subject:</span> {watchedSubject}</p>
+                    <div className="font-bold bg-gray-50 p-5 border-l-[5pt] border-gray-900 mb-8 no-break">
+                      <p className="text-[10.5pt] leading-tight"><span className="underline uppercase mr-3 text-gray-400 text-[7.5pt] font-black">Subject:</span> {watchedSubject}</p>
                     </div>
-                    <div className="space-y-8 text-[11.5pt] justified-text">
+                    <div className="space-y-6 text-[11pt] justified-text">
                       <p className="font-bold">Respected Sir/Madam,</p>
-                      <div className="whitespace-pre-wrap leading-[1.8] text-gray-800 font-medium">{watchedLetterBody}</div>
+                      <div className="whitespace-pre-wrap leading-[1.7] text-gray-800 font-medium">{watchedLetterBody}</div>
                     </div>
                   </div>
                   <PageFooter pageNum={1} />
                 </div>
 
                 {/* PAGE 2: COMMERCIAL SCHEDULE */}
-                <div className="quotation-page">
+                <div className="a4-page">
                   <PageHeader />
-                  <div className="print-body">
-                    <h3 className="text-center font-black text-xl mb-10 uppercase tracking-[0.2em] border-b-2 border-gray-900 pb-2">Commercial Schedule</h3>
+                  <div className="a4-content">
+                    <h3 className="text-center font-black text-lg mb-8 uppercase tracking-[0.15em] border-b border-gray-900 pb-2">Commercial Schedule</h3>
                     <table className="quotation-table">
                       <thead>
                         <tr>
                           <th className="w-[10%]">Sr.</th>
-                          <th className="w-[50%]">Item Description & Configuration</th>
+                          <th className="w-[50%]">Item Description</th>
                           <th className="w-[10%]">Qty</th>
                           <th className="w-[15%]">Unit (₹)</th>
                           <th className="w-[15%]">Total (₹)</th>
@@ -485,11 +476,11 @@ export function QuotationBuilder() {
                       </thead>
                       <tbody>
                         {watchedLineItems?.map((item, idx) => (
-                          <tr key={idx}>
+                          <tr key={idx} className="no-break">
                             <td className="text-center font-bold text-gray-400">{idx + 1}</td>
                             <td className="font-bold text-gray-900">
                               {item.product.model}
-                              <p className="text-[7.5pt] text-gray-500 italic font-medium mt-1 uppercase tracking-tight">{item.product.processor}</p>
+                              <p className="text-[7pt] text-gray-500 italic font-medium mt-1 uppercase tracking-tight">{item.product.processor}</p>
                             </td>
                             <td className="text-center font-bold">{item.quantity}</td>
                             <td className="text-right font-medium">{item.unitPrice.toLocaleString('en-IN')}</td>
@@ -499,26 +490,26 @@ export function QuotationBuilder() {
                       </tbody>
                     </table>
 
-                    <div className="mt-8 flex justify-end">
-                      <div className="w-[90mm] bg-gray-50 p-8 rounded-2xl border-2 border-gray-100 space-y-3">
-                        <div className="flex justify-between text-[8pt] font-black text-gray-400 uppercase tracking-widest">
+                    <div className="mt-6 flex justify-end no-break">
+                      <div className="w-[85mm] bg-gray-50 p-6 rounded-xl border border-gray-100 space-y-2">
+                        <div className="flex justify-between text-[7.5pt] font-black text-gray-400 uppercase tracking-widest">
                           <span>Sub-Total</span>
                           <span>₹{totals.subTotal.toLocaleString('en-IN')}</span>
                         </div>
-                        <div className="flex justify-between text-[8pt] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-3">
+                        <div className="flex justify-between text-[7.5pt] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">
                           <span>GST (18%)</span>
                           <span>₹{totals.totalGst.toLocaleString('en-IN')}</span>
                         </div>
-                        <div className="flex justify-between text-[14pt] font-black text-gray-900 pt-2 uppercase tracking-tight">
+                        <div className="flex justify-between text-[12pt] font-black text-gray-900 pt-1 uppercase tracking-tight">
                           <span>Grand Total</span>
                           <span>₹{totals.grandTotal.toLocaleString('en-IN')}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-10 p-6 bg-blue-50/30 rounded-xl border border-blue-100">
-                      <p className="text-[8pt] font-black text-blue-400 uppercase tracking-widest mb-2">Amount in Words</p>
-                      <p className="text-[10pt] text-blue-900 italic font-serif leading-relaxed">{numberToWords(totals.grandTotal)}</p>
+                    <div className="mt-8 p-5 bg-blue-50/20 rounded-xl border border-blue-100 no-break">
+                      <p className="text-[7.5pt] font-black text-blue-400 uppercase tracking-widest mb-1">Amount in Words</p>
+                      <p className="text-[9.5pt] text-blue-900 italic font-serif leading-relaxed">{numberToWords(totals.grandTotal)}</p>
                     </div>
                   </div>
                   <PageFooter pageNum={2} />
