@@ -17,7 +17,6 @@ const protectedLinks = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Quotation Builder", href: "/quotation-builder" },
   { name: "AI Intelligence", href: "/deal-intelligence" },
-  { name: "Follow-Up", href: "/follow-up" },
 ];
 
 export function Header() {

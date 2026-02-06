@@ -35,7 +35,6 @@ import {
   CheckCircle2,
   Loader2,
   Save,
-  Calendar,
   BrainCircuit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -409,10 +408,9 @@ export function QuotationBuilder() {
                   <Button variant="outline" className="w-full h-12 gap-2 border-primary/30 text-primary" onClick={saveQuotationToFirestore} disabled={isSaving || !watchedLineItems?.length}>
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save size={16}/> Save & Sync Deal</>}
                   </Button>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="h-12 text-[10px] font-bold uppercase" onClick={() => router.push('/deal-intelligence')} disabled={!watchedLineItems?.length}><BrainCircuit size={14} className="mr-2"/> AI Logic</Button>
-                    <Button variant="outline" className="h-12 text-[10px] font-bold uppercase" onClick={() => router.push('/follow-up')} disabled={!watchedLineItems?.length}><Calendar size={14} className="mr-2"/> Follow-Up</Button>
-                  </div>
+                  <Button variant="outline" className="w-full h-12 text-[10px] font-bold uppercase" onClick={() => router.push('/deal-intelligence')} disabled={!watchedLineItems?.length}>
+                    <BrainCircuit size={14} className="mr-2"/> Open AI Analysis Matrix
+                  </Button>
                 </motion.div>
               )}
             </AnimatePresence>
