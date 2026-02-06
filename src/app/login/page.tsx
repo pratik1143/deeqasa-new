@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
-import Image from 'next/image';
 import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
@@ -64,15 +63,11 @@ export default function LoginPage() {
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       
-      <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8">
-        <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block relative h-16 w-full">
-            <Image 
-              src="/logo_hp.png" 
-              alt="DEEQA SA TECH" 
-              fill
-              className="object-contain"
-              priority
-            />
+      <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8 text-center">
+        <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block">
+            <span className="text-2xl font-black tracking-[0.2em] text-gray-900 uppercase">
+              DEEQA SA TECH
+            </span>
         </Link>
         
         <Card className="w-full border-gray-100 shadow-2xl shadow-gray-200/50 bg-white">
@@ -83,7 +78,7 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-8 px-8">
-            <form onSubmit={handleLogin} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6 text-left">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-gray-500">Corporate Email</Label>
                 <Input
@@ -114,7 +109,7 @@ export default function LoginPage() {
               </div>
               
               <Button type="submit" className="w-full h-11 font-bold text-sm bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all active:scale-[0.98]" disabled={isLoading}>
-                {isLoading ? <div className="w-6"><LineLoader className="h-0.5 bg-white/20" /></div> : "Sign In to Portal"}
+                {isLoading ? <div className="w-6 mx-auto"><LineLoader className="h-0.5 bg-white/20" /></div> : "Sign In to Portal"}
               </Button>
             </form>
             

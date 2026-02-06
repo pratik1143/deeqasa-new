@@ -7,7 +7,6 @@ import { Button } from "../ui/button";
 import { Search, LogIn, LogOut, Menu } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
 
 const baseNavLinks = [
   { name: "Home", href: "/" },
@@ -54,15 +53,10 @@ export function Header() {
     )}>
       <div className="container mx-auto px-4 flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
-          <Link href="/" className="group transition-transform duration-250 hover:scale-[1.03] block relative h-12 w-[160px]">
-            <Image 
-              src="/logo_hp.png" 
-              alt="DEEQA SA TECH" 
-              fill
-              className="object-contain"
-              priority
-              sizes="160px"
-            />
+          <Link href="/" className="group transition-transform duration-250 hover:scale-[1.03] flex items-center">
+            <span className="text-xl font-black tracking-[0.15em] text-gray-900 uppercase">
+              DEEQA SA TECH
+            </span>
           </Link>
           <div className="hidden lg:flex items-center gap-1 border-l border-gray-200 pl-8 h-8">
               <span className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Enterprise Infrastructure</span>

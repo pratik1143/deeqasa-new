@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 const footerLinks = {
   Company: [
@@ -34,13 +33,10 @@ export function Footer() {
       <div className="container mx-auto px-4 py-20">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-12">
           <div className="col-span-2">
-            <Link href="/" className="block relative h-10 w-40 mb-6">
-              <Image 
-                src="/logo_hp.png" 
-                alt="DEEQA SA TECH" 
-                fill
-                className="object-contain"
-              />
+            <Link href="/" className="block mb-6">
+              <span className="text-xl font-black tracking-[0.15em] text-gray-900 uppercase">
+                DEEQA SA TECH
+              </span>
             </Link>
             <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
               Smart. Secure. Sustainable. Infrastructure solutions designed for the modern enterprise era.
