@@ -39,7 +39,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   Loader2,
-  Building2
+  Building2,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -111,6 +112,11 @@ export function QuotationBuilder() {
   const [currentStep, setCurrentStep] = useState('customer');
   const [activeField, setActiveField] = useState<string | null>(null);
 
+  // States for pending item configuration
+  const [pendingPrice, setPendingPrice] = useState<number>(0);
+  const [pendingQuantity, setPendingQuantity] = useState<number>(1);
+  const [isPriceOverridden, setIsPriceOverridden] = useState(false);
+
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualModel, setManualModel] = useState('');
   const [manualSpec, setManualSpec] = useState('');
@@ -156,6 +162,15 @@ export function QuotationBuilder() {
     fetchProducts();
   }, [toast]);
 
+  // Reset pending configuration when selected product changes
+  useEffect(() => {
+    if (selectedProduct) {
+      setPendingPrice(selectedProduct.price);
+      setPendingQuantity(1);
+      setIsPriceOverridden(false);
+    }
+  }, [selectedProduct]);
+
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return products;
     const q = searchQuery.toLowerCase();
@@ -176,9 +191,16 @@ export function QuotationBuilder() {
 
   const handleAddProduct = () => {
     if (selectedProduct) {
-      append({ product: selectedProduct, quantity: 1, unitPrice: selectedProduct.price });
+      append({ 
+        product: selectedProduct, 
+        quantity: pendingQuantity, 
+        unitPrice: pendingPrice 
+      });
       setSelectedProduct(null);
       setSearchQuery('');
+      setPendingQuantity(1);
+      setPendingPrice(0);
+      setIsPriceOverridden(false);
       toast({ title: 'Item Added', description: `${selectedProduct.model} added to quotation.` });
     }
   };
@@ -442,9 +464,76 @@ export function QuotationBuilder() {
                           </Command>
                         </PopoverContent>
                       </Popover>
-                      <Button type="button" className="w-full h-11 font-bold text-xs shadow-lg shadow-primary/20" onClick={handleAddProduct} disabled={!selectedProduct}>
-                        <Plus className="mr-2 h-4 w-4" /> Commit Item to List
-                      </Button>
+
+                      {/* Product Adjustment Block - Appears once a product is selected */}
+                      <AnimatePresence>
+                        {selectedProduct && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-4 overflow-hidden"
+                          >
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Item Configuration</h4>
+                              <CheckCircle2 className="h-4 w-4 text-primary/40" />
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div className="flex flex-col gap-1.5">
+                                <div className="flex justify-between items-center">
+                                  <Label className="text-[10px] font-bold uppercase text-white/50">Unit Price (₹)</Label>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-bold text-muted-foreground uppercase">Manual Override</span>
+                                    <Switch 
+                                      checked={isPriceOverridden} 
+                                      onCheckedChange={setIsPriceOverridden}
+                                      className="scale-75"
+                                    />
+                                  </div>
+                                </div>
+                                <Input 
+                                  type="number" 
+                                  value={pendingPrice} 
+                                  onChange={e => setPendingPrice(Number(e.target.value))}
+                                  disabled={!isPriceOverridden}
+                                  className={cn(
+                                    "bg-black/40 h-10 font-bold font-mono transition-all",
+                                    isPriceOverridden ? "border-primary/50 text-white" : "border-white/5 text-white/30"
+                                  )}
+                                />
+                                {!isPriceOverridden && (
+                                  <p className="text-[9px] text-muted-foreground italic px-1">Using master data price. Toggle override to edit.</p>
+                                )}
+                              </div>
+
+                              <div className="flex flex-col gap-1.5">
+                                <Label className="text-[10px] font-bold uppercase text-white/50">Quantity</Label>
+                                <div className="flex items-center gap-3">
+                                  <Input 
+                                    type="number" 
+                                    min={1}
+                                    value={pendingQuantity} 
+                                    onChange={e => setPendingQuantity(Number(e.target.value))}
+                                    className="bg-black/40 h-10 font-bold border-white/5"
+                                  />
+                                  <div className="flex-1 text-[10px] font-bold text-primary/60 text-right uppercase tracking-tighter">
+                                    Line Total: ₹{(pendingPrice * pendingQuantity).toLocaleString('en-IN')}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <Button 
+                              type="button" 
+                              className="w-full h-11 font-bold text-xs bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20" 
+                              onClick={handleAddProduct}
+                            >
+                              <Plus className="mr-2 h-4 w-4" /> Add to Proposal
+                            </Button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   ) : (
                     <div className="space-y-4 p-4 bg-white/5 rounded-xl border border-white/10">
