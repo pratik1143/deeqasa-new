@@ -1,30 +1,33 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUserWithRole, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   BrainCircuit, 
   Target, 
   ShieldAlert, 
   TrendingUp, 
   Zap, 
-  Calendar, 
   Activity, 
   Cpu, 
   Terminal,
   RefreshCw,
   AlertTriangle,
-  Lock
+  Lock,
+  History,
+  DollarSign,
+  BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { query, collection, where, orderBy, limit } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { analyzeDealIntelligence, type DealIntelligenceOutput } from "@/ai/flows/ai-deal-intelligence";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function DealIntelligencePage() {
     const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
@@ -35,40 +38,71 @@ export default function DealIntelligencePage() {
 
     const isLoading = isUserLoading || isProfileLoading;
 
+    // STEP 3: Simple Firestore read logic (No filters, no sorting at query level)
+    const quotationsQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'quotations');
+    }, [firestore, user]);
+
+    const { data: rawQuotations, isLoading: isQuotationLoading } = useCollection(quotationsQuery);
+
+    // STEP 3: Client-side processing
+    const processedData = useMemo(() => {
+        if (!rawQuotations || rawQuotations.length === 0) return null;
+
+        // Sort by date descending
+        const sorted = [...rawQuotations].sort((a, b) => 
+            new Date(b.createdAt).getTime() - new Date(a.getTime).getTime()
+        );
+
+        const activeQuotation = sorted.find(q => q.status === 'ACTIVE') || sorted[0];
+        
+        // Stats calculations
+        let totalImpact = 0;
+        let activeCount = 0;
+        let archivedCount = 0;
+
+        sorted.forEach(q => {
+            try {
+                const totals = JSON.parse(q.totals || '{}');
+                totalImpact += (totals.grandTotal || 0);
+                if (q.status === 'ACTIVE') activeCount++;
+                else archivedCount++;
+            } catch (e) {
+                console.error("Parse error in stats", e);
+            }
+        });
+
+        return {
+            activeQuotation,
+            totalImpact,
+            activeCount,
+            archivedCount,
+            history: sorted.slice(0, 5)
+        };
+    }, [rawQuotations]);
+
     useEffect(() => {
         if (!isLoading && !user) {
             router.push('/login');
         }
     }, [user, isLoading, router]);
 
-    const activeQuotationQuery = useMemoFirebase(() => {
-        if (!firestore || !user) return null;
-        // Admin-only model: Fetch latest active record globally
-        return query(
-            collection(firestore, 'quotations'),
-            where('status', '==', 'ACTIVE'),
-            orderBy('createdAt', 'desc'),
-            limit(1)
-        );
-    }, [firestore, user]);
-
-    const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
-    const activeQuotation = quotations?.[0] || null;
-
     const runAnalysis = async () => {
-        if (!activeQuotation) return;
+        if (!processedData?.activeQuotation) return;
         setIsAnalyzing(true);
         try {
-            const client = JSON.parse(activeQuotation.clientDetails);
-            const products = JSON.parse(activeQuotation.products);
-            const pricing = JSON.parse(activeQuotation.pricing);
-            const totals = JSON.parse(activeQuotation.totals);
+            const active = processedData.activeQuotation;
+            const client = JSON.parse(active.clientDetails || '{}');
+            const products = JSON.parse(active.products || '[]');
+            const pricing = JSON.parse(active.pricing || '[]');
+            const totals = JSON.parse(active.totals || '{}');
 
             const result = await analyzeDealIntelligence({
                 customerName: client.name || 'Unknown',
                 companyName: client.companyName || 'Unknown',
                 totalAmount: totals.grandTotal || 0,
-                subject: activeQuotation.subject || 'Enterprise Quotation',
+                subject: active.subject || 'Enterprise Quotation',
                 products: products.map((item: any, idx: number) => ({
                     model: item.model || 'Item',
                     quantity: item.quantity || 1,
@@ -83,33 +117,24 @@ export default function DealIntelligencePage() {
         }
     };
 
-    useEffect(() => {
-        if (activeQuotation && !report && !isAnalyzing) {
-            runAnalysis();
-        }
-    }, [activeQuotation]);
-
-    if (isLoading || isQuotationLoading) return <CenteredLoader text="Authenticating Uplink..." />;
+    if (isLoading || isQuotationLoading) return <CenteredLoader text="Syncing Intelligence Matrix..." />;
     if (!user) return null;
     if (!profile || profile.role !== 'admin') return <AccessDenied />;
 
-    const IntelligenceModule = ({ title, icon: Icon, children, className }: any) => (
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={cn("bg-black/40 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden holographic-edge group", className)}
-        >
-            <div className="bg-white/5 border-b border-white/5 px-6 py-3 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <Icon size={14} className="text-primary" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">{title}</span>
+    const StatCard = ({ label, value, icon: Icon, colorClass }: any) => (
+        <Card className="bg-black/40 border-white/5 holographic-edge overflow-hidden group">
+            <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{label}</p>
+                        <p className={cn("text-2xl font-black tracking-tighter", colorClass)}>{value}</p>
+                    </div>
+                    <div className={cn("p-3 rounded-xl bg-white/5 group-hover:scale-110 transition-transform", colorClass.replace('text-', 'text-'))}>
+                        <Icon size={20} />
+                    </div>
                 </div>
-                <div className="h-1 w-8 bg-primary/20 rounded-full group-hover:bg-primary/40 transition-colors" />
-            </div>
-            <div className="p-6">
-                {children}
-            </div>
-        </motion.div>
+            </CardContent>
+        </Card>
     );
 
     return (
@@ -120,159 +145,203 @@ export default function DealIntelligencePage() {
                 <div className="scanline" />
 
                 <div className="container mx-auto px-4 relative z-10">
+                    {/* Header */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
-                                <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Intelligence Briefing Alpha</span>
+                                <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Intelligence Center Alpha</span>
                             </div>
                             <h1 className="text-4xl font-black tracking-tighter text-white uppercase flex items-center gap-4">
-                                Deal Intelligence <span className="text-white/10">|</span> <span className="text-white/40 font-light">Report v4.0.1</span>
+                                Deal Intelligence <span className="text-white/10">|</span> <span className="text-white/40 font-light">System v4.5</span>
                             </h1>
                         </div>
-                        {activeQuotation && (
+                        {processedData?.activeQuotation && (
                             <Button 
-                                variant="outline" 
                                 onClick={runAnalysis}
                                 disabled={isAnalyzing}
-                                className="h-12 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary uppercase font-bold text-xs tracking-widest px-8"
+                                className="h-14 bg-primary text-black font-black uppercase tracking-widest px-10 hover:shadow-[0_0_20px_rgba(0,224,255,0.4)] transition-all"
                             >
-                                {isAnalyzing ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
-                                Recalibrate Analysis
+                                {isAnalyzing ? <RefreshCw className="mr-2 h-5 w-5 animate-spin" /> : <BrainCircuit className="mr-2 h-5 w-5" />}
+                                Run AI Analysis
                             </Button>
                         )}
                     </div>
 
-                    {!activeQuotation ? (
-                        <div className="h-[60vh] flex flex-col items-center justify-center text-center">
+                    {!processedData ? (
+                        <div className="h-[60vh] flex flex-col items-center justify-center text-center p-8 bg-black/40 border border-white/5 rounded-3xl backdrop-blur-xl">
                             <ShieldAlert size={64} className="text-white/10 mb-6" />
-                            <h2 className="text-xl font-bold text-white uppercase tracking-widest">No Active Quotation Data</h2>
-                            <p className="text-white/30 text-sm mt-2 max-w-sm">Please save a quotation in the Studio first to run a deal intelligence report.</p>
+                            <h2 className="text-xl font-bold text-white uppercase tracking-widest">Database Offline or Empty</h2>
+                            <p className="text-white/30 text-sm mt-2 max-w-sm">No quotation records found in the mission registry. Generate a proposal in the Studio first.</p>
                             <Button className="mt-8 bg-primary text-black font-bold uppercase tracking-widest px-8" onClick={() => router.push('/quotation-builder')}>
                                 Return to Studio
                             </Button>
                         </div>
-                    ) : isAnalyzing ? (
-                        <div className="h-[60vh] flex flex-col items-center justify-center">
-                            <div className="relative mb-8">
-                                <div className="w-24 h-24 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <Cpu className="text-primary animate-pulse" size={32} />
-                                </div>
-                            </div>
-                            <p className="text-[10px] font-black text-primary tracking-[0.5em] uppercase">Synthesizing Logic Matrix...</p>
-                        </div>
-                    ) : report && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            <div className="lg:col-span-1 space-y-8">
-                                <IntelligenceModule title="Deal Health Matrix" icon={Activity}>
-                                    <div className="text-center py-6">
-                                        <div className="relative inline-block">
-                                            <svg className="w-40 h-40 transform -rotate-90">
-                                                <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
-                                                <motion.circle 
-                                                    initial={{ strokeDashoffset: 440 }}
-                                                    animate={{ strokeDashoffset: 440 - (440 * (report.dealHealth?.score || 0)) / 100 }}
-                                                    transition={{ duration: 2, ease: "easeOut" }}
-                                                    cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="8" fill="transparent" 
-                                                    strokeDasharray="440"
-                                                    className="text-primary drop-shadow-[0_0_8px_rgba(0,224,255,0.5)]" 
-                                                />
-                                            </svg>
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                                <span className="text-4xl font-black text-white">{report.dealHealth?.score || 0}</span>
-                                                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Index</span>
-                                            </div>
-                                        </div>
-                                        <div className="mt-6 space-y-2">
-                                            <div className={cn(
-                                                "inline-block px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] border",
-                                                report.dealHealth?.status === 'HIGH-CONFIDENCE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                report.dealHealth?.status === 'STRONG' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                            )}>
-                                                {report.dealHealth?.status || 'MODERATE'}
-                                            </div>
-                                            <p className="text-[11px] text-white/60 italic leading-relaxed px-4">"{report.dealHealth?.reason || 'Awaiting full telemetry data.'}"</p>
-                                        </div>
-                                    </div>
-                                </IntelligenceModule>
+                    ) : (
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                            {/* Analytics Sidebar */}
+                            <div className="lg:col-span-1 space-y-6">
+                                <StatCard 
+                                    label="Global Valuation" 
+                                    value={`₹${(processedData.totalImpact / 100000).toFixed(1)}L`} 
+                                    icon={DollarSign} 
+                                    colorClass="text-primary" 
+                                />
+                                <StatCard 
+                                    label="Active Deals" 
+                                    value={processedData.activeCount} 
+                                    icon={Activity} 
+                                    colorClass="text-emerald-400" 
+                                />
+                                <StatCard 
+                                    label="Historical Log" 
+                                    value={processedData.archivedCount} 
+                                    icon={History} 
+                                    colorClass="text-white/40" 
+                                />
 
-                                <IntelligenceModule title="Probability Scanner" icon={Target}>
-                                    <div className="space-y-6">
-                                        <div className="flex justify-between items-end">
-                                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Success Logic</span>
-                                            <span className="text-2xl font-black text-primary">{report.winProbability || 0}%</span>
-                                        </div>
-                                        <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                            <motion.div initial={{ width: 0 }} animate={{ width: `${report.winProbability || 0}%` }} className="h-full bg-primary shadow-[0_0_15px_rgba(0,224,255,0.5)]" />
-                                        </div>
+                                <Card className="bg-black/40 border-white/5 backdrop-blur-xl p-6">
+                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-4 flex items-center gap-2">
+                                        <History size={12}/> Registry Sync
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {processedData.history.map((q, i) => (
+                                            <div key={i} className="flex flex-col gap-1 border-l border-white/10 pl-4 py-1">
+                                                <p className="text-[10px] font-bold text-white/80 truncate uppercase">{q.quotationId}</p>
+                                                <p className="text-[8px] font-medium text-white/30 uppercase">{new Date(q.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        ))}
                                     </div>
-                                </IntelligenceModule>
+                                </Card>
                             </div>
 
-                            <div className="lg:col-span-2 space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <IntelligenceModule title="Risk Factors Detected" icon={ShieldAlert}>
-                                        <div className="space-y-4">
-                                            {report.riskFactors?.map((risk, i) => (
-                                                <div key={i} className="flex gap-3 items-start group">
-                                                    <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
-                                                    <span className="text-[11px] text-white/70 font-medium leading-relaxed group-hover:text-white transition-colors">{risk}</span>
+                            {/* Main Intelligence View */}
+                            <div className="lg:col-span-3">
+                                <AnimatePresence mode="wait">
+                                    {isAnalyzing ? (
+                                        <motion.div 
+                                            key="analyzing"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="h-[500px] flex flex-col items-center justify-center bg-black/40 border border-primary/20 rounded-3xl backdrop-blur-xl"
+                                        >
+                                            <div className="relative mb-8">
+                                                <div className="w-24 h-24 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <Cpu className="text-primary animate-pulse" size={32} />
                                                 </div>
-                                            )) || <span className="text-[11px] text-white/30 italic">No critical risks identified.</span>}
-                                        </div>
-                                    </IntelligenceModule>
-
-                                    <IntelligenceModule title="Discount Intelligence" icon={TrendingUp}>
-                                        <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 p-2 opacity-10"><Lock size={40} /></div>
-                                            <p className="text-[11px] text-primary leading-relaxed font-bold italic">
-                                                {report.discountIntelligence || "Pricing parameters within safe margins."}
-                                            </p>
-                                        </div>
-                                    </IntelligenceModule>
-                                </div>
-
-                                <IntelligenceModule title="Actionable Sales Command" icon={Terminal} className="border-primary/20">
-                                    <div className="flex gap-6 items-start">
-                                        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                            <BrainCircuit size={24} />
-                                        </div>
-                                        <div className="space-y-4">
-                                            <h3 className="text-sm font-black text-white uppercase tracking-widest">Next Phase Protocol:</h3>
-                                            <p className="text-[12px] text-white/70 leading-relaxed font-medium border-l-2 border-primary/30 pl-4 py-1 italic">
-                                                {report.salesAdvice || "Awaiting strategic synthesis."}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </IntelligenceModule>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <IntelligenceModule title="Follow-Up Strategy" icon={Calendar}>
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Target Engagement</span>
-                                                <span className="text-xs font-bold text-primary font-mono">{report.followUpStrategy?.suggestedDate || 'TBD'}</span>
                                             </div>
-                                            <div className="bg-black/40 p-4 rounded-xl border border-white/5">
-                                                <p className="text-[10px] text-white/60 leading-relaxed font-serif italic">
-                                                    "{report.followUpStrategy?.message || 'Ready for client dispatch.'}"
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </IntelligenceModule>
+                                            <p className="text-[10px] font-black text-primary tracking-[0.5em] uppercase">Synthesizing Logic Matrix...</p>
+                                        </motion.div>
+                                    ) : report ? (
+                                        <motion.div 
+                                            key="report"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="space-y-8"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                {/* Health Matrix */}
+                                                <Card className="bg-black/40 border-white/5 overflow-hidden holographic-edge">
+                                                    <CardHeader className="bg-white/5 border-b border-white/5 flex flex-row items-center justify-between">
+                                                        <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                                            <Activity size={14} className="text-primary"/> Deal Health
+                                                        </CardTitle>
+                                                        <span className="text-[10px] font-bold text-primary">{report.winProbability}% Score</span>
+                                                    </CardHeader>
+                                                    <CardContent className="p-8 flex flex-col items-center">
+                                                        <div className="relative w-32 h-32 mb-6">
+                                                            <svg className="w-full h-full transform -rotate-90">
+                                                                <circle cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-white/5" />
+                                                                <motion.circle 
+                                                                    initial={{ strokeDashoffset: 377 }}
+                                                                    animate={{ strokeDashoffset: 377 - (377 * (report.dealHealth?.score || 0)) / 100 }}
+                                                                    cx="64" cy="64" r="60" stroke="currentColor" strokeWidth="4" fill="transparent" 
+                                                                    strokeDasharray="377"
+                                                                    className="text-primary" 
+                                                                />
+                                                            </svg>
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <span className="text-2xl font-black text-white">{report.dealHealth?.score}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className={cn(
+                                                            "px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border mb-4",
+                                                            report.dealHealth?.status === 'HIGH-CONFIDENCE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                        )}>
+                                                            {report.dealHealth?.status}
+                                                        </div>
+                                                        <p className="text-xs text-white/60 text-center italic leading-relaxed px-4">
+                                                            "{report.dealHealth?.reason}"
+                                                        </p>
+                                                    </CardContent>
+                                                </Card>
 
-                                    <IntelligenceModule title="Client Buying Signals" icon={Zap}>
-                                        <div className="space-y-4">
-                                            <div className="p-4 rounded-xl border border-white/5 bg-gradient-to-br from-white/5 to-transparent">
-                                                <p className="text-[11px] text-white/70 leading-relaxed font-medium italic">
-                                                    {report.buyingSignals || "Analyzing historical organizational patterns."}
-                                                </p>
+                                                {/* Risk Scanner */}
+                                                <Card className="bg-black/40 border-white/5 overflow-hidden holographic-edge">
+                                                    <CardHeader className="bg-white/5 border-b border-white/5">
+                                                        <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                                            <ShieldAlert size={14} className="text-red-500"/> Risk Telemetry
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="p-6">
+                                                        <div className="space-y-4">
+                                                            {report.riskFactors?.map((risk, i) => (
+                                                                <div key={i} className="flex gap-3 items-start border-l-2 border-red-500/30 pl-4 py-1">
+                                                                    <AlertTriangle size={12} className="text-red-500 mt-0.5 shrink-0" />
+                                                                    <span className="text-[11px] text-white/70 font-medium leading-relaxed uppercase">{risk}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
-                                        </div>
-                                    </IntelligenceModule>
-                                </div>
+
+                                            {/* Actionable Command */}
+                                            <Card className="bg-primary border-none shadow-[0_0_40px_rgba(0,224,255,0.2)] overflow-hidden">
+                                                <CardContent className="p-8 flex items-center gap-8">
+                                                    <div className="w-16 h-16 rounded-2xl bg-black/10 flex items-center justify-center text-black shrink-0">
+                                                        <Terminal size={32} />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-[10px] font-black text-black/40 uppercase tracking-[0.3em] mb-2">Primary Sales Command</h3>
+                                                        <p className="text-xl font-black text-black leading-tight uppercase">
+                                                            {report.salesAdvice}
+                                                        </p>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+
+                                            {/* Sub-Intelligence Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <Card className="bg-black/40 border-white/5 p-6">
+                                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2"><Zap size={12}/> Client Buying Signals</h4>
+                                                    <p className="text-xs text-white/60 leading-relaxed font-medium italic border-l border-primary/30 pl-4">
+                                                        {report.buyingSignals}
+                                                    </p>
+                                                </Card>
+                                                <Card className="bg-black/40 border-white/5 p-6">
+                                                    <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2"><Lock size={12}/> Margin Integrity</h4>
+                                                    <p className="text-xs text-white/60 leading-relaxed font-medium italic border-l border-white/10 pl-4">
+                                                        {report.discountIntelligence}
+                                                    </p>
+                                                </Card>
+                                            </div>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div 
+                                            key="standby"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl group hover:border-primary/20 transition-all"
+                                        >
+                                            <BrainCircuit className="h-16 w-16 text-white/10 group-hover:text-primary/40 transition-all mb-6" />
+                                            <h3 className="text-xl font-black text-white uppercase tracking-[0.3em] mb-2">Logic Standby</h3>
+                                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Ready to analyze target entity: {processedData.activeQuotation.quotationId}</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         </div>
                     )}
