@@ -14,7 +14,6 @@ import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Lock, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -93,21 +92,12 @@ export default function LoginPage() {
           className="text-center"
         >
           <Link href="/" className="group block">
-            <motion.span 
-              initial={{ letterSpacing: "0.2em" }}
-              animate={{ letterSpacing: "0.4em" }}
-              transition={{ duration: 2, ease: "easeOut" }}
-              className="text-4xl font-black text-white uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] block"
-            >
+            <span className="text-4xl font-black text-white uppercase tracking-tight block">
               DEEQASA
-            </motion.span>
-            <motion.div 
-              animate={{ opacity: [0.4, 0.7, 0.4] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="mt-2 text-[10px] font-bold text-primary uppercase tracking-[0.3em]"
-            >
-              Enterprise Infrastructure
-            </motion.div>
+            </span>
+            <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
+              HP AUTHORIZED RESELLER
+            </div>
           </Link>
         </motion.div>
 
