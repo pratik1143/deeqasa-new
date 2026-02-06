@@ -280,11 +280,13 @@ export function QuotationBuilder() {
   const QuotationHeader = () => (
     <div className="flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
       <div className="flex flex-col items-start">
-        <img src="/hp-logo.png" alt="HP" className="h-[28mm] w-auto object-contain bg-white" />
+        <span className="text-[28pt] font-black tracking-[0.2em] text-gray-900 uppercase leading-none">
+          DEEQASA
+        </span>
         <span className="text-[7pt] font-bold text-gray-400 tracking-widest uppercase mt-2">HP Connect Partner</span>
       </div>
       <div className="text-right">
-        <h2 className="text-[14pt] font-bold text-gray-900 uppercase">M/s DeeQasa-Tech</h2>
+        <h2 className="text-[14pt] font-bold text-gray-900 uppercase">DEEQASA</h2>
         <p className="text-[8pt] text-gray-500 italic">Smart. Secure. Sustainable. IT Solutions.</p>
         <p className="text-[7pt] text-gray-400 uppercase mt-1">GSTIN: 03ABCDE1234F1Z5</p>
       </div>
@@ -491,7 +493,6 @@ export function QuotationBuilder() {
               <BrochurePreview 
                 products={Array.from(new Set(watchedLineItems.map(i => i.product.id))).map(id => watchedLineItems.find(i => i.product.id === id)!.product)} 
                 marketingData={marketingData} 
-                companyName={watchedCompany}
               />
             )}
           </TabsContent>
