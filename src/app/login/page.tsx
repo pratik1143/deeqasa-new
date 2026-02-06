@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser, useFirestore } from '@/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { useAuth, useUser } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,16 +12,13 @@ import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Lock, ArrowRight, UserPlus, LogIn } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ShieldCheck, Lock, ArrowRight, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const auth = useAuth();
-  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   
-  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -45,26 +41,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        // Automatically create admin profile for the prototype
-        await setDoc(doc(firestore, 'users', userCredential.user.uid), {
-          email: email,
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        });
-      }
+      await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
         setError('Authentication failed. Invalid identity credentials.');
-      } else if (err.code === 'auth/email-already-in-use') {
-        setError('Identity already exists. Please use login protocol.');
-      } else if (err.code === 'auth/weak-password') {
-        setError('Security key is too weak. Minimum 6 characters required.');
       } else {
         setError('System error during authentication. Please try again.');
       }
@@ -79,16 +61,27 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-black font-body">
-      {/* Background Layer */}
-      <div className="absolute inset-0 bg-black z-0" />
-      <div className="absolute inset-0 command-grid opacity-20 pointer-events-none" />
+      {/* Immersive Background Video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
+      >
+        <source src="/bg-video.mp4" type="video/mp4" />
+      </video>
+
+      {/* Layered Overlays */}
+      <div className="absolute inset-0 bg-black/60 z-10" />
+      <div className="absolute inset-0 command-grid opacity-20 pointer-events-none z-10" />
       
       {/* Top Professional Accent */}
       <motion.div 
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 1.5, ease: "circOut" }}
-        className="absolute top-0 left-0 w-full h-[2px] bg-primary z-20 origin-left shadow-[0_0_15px_rgba(0,224,255,0.5)]" 
+        className="absolute top-0 left-0 w-full h-[2px] bg-primary z-30 origin-left shadow-[0_0_15px_rgba(0,224,255,0.5)]" 
       />
       
       {/* Main Content Container */}
@@ -111,18 +104,6 @@ export default function LoginPage() {
           </Link>
         </motion.div>
 
-        {/* Auth Mode Selector */}
-        <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-white/5 border border-white/10 rounded-full h-12 p-1">
-            <TabsTrigger value="login" className="rounded-full text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-black">
-              Authorize
-            </TabsTrigger>
-            <TabsTrigger value="register" className="rounded-full text-[10px] font-bold uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-black">
-              Register
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
         {/* Login Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96, y: 20 }}
@@ -138,14 +119,14 @@ export default function LoginPage() {
                   transition={{ duration: 6, repeat: Infinity }}
                   className="p-2 rounded-full bg-primary/10 border border-primary/20"
                 >
-                  {mode === 'login' ? <Lock className="w-4 h-4 text-primary" /> : <UserPlus className="w-4 h-4 text-primary" />}
+                  <Lock className="w-4 h-4 text-primary" />
                 </motion.div>
               </div>
               <CardTitle className="text-xl font-bold tracking-tight text-white uppercase tracking-[0.1em]">
-                {mode === 'login' ? 'System Authorization' : 'New Identity Request'}
+                System Authorization
               </CardTitle>
               <CardDescription className="text-white/40 text-xs font-medium uppercase tracking-widest">
-                {mode === 'login' ? 'Identity & Access Management' : 'Admin Infrastructure Access'}
+                Identity & Access Management
               </CardDescription>
             </CardHeader>
 
@@ -191,7 +172,7 @@ export default function LoginPage() {
                       <div className="w-full px-4"><LineLoader className="h-0.5 bg-white/20" /></div>
                     ) : (
                       <>
-                        {mode === 'login' ? 'Authorize Session' : 'Request Access'}
+                        Authorize Session
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
