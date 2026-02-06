@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 98%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
     --primary: 188 100% 50%;
-    --primary-foreground: 0 0% 5%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
     --accent: 276 73% 53%;
-    --accent-foreground: 0 0% 98%;
+    --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
     --ring: 188 100% 50%;
     --radius: 0.5rem;
     --emerald-hsl: 165 100% 50%;
@@ -53,7 +53,7 @@
   background: white !important;
   color: black !important;
   padding: 20mm 18mm !important;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   box-sizing: border-box !important;
   font-family: 'Times New Roman', Times, serif !important;
   position: relative;
@@ -70,7 +70,7 @@
   background: white !important;
   color: #1a1a1a !important;
   padding: 20mm 18mm !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
   box-sizing: border-box !important;
   font-family: 'Inter', sans-serif !important;
   position: relative;
@@ -144,5 +144,17 @@
   @keyframes line-loader {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
   }
 }

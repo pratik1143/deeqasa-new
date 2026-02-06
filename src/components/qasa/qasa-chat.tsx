@@ -68,10 +68,10 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in">
+    <div className="fixed inset-0 z-[100] bg-white/60 backdrop-blur-sm flex items-center justify-center animate-fade-in">
       <div className={cn("animated-snake-wrapper rounded-lg", isPending && "is-thinking")}>
-        <Card className="w-[90vw] max-w-2xl h-[80vh] flex flex-col bg-card/90 backdrop-blur-xl border-0 shadow-2xl shadow-primary/10">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-b-primary/10">
+        <Card className="w-[90vw] max-w-2xl h-[80vh] flex flex-col bg-card/95 backdrop-blur-xl border-border shadow-2xl">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-border">
             <CardTitle className="flex items-center gap-2 font-headline text-primary">
               <Bot /> QASA Assistant
             </CardTitle>
@@ -85,7 +85,7 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
                 {messages.map((msg, index) => (
                   <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
                     {msg.role === 'assistant' && <Bot className="text-primary flex-shrink-0 mt-1" />}
-                    <div className={cn("rounded-lg px-4 py-2 max-w-[80%] whitespace-pre-wrap", msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary')}>
+                    <div className={cn("rounded-lg px-4 py-2 max-w-[80%] whitespace-pre-wrap", msg.role === 'user' ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-secondary border border-border')}>
                       {msg.content}
                     </div>
                     {msg.role === 'user' && <User className="text-primary flex-shrink-0 mt-1" />}
@@ -94,7 +94,7 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
                 {isPending && (
                   <div className="flex items-start gap-3">
                     <Bot className="text-primary mt-1" />
-                    <div className="rounded-lg px-4 py-2 bg-secondary flex items-center gap-2">
+                    <div className="rounded-lg px-4 py-2 bg-secondary border border-border flex items-center gap-2">
                       <div className="w-4 h-4 flex items-center">
                         <LineLoader className="h-0.5" />
                       </div>
@@ -106,7 +106,7 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
               </div>
             </ScrollArea>
           </CardContent>
-          <CardFooter className="flex flex-col items-start gap-4 border-t border-t-primary/10 pt-4">
+          <CardFooter className="flex flex-col items-start gap-4 border-t border-border pt-4">
               <RadioGroup defaultValue="generate" onValueChange={(value: AiAction) => setAiAction(value)} className="flex gap-4">
                   <div className="flex items-center space-x-2">
                       <RadioGroupItem value="generate" id="r1" />
@@ -122,7 +122,7 @@ export function QasaChat({ onClose }: { onClose: () => void }) {
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       placeholder={getPlaceholder()}
-                      className="flex-1 resize-none bg-background"
+                      className="flex-1 resize-none bg-background border-border"
                       rows={1}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {

@@ -12,7 +12,6 @@ const posterImageUrl = posterImage?.imageUrl || "https://images.unsplash.com/pho
 const VideoBackground = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const { scrollY } = useScroll();
-    // Parallax effect: video moves slower than the scroll
     const y = useTransform(scrollY, [0, 500], [0, 100], { clamp: false });
     const scale = useTransform(scrollY, [0, 500], [1, 1.15]);
 
@@ -30,9 +29,9 @@ const VideoBackground = () => {
                 preload="metadata"
                 className="absolute w-full h-full object-cover"
                 style={{
-                    filter: `brightness(0.4) contrast(1.2) saturate(1.1)`
+                    filter: `brightness(0.9) contrast(1.1) saturate(1)`
                 }}
-                poster={posterImageUrl} // Poster image for loading
+                poster={posterImageUrl}
             >
                 <source src="/HP_ZBook_Fury_G1i_1080P.mp4" type="video/mp4" />
             </video>
@@ -43,7 +42,7 @@ const VideoBackground = () => {
 const FallbackImage = () => {
     if (!posterImage) {
         return (
-             <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 -z-10" />
+             <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-blue-50 to-purple-50 -z-10" />
         );
     }
     
@@ -53,7 +52,7 @@ const FallbackImage = () => {
                 src={posterImage.imageUrl}
                 alt={posterImage.description}
                 fill
-                className="object-cover"
+                className="object-cover opacity-80"
                 data-ai-hint={posterImage.imageHint}
                 priority
             />
@@ -72,12 +71,10 @@ export const HeroVideoBackground = () => {
         <div ref={ref} className="absolute inset-0 w-full h-full">
             {showVideo ? <VideoBackground /> : <FallbackImage />}
             
-            {/* Overlay Effects */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-background/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-background/20" />
             
-            {/* Animated Scan Lines */}
-            <div className="absolute inset-0 opacity-5 pointer-events-none">
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <div className="absolute top-0 h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent animate-scanline" />
             </div>
         </div>
