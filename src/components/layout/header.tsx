@@ -49,17 +49,19 @@ export function Header() {
   return (
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b",
-      isScrolled || pathname !== '/' ? "bg-white shadow-sm border-gray-200" : "bg-white/95 border-transparent backdrop-blur-md"
+      isScrolled || pathname !== '/' 
+        ? "bg-black/95 border-white/10 shadow-2xl backdrop-blur-md" 
+        : "bg-transparent border-transparent"
     )}>
       <div className="container mx-auto px-4 flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
           <Link href="/" className="group transition-transform duration-250 hover:scale-[1.03] flex items-center">
-            <span className="text-xl font-black tracking-[0.15em] text-gray-900 uppercase">
+            <span className="text-xl font-black tracking-[0.15em] text-white uppercase">
               DEEQA SA TECH
             </span>
           </Link>
-          <div className="hidden lg:flex items-center gap-1 border-l border-gray-200 pl-8 h-8">
-              <span className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Enterprise Infrastructure</span>
+          <div className="hidden lg:flex items-center gap-1 border-l border-white/10 pl-8 h-8">
+              <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">Enterprise Infrastructure</span>
           </div>
         </div>
 
@@ -72,7 +74,7 @@ export function Header() {
                 href={link.href} 
                 className={cn(
                   "relative h-full flex items-center text-sm font-semibold tracking-tight transition-colors duration-200 py-2",
-                  isActive ? "text-primary" : "text-gray-600 hover:text-primary"
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-white"
                 )}
               >
                 {link.name}
@@ -86,7 +88,7 @@ export function Header() {
         </nav>
         
         <div className="flex items-center gap-3">
-            <Button variant="ghost" className="hidden xl:inline-flex text-gray-600 font-bold hover:bg-gray-50">
+            <Button variant="ghost" className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-white/5 hover:text-white">
               Contact Sales
             </Button>
             
@@ -97,7 +99,7 @@ export function Header() {
             ) : user ? (
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 font-bold" 
+                className="flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
                 onClick={handleSignOut}
               >
                 <span className="hidden sm:inline">Sign Out</span>
@@ -106,7 +108,7 @@ export function Header() {
             ) : (
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 font-bold" 
+                className="flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
                 onClick={handleSignIn}
               >
                 <LogIn className="h-4 w-4" />

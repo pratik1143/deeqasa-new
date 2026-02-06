@@ -57,30 +57,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
       
       <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8 text-center">
         <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block">
-            <span className="text-2xl font-black tracking-[0.2em] text-gray-900 uppercase">
+            <span className="text-2xl font-black tracking-[0.2em] text-white uppercase">
               DEEQA SA TECH
             </span>
         </Link>
         
-        <Card className="w-full border-gray-100 shadow-2xl shadow-gray-200/50 bg-white">
+        <Card className="w-full border-white/10 shadow-2xl bg-black/60 backdrop-blur-xl">
           <CardHeader className="text-center pt-8">
-            <CardTitle className="text-2xl font-bold tracking-tight text-gray-900">Admin Portal</CardTitle>
-            <CardDescription className="text-gray-500 font-medium">
+            <CardTitle className="text-2xl font-bold tracking-tight text-white">Admin Portal</CardTitle>
+            <CardDescription className="text-muted-foreground font-medium">
               Enterprise Identity Verification
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-8 px-8">
             <form onSubmit={handleLogin} className="space-y-6 text-left">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-gray-500">Corporate Email</Label>
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Corporate Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -90,11 +90,11 @@ export default function LoginPage() {
                   disabled={isLoading}
                   required
                   autoComplete="email"
-                  className="bg-gray-50/50 border-gray-200 h-11 focus:bg-white transition-colors"
+                  className="bg-white/5 border-white/10 h-11 focus:bg-white/10 transition-colors text-white"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-gray-500">Security Credential</Label>
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Security Credential</Label>
                 <Input
                   id="password"
                   type="password"
@@ -104,7 +104,7 @@ export default function LoginPage() {
                   disabled={isLoading}
                   required
                   autoComplete="current-password"
-                  className="bg-gray-50/50 border-gray-200 h-11 focus:bg-white transition-colors"
+                  className="bg-white/5 border-white/10 h-11 focus:bg-white/10 transition-colors text-white"
                 />
               </div>
               
@@ -119,15 +119,15 @@ export default function LoginPage() {
               </div>
             )}
             
-            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-              <Link href="/" className="text-xs font-bold text-gray-400 hover:text-primary transition-colors uppercase tracking-widest">
+            <div className="mt-8 pt-6 border-t border-white/5 text-center">
+              <Link href="/" className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-widest">
                 &larr; Return to Infrastructure Site
               </Link>
             </div>
           </CardContent>
         </Card>
         
-        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.3em]">
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
           Secure Terminal v4.0.1
         </p>
       </div>

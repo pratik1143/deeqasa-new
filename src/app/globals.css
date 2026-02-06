@@ -4,27 +4,35 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    /* Pure Dark Mode Variables */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
     --primary: 188 100% 42%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
     --accent: 188 100% 42%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
     --ring: 188 100% 42%;
     --radius: 0.5rem;
     --emerald-hsl: 165 100% 42%;
+    
+    /* Chart Colors */
+    --chart-1: 188 100% 42%;
+    --chart-2: 165 100% 42%;
+    --chart-3: 0 84% 60%;
+    --chart-4: 210 100% 50%;
+    --chart-5: 280 100% 50%;
   }
 }
 
@@ -40,7 +48,7 @@
 */
 
 .quotation-container {
-  background-color: #f3f4f6;
+  background-color: #1a1a1a;
   min-height: 100vh;
   padding: 40px 0;
 }
@@ -53,7 +61,7 @@
   background: white !important;
   color: black !important;
   padding: 20mm 18mm !important;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   box-sizing: border-box !important;
   font-family: 'Times New Roman', Times, serif !important;
   position: relative;
@@ -70,7 +78,7 @@
   background: white !important;
   color: #1a1a1a !important;
   padding: 20mm 18mm !important;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   box-sizing: border-box !important;
   font-family: 'Inter', sans-serif !important;
   position: relative;
