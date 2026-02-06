@@ -51,6 +51,14 @@ export default function FollowUpPage() {
     const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
     const activeQuotation = quotations?.[0] || null;
 
+    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/login');
+        }
+    }, [user, isLoading, router]);
+
     const runAnalysis = async () => {
         if (!activeQuotation) return;
         setIsGenerating(true);
@@ -76,10 +84,8 @@ export default function FollowUpPage() {
         }
     }, [activeQuotation]);
 
-    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
-
     if (isLoading) return <CenteredLoader text="Syncing Follow-Up Matrix..." />;
-    if (!user) { router.push('/login'); return null; }
+    if (!user) return <CenteredLoader text="Redirecting to login..." />;
     if (!profile || profile.role !== 'admin') return <AccessDenied />;
 
     return (

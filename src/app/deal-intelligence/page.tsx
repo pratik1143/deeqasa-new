@@ -49,6 +49,14 @@ export default function DealIntelligencePage() {
     const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
     const activeQuotation = quotations?.[0] || null;
 
+    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/login');
+        }
+    }, [user, isLoading, router]);
+
     const runAnalysis = async () => {
         if (!activeQuotation) return;
         setIsAnalyzing(true);
@@ -83,10 +91,8 @@ export default function DealIntelligencePage() {
         }
     }, [activeQuotation]);
 
-    const isLoading = isUserLoading || isProfileLoading || isQuotationLoading;
-
     if (isLoading) return <CenteredLoader text="Authenticating Uplink..." />;
-    if (!user) { router.push('/login'); return null; }
+    if (!user) return <CenteredLoader text="Redirecting to login..." />;
     if (!profile || profile.role !== 'admin') return <AccessDenied />;
 
     const IntelligenceModule = ({ title, icon: Icon, children, className }: any) => (
