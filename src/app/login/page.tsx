@@ -58,10 +58,23 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background decoration */}
+      {/* Background Video */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover -z-10"
+      >
+        <source src="/bg-video.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/70 -z-10" />
+
+      {/* Top Accent Line */}
       <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
       
       <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8 text-center">
         <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block">
