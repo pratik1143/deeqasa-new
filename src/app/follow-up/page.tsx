@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUserWithRole, useFirestore, useMemoFirebase, useCollection } from "@/firebase";
 import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   MessageSquare, 
   Phone, 
@@ -19,10 +19,11 @@ import {
   Terminal,
   Activity,
   RefreshCw,
-  Send
+  Send,
+  Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { query, collection, where, orderBy, limit } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import { generateFollowUpPlan, type FollowUpOutput } from "@/ai/flows/ai-follow-up-generation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -35,6 +36,26 @@ export default function FollowUpPage() {
     const [plan, setPlan] = useState<FollowUpOutput | null>(null);
     const [isGenerating, setIsGenerating] = useState(false);
 
+    // STEP 3: Simple Firestore read logic (No filters at query level)
+    const quotationsQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'quotations');
+    }, [firestore, user]);
+
+    const { data: rawQuotations, isLoading: isQuotationLoading } = useCollection(quotationsQuery);
+
+    // STEP 3: Client-side processing to find the active deal
+    const activeQuotation = useMemo(() => {
+        if (!rawQuotations || rawQuotations.length === 0) return null;
+        
+        // Find latest active quotation by sorting client-side
+        const activeDeals = rawQuotations
+            .filter(q => q.status === 'ACTIVE')
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            
+        return activeDeals[0] || null;
+    }, [rawQuotations]);
+
     const isLoading = isUserLoading || isProfileLoading;
 
     useEffect(() => {
@@ -43,28 +64,16 @@ export default function FollowUpPage() {
         }
     }, [user, isLoading, router]);
 
-    const activeQuotationQuery = useMemoFirebase(() => {
-        if (!firestore || !user) return null;
-        // Admin-only model: Fetch latest globally
-        return query(
-            collection(firestore, 'quotations'),
-            where('status', '==', 'ACTIVE'),
-            orderBy('createdAt', 'desc'),
-            limit(1)
-        );
-    }, [firestore, user]);
-
-    const { data: quotations, isLoading: isQuotationLoading } = useCollection(activeQuotationQuery);
-    const activeQuotation = quotations?.[0] || null;
-
     const runAnalysis = async () => {
         if (!activeQuotation) return;
         setIsGenerating(true);
         try {
-            const totals = JSON.parse(activeQuotation.totals);
+            const client = JSON.parse(activeQuotation.clientDetails || '{}');
+            const totals = JSON.parse(activeQuotation.totals || '{}');
+            
             const result = await generateFollowUpPlan({
-                customerName: JSON.parse(activeQuotation.clientDetails).name || 'Client',
-                companyName: JSON.parse(activeQuotation.clientDetails).companyName || 'Organization',
+                customerName: client.name || 'Client',
+                companyName: client.companyName || 'Organization',
                 totalAmount: totals.grandTotal || 0,
                 createdAt: activeQuotation.createdAt,
             });
@@ -76,6 +85,7 @@ export default function FollowUpPage() {
         }
     };
 
+    // Auto-run analysis when active quotation is found
     useEffect(() => {
         if (activeQuotation && !plan && !isGenerating) {
             runAnalysis();
@@ -118,7 +128,7 @@ export default function FollowUpPage() {
                     </div>
 
                     {!activeQuotation ? (
-                        <div className="h-[60vh] flex flex-col items-center justify-center text-center">
+                        <div className="h-[60vh] flex flex-col items-center justify-center text-center p-8 bg-black/40 border border-white/5 rounded-3xl backdrop-blur-xl">
                             <AlertCircle size={64} className="text-white/10 mb-6" />
                             <h2 className="text-xl font-bold text-white uppercase tracking-widest">No Active Deal Record</h2>
                             <p className="text-white/30 text-sm mt-2 max-w-sm">Please save a quotation in the Studio to generate a follow-up execution plan.</p>
@@ -127,7 +137,7 @@ export default function FollowUpPage() {
                             </Button>
                         </div>
                     ) : isGenerating ? (
-                        <div className="h-[60vh] flex flex-col items-center justify-center">
+                        <div className="h-[60vh] flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-3xl backdrop-blur-xl">
                             <div className="relative mb-8">
                                 <div className="w-24 h-24 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
                                 <div className="absolute inset-0 flex items-center justify-center">
