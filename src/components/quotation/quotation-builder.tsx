@@ -90,7 +90,7 @@ const STEPS = [
   { id: 'summary', title: 'Export', icon: CheckCircle2 },
 ];
 
-const HP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HP_logo_2012.svg/1024px-HP_logo_2012.svg.png";
+const HP_LOGO_URL = "/hp-logo.png";
 
 export function QuotationBuilder() {
   const { toast } = useToast();
@@ -522,48 +522,6 @@ export function QuotationBuilder() {
                     </div>
                   </div>
                   <PageFooter pageNum={2} />
-                </div>
-
-                {/* PAGE 3: OEM TRUST & WARRANTY */}
-                <div className="quotation-page">
-                  <PageHeader />
-                  <div className="print-body">
-                    <h3 className="text-center font-black text-xl mb-12 uppercase tracking-[0.2em]">OEM Authorization & Compliance</h3>
-                    
-                    <div className="grid grid-cols-2 gap-8 mb-12">
-                      <div className="p-8 bg-gray-50 rounded-3xl border border-gray-100">
-                        <CheckCircle2 className="text-primary mb-4" size={32} />
-                        <h4 className="font-black text-[10pt] uppercase mb-2 tracking-widest">Certified Partner</h4>
-                        <p className="text-[9pt] text-gray-600 leading-relaxed italic">Authorized to supply, install, and maintain HP Enterprise Infrastructure across North India.</p>
-                      </div>
-                      <div className="p-8 bg-gray-50 rounded-3xl border border-gray-100">
-                        <BrainCircuit className="text-primary mb-4" size={32} />
-                        <h4 className="font-black text-[10pt] uppercase mb-2 tracking-widest">Technical Support</h4>
-                        <p className="text-[9pt] text-gray-600 leading-relaxed italic">Direct OEM L2/L3 onsite support with 4-hour response time for critical server infrastructure.</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div className="p-10 border-2 border-dashed border-gray-200 rounded-[40px] text-center">
-                        <h4 className="font-black text-[12pt] uppercase mb-4 tracking-tighter">Sustainability Commitment</h4>
-                        <p className="text-[10pt] text-gray-500 leading-relaxed max-w-md mx-auto">All proposed HP Enterprise hardware is EPEAT Silver/Gold certified and Energy Star 8.0 compliant, supporting your green IT initiatives.</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-auto mb-10 border-t-4 border-gray-900 pt-8 flex justify-between items-start">
-                      <div className="max-w-[60%]">
-                        <p className="text-[8pt] font-black uppercase text-gray-400 mb-2">Authorized Signatory</p>
-                        <div className="h-16 w-48 border-b border-gray-200 mb-4"></div>
-                        <p className="text-[10pt] font-black uppercase tracking-tight">System Architect</p>
-                        <p className="text-[8pt] text-gray-400 font-bold uppercase">DEEQASA TECH | HP Partner ID: 1029384</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[8pt] font-black uppercase text-gray-400 mb-4">Company Seal</p>
-                        <div className="w-24 h-24 rounded-full border-2 border-gray-100 flex items-center justify-center text-[8pt] font-black text-gray-200 uppercase tracking-widest">Seal Area</div>
-                      </div>
-                    </div>
-                  </div>
-                  <PageFooter pageNum={3} />
                 </div>
               </div>
             ) : (

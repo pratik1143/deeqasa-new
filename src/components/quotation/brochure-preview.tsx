@@ -35,7 +35,7 @@ const SectorIcon = ({ sector }: { sector: string }) => {
   }
 };
 
-const HP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HP_logo_2012.svg/1024px-HP_logo_2012.svg.png";
+const HP_LOGO_URL = "/hp-logo.png";
 
 export function BrochurePreview({ products, marketingData }: BrochurePreviewProps) {
   
