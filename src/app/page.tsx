@@ -8,7 +8,6 @@ import { Hero } from '@/components/sections/hero';
 import { Clients } from '@/components/sections/clients';
 import { Services } from '@/components/sections/services';
 import { Proof } from '@/components/sections/proof';
-import { Sustainability } from '@/components/sections/sustainability';
 import { QasaAssistant } from '@/components/qasa/qasa-assistant';
 import { CustomCursor } from '@/components/ui/custom-cursor';
 import { Preloader } from '@/components/layout/preloader';
@@ -32,7 +31,6 @@ export default function Home() {
           <Services />
           <Proof />
           <Printers />
-          <Sustainability />
         </main>
         <Footer />
       </div>

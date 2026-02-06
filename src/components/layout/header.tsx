@@ -11,8 +11,6 @@ import { useRouter } from "next/navigation";
 const baseNavLinks = [
   { name: "Home", href: "/" },
   { name: "Solutions", href: "/#solutions" },
-  { name: "Industries", href: "#industries" },
-  { name: "Sustainability", href: "https://www.hp.com/in-en/sustainable-impact.html" },
   { name: "About", href: "#about" },
 ];
 
