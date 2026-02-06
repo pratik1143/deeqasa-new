@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const footerLinks = {
   Company: [
-    { name: 'About DEEQA SA', href: '#' },
+    { name: 'About DEEQASA', href: '#' },
     { name: 'Infrastructure Solutions', href: '#' },
     { name: 'Careers', href: '#' },
     { name: 'Newsroom', href: '#' },
@@ -34,8 +34,8 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-12">
           <div className="col-span-2">
             <Link href="/" className="block mb-6">
-              <span className="text-xl font-black tracking-[0.15em] text-white uppercase">
-                DEEQA SA TECH
+              <span className="text-2xl font-black tracking-[0.25em] text-white uppercase">
+                DEEQASA
               </span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
@@ -60,7 +60,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/5">
         <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-          <p>&copy; {new Date().getFullYear()} DEEQA SA TECH. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} DEEQASA. All rights reserved.</p>
           <div className="flex items-center gap-6 mt-4 md:mt-0">
             <span className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

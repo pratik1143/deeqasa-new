@@ -65,8 +65,8 @@ export default function LoginPage() {
       
       <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8 text-center">
         <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block">
-            <span className="text-2xl font-black tracking-[0.2em] text-white uppercase">
-              DEEQA SA TECH
+            <span className="text-3xl font-black tracking-[0.3em] text-white uppercase">
+              DEEQASA
             </span>
         </Link>
         

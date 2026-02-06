@@ -56,8 +56,8 @@ export function Header() {
       <div className="container mx-auto px-4 flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
           <Link href="/" className="group transition-transform duration-250 hover:scale-[1.03] flex items-center">
-            <span className="text-xl font-black tracking-[0.15em] text-white uppercase">
-              DEEQA SA TECH
+            <span className="text-2xl font-black tracking-[0.25em] text-white uppercase">
+              DEEQASA
             </span>
           </Link>
           <div className="hidden lg:flex items-center gap-1 border-l border-white/10 pl-8 h-8">
