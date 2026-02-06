@@ -7,8 +7,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
@@ -72,26 +72,29 @@ export default function LoginPage() {
       </video>
 
       {/* Layer 2: Dark Overlay */}
-      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-black/60" />
       
       {/* Layer 3: Content */}
       <div className="relative z-10 h-full flex items-center justify-center p-4">
         <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors">
               &larr; Back to Home
         </Link>
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-8 w-full max-w-sm">
             <div className="text-center">
-                <h1 className="text-4xl font-headline font-bold tracking-tighter text-foreground">DEEQASA ADMIN</h1>
-                <p className="text-lg text-muted-foreground">(Depinder Kour)</p>
+                <Image 
+                  src="/logo_hp.png" 
+                  alt="DEEQASA TECH" 
+                  width={240} 
+                  height={60} 
+                  className="h-16 w-auto object-contain mb-4 mx-auto"
+                />
+                <h1 className="text-xl font-headline font-bold tracking-widest text-white/90 uppercase">Admin Portal</h1>
             </div>
-            <Card className="w-full max-w-sm bg-card/80 backdrop-blur-sm border-border">
+            <Card className="w-full bg-card/80 backdrop-blur-md border-primary/20 shadow-2xl">
                 <CardHeader className="text-center">
-                    <div className="flex justify-center mb-2">
-                        <ShieldCheck className="w-10 h-10 text-primary" />
-                    </div>
-                <CardTitle className="text-2xl font-headline">Admin Portal Access</CardTitle>
+                <CardTitle className="text-2xl font-headline">Secure Access</CardTitle>
                 <CardDescription>
-                    Enter your credentials to access the dashboard.
+                    Authorized personnel only.
                 </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -107,6 +110,7 @@ export default function LoginPage() {
                                 disabled={isLoading}
                                 required
                                 autoComplete="email"
+                                className="bg-background/50 border-primary/20"
                             />
                         </div>
                         <div className="space-y-2">
@@ -120,14 +124,15 @@ export default function LoginPage() {
                                 disabled={isLoading}
                                 required
                                 autoComplete="current-password"
+                                className="bg-background/50 border-primary/20"
                             />
                         </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button type="submit" className="w-full font-bold shadow-lg shadow-primary/20" disabled={isLoading}>
                         {isLoading ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : null}
                         Sign In
                     </Button>
                     </form>
-                {error && <p className="text-destructive text-center text-sm mt-4">{error}</p>}
+                {error && <p className="text-destructive text-center text-sm mt-4 font-medium">{error}</p>}
                 </CardContent>
             </Card>
         </div>

@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Search, LogIn, LogOut } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const baseNavLinks = [
   { name: "Home", href: "/" },
@@ -42,7 +43,6 @@ export function Header() {
     router.push('/login');
   };
 
-  // Combine links based on authentication status
   const navLinks = user 
     ? [...baseNavLinks.slice(0, 2), ...protectedLinks, ...baseNavLinks.slice(2)]
     : baseNavLinks;
@@ -55,13 +55,18 @@ export function Header() {
     )}>
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-6">
-          <Link href="/">
-            <h1 className="text-2xl font-headline font-bold tracking-tighter text-foreground transition-colors hover:text-primary">
-              DEEQASA
-            </h1>
+          <Link href="/" className="flex items-center gap-2">
+            <Image 
+              src="/logo_hp.png" 
+              alt="DEEQASA TECH" 
+              width={160} 
+              height={40} 
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </Link>
           <div className="hidden md:flex items-center gap-2 border-l border-border pl-4">
-              <span className="text-xs font-bold tracking-wider text-muted-foreground">HP CONNECT PARTNER</span>
+              <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">Enterprise Solutions</span>
           </div>
         </div>
 
