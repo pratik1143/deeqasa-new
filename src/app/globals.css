@@ -35,7 +35,7 @@
 
 /* 
    ==========================================================================
-   ENTERPRISE A4 PRINT ENGINE (PORTRAIT)
+   ENTERPRISE A4 PRINT ENGINE (PRECISION LOCKED)
    ==========================================================================
 */
 
@@ -46,21 +46,38 @@
 }
 
 .quotation-page {
-  width: 210mm;
-  min-height: 297mm;
+  width: 210mm !important;
+  height: 297mm !important;
+  min-height: 297mm !important;
   margin: 0 auto 40px auto;
   background: white !important;
   color: black !important;
   padding: 20mm 18mm !important;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   font-family: 'Times New Roman', Times, serif !important;
   position: relative;
-  overflow: hidden;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
 }
 
-.quotation-page h1, .quotation-page h2, .quotation-page h3 {
-  font-family: Arial, Helvetica, sans-serif !important;
+.brochure-page {
+  width: 210mm !important;
+  height: 297mm !important;
+  min-height: 297mm !important;
+  margin: 0 auto 40px auto;
+  background: white !important;
+  color: #1a1a1a !important;
+  padding: 15mm !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  box-sizing: border-box !important;
+  font-family: 'Inter', sans-serif !important;
+  position: relative;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  page-break-after: always;
 }
 
 .justified-text {
@@ -91,11 +108,6 @@
   text-align: center !important;
 }
 
-.col-sr { width: 40px !important; }
-.col-qty { width: 50px !important; }
-.col-price { width: 110px !important; }
-.col-total { width: 110px !important; }
-
 @media print {
   @page {
     size: A4 portrait;
@@ -114,15 +126,13 @@
     background: white !important;
   }
 
-  .quotation-page {
+  .quotation-page, .brochure-page {
     margin: 0 !important;
     box-shadow: none !important;
     page-break-after: always !important;
     border: none !important;
-  }
-
-  .keep-together {
-    page-break-inside: avoid !important;
+    width: 210mm !important;
+    height: 297mm !important;
   }
 }
 

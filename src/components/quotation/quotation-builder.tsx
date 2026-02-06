@@ -223,10 +223,31 @@ export function QuotationBuilder() {
     const html2pdf = (await import('html2pdf.js')).default;
     const element = document.getElementById(rootId);
     if (!element) return;
-    const opt = { margin: 0, filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true, letterRendering: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+    
+    // PRECISION SETTINGS FOR A4 PORTRAIT
+    const opt = { 
+      margin: 0, 
+      filename, 
+      image: { type: 'jpeg', quality: 1.0 }, 
+      html2canvas: { 
+        scale: 3, 
+        useCORS: true, 
+        letterRendering: true,
+        logging: false,
+        windowWidth: 794 // 210mm at 96 DPI
+      }, 
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait',
+        compress: true
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
     try {
       await html2pdf().from(element).set(opt).save();
-      toast({ title: 'Success', description: 'PDF generated successfully.' });
+      toast({ title: 'Success', description: 'A4 Portrait PDF exported.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
     } finally { setIsDownloading(false); }
@@ -238,13 +259,19 @@ export function QuotationBuilder() {
         const { toPng } = await import('html-to-image');
         const pages = document.querySelectorAll(`.${className}`);
         for (let i = 0; i < pages.length; i++) {
-            const dataUrl = await toPng(pages[i] as HTMLElement, { quality: 1.0, pixelRatio: 3, backgroundColor: '#ffffff' });
+            const dataUrl = await toPng(pages[i] as HTMLElement, { 
+              quality: 1.0, 
+              pixelRatio: 3, 
+              backgroundColor: '#ffffff',
+              width: 794,
+              height: 1123
+            });
             const link = document.createElement('a');
             link.download = `${filenamePrefix}_Page_${i + 1}.png`;
             link.href = dataUrl;
             link.click();
         }
-        toast({ title: 'Success', description: 'All pages exported as PNG.' });
+        toast({ title: 'Success', description: 'HD PNG pages exported.' });
     } catch (e: any) {
         toast({ variant: 'destructive', title: 'PNG Export Failed', description: e.message });
     } finally { setIsDownloading(false); }
@@ -383,7 +410,7 @@ export function QuotationBuilder() {
               <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Quotation.pdf' : 'Product_Brochure.pdf')} size="sm" disabled={isDownloading} className="rounded-full">
                 {isDownloading ? <LineLoader className="w-8 h-0.5" /> : <><Download size={14} className="mr-2"/> PDF</>}
               </Button>
-              <Button onClick={() => handleDownloadPng('quotation-page', activeTab === 'quotation' ? 'Quotation' : 'Brochure')} size="sm" variant="outline" disabled={isDownloading} className="rounded-full border-primary text-primary">
+              <Button onClick={() => handleDownloadPng(activeTab === 'quotation' ? 'quotation-page' : 'brochure-page', activeTab === 'quotation' ? 'Quotation' : 'Brochure')} size="sm" variant="outline" disabled={isDownloading} className="rounded-full border-primary text-primary">
                 {isDownloading ? <LineLoader className="w-8 h-0.5" /> : <><ImageIcon size={14} className="mr-2"/> PNG</>}
               </Button>
             </div>
