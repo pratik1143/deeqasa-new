@@ -1,106 +1,45 @@
 {
   "entities": {
     "Quotation": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Quotation",
+      "description": "Enterprise HP solution records. Managed exclusively by deeqasa@admin.in.",
       "type": "object",
-      "description": "Administrative quotation records for HP Enterprise solutions.",
       "properties": {
-        "quotationId": {
-          "type": "string",
-          "description": "Unique identifier for the Quotation entity."
-        },
-        "clientDetails": {
-          "type": "string",
-          "description": "JSON string containing client identity and location."
-        },
-        "products": {
-          "type": "string",
-          "description": "JSON string representing the bill of materials."
-        },
-        "pricing": {
-          "type": "string",
-          "description": "JSON string representing unit pricing."
-        },
-        "totals": {
-          "type": "string",
-          "description": "JSON string representing commercial totals."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "ISO 8601 creation timestamp.",
-          "format": "date-time"
-        },
-        "createdBy": {
-          "type": "string",
-          "description": "UID of the administrator who generated the record."
-        },
-        "status": {
-          "type": "string",
-          "enum": ["ACTIVE", "ARCHIVED"],
-          "description": "Active pipeline status."
-        },
-        "subject": {
-          "type": "string",
-          "description": "Quotation subject line."
-        }
+        "quotationId": { "type": "string" },
+        "clientDetails": { "type": "string" },
+        "products": { "type": "string" },
+        "pricing": { "type": "string" },
+        "totals": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED"] },
+        "subject": { "type": "string" }
       },
-      "required": [
-        "quotationId",
-        "clientDetails",
-        "products",
-        "pricing",
-        "totals",
-        "createdAt",
-        "createdBy",
-        "status"
-      ]
+      "required": ["quotationId", "clientDetails", "products", "pricing", "totals", "createdAt", "createdBy", "status"]
     },
     "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserProfile",
+      "description": "Administrator identity profile.",
       "type": "object",
-      "description": "Administrator profile identity.",
       "properties": {
-        "email": {
-          "type": "string",
-          "description": "Verified administrative email."
-        },
-        "role": {
-          "type": "string",
-          "enum": ["admin"],
-          "description": "System access level."
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Profile initialization timestamp."
-        }
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": [
-        "email",
-        "role",
-        "createdAt"
-      ]
+      "required": ["email", "role", "createdAt"]
     }
   },
   "auth": {
-    "providers": [
-      "password"
-    ]
+    "providers": ["password"]
   },
   "firestore": {
     "/quotations/{quotationId}": {
-      "schema": {
-        "$ref": "#/backend/entities/Quotation"
-      },
-      "description": "Global administrative quotation repository. Restricted to deeqasa@admin.in."
+      "schema": { "$ref": "#/backend/entities/Quotation" },
+      "description": "Master quotation repository. Restricted to deeqasa@admin.in."
     },
     "/users/{userId}": {
-      "schema": {
-        "$ref": "#/backend/entities/UserProfile"
-      },
-      "description": "Administrative profile data."
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
+      "description": "Administrator profiles."
     }
   }
 }
