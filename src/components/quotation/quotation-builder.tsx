@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +41,8 @@ import {
   ShieldCheck,
   Loader2,
   Building2,
-  ArrowRight
+  ArrowRight,
+  BrainCircuit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -102,6 +104,7 @@ const STEPS = [
 
 export function QuotationBuilder() {
   const { toast } = useToast();
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -112,7 +115,6 @@ export function QuotationBuilder() {
   const [currentStep, setCurrentStep] = useState('customer');
   const [activeField, setActiveField] = useState<string | null>(null);
 
-  // States for pending item configuration
   const [pendingPrice, setPendingPrice] = useState<number>(0);
   const [pendingQuantity, setPendingQuantity] = useState<number>(1);
   const [isPriceOverridden, setIsPriceOverridden] = useState(false);
@@ -162,7 +164,6 @@ export function QuotationBuilder() {
     fetchProducts();
   }, [toast]);
 
-  // Reset pending configuration when selected product changes
   useEffect(() => {
     if (selectedProduct) {
       setPendingPrice(selectedProduct.price);
@@ -259,6 +260,19 @@ export function QuotationBuilder() {
     } finally {
       setIsGeneratingBrochure(false);
     }
+  };
+
+  const handleRunIntelligence = () => {
+    if (!watchedLineItems?.length) return;
+    const analysisPayload = {
+        customerName: watchedCustomer,
+        companyName: watchedCompany,
+        subject: watchedSubject,
+        totalAmount: totals.grandTotal,
+        lineItems: watchedLineItems,
+    };
+    localStorage.setItem('current_quotation_analysis', JSON.stringify(analysisPayload));
+    router.push('/deal-intelligence');
   };
 
   const handleDownloadPdf = async (rootId: string, filename: string) => {
@@ -465,7 +479,6 @@ export function QuotationBuilder() {
                         </PopoverContent>
                       </Popover>
 
-                      {/* Product Adjustment Block - Appears once a product is selected */}
                       <AnimatePresence>
                         {selectedProduct && (
                           <motion.div 
@@ -586,9 +599,20 @@ export function QuotationBuilder() {
                   </div>
 
                   <div className="space-y-3">
-                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center px-4">Marketing Intelligence</p>
-                     <Button variant="outline" className="w-full h-12 gap-2 border-primary/30 text-primary hover:bg-primary/10 font-bold text-xs group" onClick={handleGenerateBrochure} disabled={isGeneratingBrochure || !watchedLineItems?.length}>
-                        {isGeneratingBrochure ? <Loader2 className="w-4 h-4 animate-spin" /> : <><BookOpen size={16} className="group-hover:scale-110 transition-transform"/> Compile 3-Page Product Brochure</>}
+                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center px-4">AI Intelligence Modules</p>
+                     
+                     <Button 
+                        variant="outline" 
+                        className="w-full h-12 gap-2 border-primary/30 text-primary hover:bg-primary/10 font-bold text-xs group shadow-[0_0_15px_rgba(0,224,255,0.1)]" 
+                        onClick={handleRunIntelligence} 
+                        disabled={!watchedLineItems?.length}
+                     >
+                        <BrainCircuit size={16} className="group-hover:scale-110 transition-transform text-primary"/>
+                        Run Intelligence Report
+                     </Button>
+
+                     <Button variant="outline" className="w-full h-12 gap-2 border-white/10 text-white/60 hover:bg-white/5 font-bold text-xs group" onClick={handleGenerateBrochure} disabled={isGeneratingBrochure || !watchedLineItems?.length}>
+                        {isGeneratingBrochure ? <Loader2 className="w-4 h-4 animate-spin" /> : <><BookOpen size={16} className="group-hover:scale-110 transition-transform"/> Compile 3-Page Brochure</>}
                      </Button>
                   </div>
                 </motion.div>
@@ -732,7 +756,7 @@ export function QuotationBuilder() {
                             <td className="text-center font-bold text-gray-300">{idx + 1}</td>
                             <td style={{ padding: '10px 15px' }}>
                               <p className="font-black uppercase text-[#111827] text-[10pt] mb-1 tracking-tight">{item.product.model}</p>
-                              <p className="text-[8.5pt] text-[#6B7280] leading-relaxed font-serif italic">{getLongDescription(item.product)}</p>
+                              <p className="text-[8.5pt] text-[#6B7280] length-relaxed font-serif italic">{getLongDescription(item.product)}</p>
                             </td>
                             <td className="text-center font-bold text-[11pt] text-[#111827]">{item.quantity}</td>
                             <td className="text-right text-[10pt] font-mono text-[#4B5563]">{item.unitPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
@@ -812,7 +836,6 @@ export function QuotationBuilder() {
         </ScrollArea>
       </div>
 
-      {/* Floating Action Hint */}
       <AnimatePresence>
         {!watchedLineItems?.length && (
           <motion.div 

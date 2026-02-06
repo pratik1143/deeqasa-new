@@ -11,3 +11,4 @@ import '@/ai/flows/get-product-data.ts';
 import '@/ai/flows/ai-quotation-letter-generation.ts';
 import '@/ai/flows/ai-brochure-generation.ts';
 import '@/ai/flows/store-brochure-data.ts';
+import '@/ai/flows/ai-deal-intelligence.ts';

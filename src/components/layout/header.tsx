@@ -1,11 +1,10 @@
-
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search, LogIn, LogOut, Menu } from "lucide-react";
+import { Search, LogIn, LogOut, Menu, BrainCircuit } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -17,6 +16,7 @@ const baseNavLinks = [
 const protectedLinks = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Quotation Builder", href: "/quotation-builder" },
+  { name: "AI Intelligence", href: "/deal-intelligence" },
 ];
 
 export function Header() {
