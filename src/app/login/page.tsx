@@ -54,88 +54,87 @@ export default function LoginPage() {
   };
   
   if (isUserLoading || user) {
-    return <CenteredLoader text="Redirecting..." />;
+    return <CenteredLoader text="Authenticating..." />;
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
-      {/* Layer 1: Background Video */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover"
-      >
-        <source src="/bg-video.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-
-      {/* Layer 2: Dark Overlay */}
-      <div className="absolute inset-0 bg-black/60" />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       
-      {/* Layer 3: Content */}
-      <div className="relative z-10 h-full flex items-center justify-center p-4">
-        <Link href="/" className="absolute top-4 left-4 text-sm font-medium text-white/80 hover:text-primary transition-colors">
-              &larr; Back to Home
+      <div className="w-full max-w-[400px] relative z-10 flex flex-col items-center gap-8">
+        <Link href="/" className="group transition-transform duration-250 hover:scale-[1.05] block relative h-16 w-full">
+            <Image 
+              src="/logo_hp.png" 
+              alt="DEEQA SA TECH" 
+              fill
+              className="object-contain"
+              priority
+            />
         </Link>
-        <div className="flex flex-col items-center gap-8 w-full max-w-sm">
-            <div className="text-center">
-                <Image 
-                  src="/logo_hp.png" 
-                  alt="DEEQASA TECH" 
-                  width={240} 
-                  height={60} 
-                  className="h-16 w-auto object-contain mb-4 mx-auto"
+        
+        <Card className="w-full border-gray-100 shadow-2xl shadow-gray-200/50 bg-white">
+          <CardHeader className="text-center pt-8">
+            <CardTitle className="text-2xl font-bold tracking-tight text-gray-900">Admin Portal</CardTitle>
+            <CardDescription className="text-gray-500 font-medium">
+              Enterprise Identity Verification
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pb-8 px-8">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-gray-500">Corporate Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@deeqasa.tech"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  autoComplete="email"
+                  className="bg-gray-50/50 border-gray-200 h-11 focus:bg-white transition-colors"
                 />
-                <h1 className="text-xl font-headline font-bold tracking-widest text-white/90 uppercase">Admin Portal</h1>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-gray-500">Security Credential</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                  autoComplete="current-password"
+                  className="bg-gray-50/50 border-gray-200 h-11 focus:bg-white transition-colors"
+                />
+              </div>
+              
+              <Button type="submit" className="w-full h-11 font-bold text-sm bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all active:scale-[0.98]" disabled={isLoading}>
+                {isLoading ? <div className="w-6"><LineLoader className="h-0.5 bg-white/20" /></div> : "Sign In to Portal"}
+              </Button>
+            </form>
+            
+            {error && (
+              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-destructive text-center text-xs font-bold">{error}</p>
+              </div>
+            )}
+            
+            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+              <Link href="/" className="text-xs font-bold text-gray-400 hover:text-primary transition-colors uppercase tracking-widest">
+                &larr; Return to Infrastructure Site
+              </Link>
             </div>
-            <Card className="w-full bg-card/80 backdrop-blur-md border-primary/20 shadow-2xl">
-                <CardHeader className="text-center">
-                <CardTitle className="text-2xl font-headline">Secure Access</CardTitle>
-                <CardDescription>
-                    Authorized personnel only.
-                </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleLogin} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="admin@deeqasa.tech"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={isLoading}
-                                required
-                                autoComplete="email"
-                                className="bg-background/50 border-primary/20"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="••••••••"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                disabled={isLoading}
-                                required
-                                autoComplete="current-password"
-                                className="bg-background/50 border-primary/20"
-                            />
-                        </div>
-                    <Button type="submit" className="w-full font-bold shadow-lg shadow-primary/20" disabled={isLoading}>
-                        {isLoading ? <div className="w-4 h-4 mr-2 flex items-center"><LineLoader className="h-0.5"/></div> : null}
-                        Sign In
-                    </Button>
-                    </form>
-                {error && <p className="text-destructive text-center text-sm mt-4 font-medium">{error}</p>}
-                </CardContent>
-            </Card>
-        </div>
+          </CardContent>
+        </Card>
+        
+        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.3em]">
+          Secure Terminal v4.0.1
+        </p>
       </div>
     </div>
   );

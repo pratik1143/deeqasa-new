@@ -4,15 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search, LogIn, LogOut } from "lucide-react";
+import { Search, LogIn, LogOut, Menu } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 
 const baseNavLinks = [
   { name: "Home", href: "/" },
   { name: "Solutions", href: "/#solutions" },
-  { name: "About", href: "#about" },
 ];
 
 const protectedLinks = [
@@ -25,6 +24,7 @@ export function Header() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,66 +44,88 @@ export function Header() {
   };
 
   const navLinks = user 
-    ? [...baseNavLinks.slice(0, 2), ...protectedLinks, ...baseNavLinks.slice(2)]
+    ? [...baseNavLinks, ...protectedLinks]
     : baseNavLinks;
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print",
-      isScrolled ? "bg-card/80 backdrop-blur-sm border-b border-border" : "bg-transparent",
-      "p-4"
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b",
+      isScrolled || pathname !== '/' ? "bg-white shadow-sm border-gray-200" : "bg-white/95 border-transparent backdrop-blur-md"
     )}>
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
+      <div className="container mx-auto px-4 flex justify-between items-center h-full">
+        <div className="flex items-center gap-8">
+          <Link href="/" className="group transition-transform duration-250 hover:scale-[1.03] block relative h-12 w-[160px]">
             <Image 
               src="/logo_hp.png" 
-              alt="DEEQASA TECH" 
-              width={160} 
-              height={40} 
-              className="h-10 w-auto object-contain"
+              alt="DEEQA SA TECH" 
+              fill
+              className="object-contain"
               priority
+              sizes="160px"
             />
           </Link>
-          <div className="hidden md:flex items-center gap-2 border-l border-border pl-4">
-              <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">Enterprise Solutions</span>
+          <div className="hidden lg:flex items-center gap-1 border-l border-gray-200 pl-8 h-8">
+              <span className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Enterprise Infrastructure</span>
           </div>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link key={link.name} href={link.href} className="font-medium text-sm text-foreground/80 hover:text-primary transition-colors">
-              {link.name}
-            </Link>
-          ))}
+        <nav className="hidden lg:flex items-center gap-8 h-full">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link 
+                key={link.name} 
+                href={link.href} 
+                className={cn(
+                  "relative h-full flex items-center text-sm font-semibold tracking-tight transition-colors duration-200 py-2",
+                  isActive ? "text-primary" : "text-gray-600 hover:text-primary"
+                )}
+              >
+                {link.name}
+                <span className={cn(
+                  "absolute bottom-0 left-0 w-full h-0.5 bg-primary transition-transform duration-300 scale-x-0 group-hover:scale-x-100",
+                  isActive && "scale-x-100"
+                )} />
+              </Link>
+            );
+          })}
         </nav>
         
-        <div className="flex items-center gap-2">
-            <Button variant="ghost" className="hidden md:inline-flex">Contact Sales</Button>
-            <Button asChild className="bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground font-bold hover:shadow-lg hover:shadow-primary/50 transition-shadow duration-300 rounded-full">
-              <a href="https://www.hp.com/in-en/shop/laptops-tablets/business-laptops.html" target="_blank" rel="noopener noreferrer">
-                View Product
-              </a>
+        <div className="flex items-center gap-3">
+            <Button variant="ghost" className="hidden xl:inline-flex text-gray-600 font-bold hover:bg-gray-50">
+              Contact Sales
             </Button>
             
             {isUserLoading ? (
-              <Button variant="ghost" size="icon" disabled>
+              <div className="w-10 h-10 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-              </Button>
+              </div>
             ) : user ? (
-              <Button variant="ghost" className="flex items-center gap-2" onClick={handleSignOut} aria-label="Sign Out">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 font-bold" 
+                onClick={handleSignOut}
+              >
                 <span className="hidden sm:inline">Sign Out</span>
                 <LogOut className="h-4 w-4" />
               </Button>
             ) : (
-              <Button variant="ghost" className="flex items-center gap-2" onClick={handleSignIn} aria-label="Sign In">
-                <span className="hidden sm:inline">Admin Login</span>
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2 border-gray-200 hover:bg-gray-50 font-bold" 
+                onClick={handleSignIn}
+              >
                 <LogIn className="h-4 w-4" />
+                <span className="hidden sm:inline">Admin Access</span>
               </Button>
             )}
 
-            <Button variant="ghost" size="icon">
-                <Search />
+            <Button size="icon" className="bg-primary hover:bg-primary/90 text-white rounded-full h-10 w-10 transition-shadow hover:shadow-lg hover:shadow-primary/20">
+                <Search className="h-4 w-4" />
+            </Button>
+            
+            <Button variant="ghost" size="icon" className="lg:hidden">
+              <Menu className="h-6 w-6" />
             </Button>
         </div>
       </div>
