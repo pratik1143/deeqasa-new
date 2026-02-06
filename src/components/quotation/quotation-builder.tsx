@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, useTransition } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -13,18 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList, CommandItem } from '@/components/ui/command';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
-import { generateBrochureContent, type BrochureOutput } from '@/ai/flows/ai-brochure-generation';
-import { storeBrochureLog } from '@/ai/flows/store-brochure-data';
-import { type Product, ProductSchema } from '@/lib/quotation-schemas';
+import { type BrochureOutput } from '@/ai/flows/ai-brochure-generation';
+import { ProductSchema, type Product } from '@/lib/quotation-schemas';
 import { useFirestore, useUser } from '@/firebase';
 import { collection, doc, writeBatch, query, where, getDocs } from 'firebase/firestore';
 import { 
@@ -33,29 +29,17 @@ import {
   Trash2, 
   Sparkles, 
   Download, 
-  Image as ImageIcon, 
-  FileText, 
-  BookOpen,
   User,
   Layout,
   Package,
   CheckCircle2,
-  ShieldCheck,
   Loader2,
-  Building2,
-  ArrowRight,
-  BrainCircuit,
-  Award,
-  History,
-  Globe,
-  Leaf,
-  Wrench,
   Save,
-  Calendar
+  Calendar,
+  BrainCircuit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { LineLoader } from '../ui/line-loader';
 import { BrochurePreview } from './brochure-preview';
 
 const FormSchema = z.object({
@@ -99,17 +83,14 @@ function numberToWords(num: number): string {
     return result.charAt(0).toUpperCase() + result.slice(1) + ' only.';
 };
 
-const getLongDescription = (product: Product): string => {
-  if (product.id.startsWith('MAN-')) return product.processor;
-  return [product.processor, product.memory, product.hdd !== '-' ? product.hdd : null, product.hdd2 !== '-' ? product.hdd2 : null, product.gfx !== '-' ? product.gfx : null, product.os !== '-' ? product.os : null, product.warranty !== '-' ? product.warranty : null].filter(Boolean).join(' | ');
-};
-
 const STEPS = [
   { id: 'customer', title: 'Customer', icon: User },
   { id: 'letter', title: 'Cover Letter', icon: Layout },
   { id: 'items', title: 'Line Items', icon: Package },
   { id: 'summary', title: 'Export', icon: CheckCircle2 },
 ];
+
+const HP_LOGO_URL = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HP_logo_2012.svg/1024px-HP_logo_2012.svg.png";
 
 export function QuotationBuilder() {
   const { toast } = useToast();
@@ -125,15 +106,11 @@ export function QuotationBuilder() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState("quotation");
   const [currentStep, setCurrentStep] = useState('customer');
-  const [activeField, setActiveField] = useState<string | null>(null);
 
   const [pendingPrice, setPendingPrice] = useState<number>(0);
   const [pendingQuantity, setPendingQuantity] = useState<number>(1);
-  const [isPriceOverridden, setIsPriceOverridden] = useState(false);
 
-  const [isManualMode, setIsManualMode] = useState(false);
-  const [marketingData, setMarketingData] = useState<BrochureOutput | null>(null);
-  const [isGeneratingBrochure, setIsGeneratingBrochure] = useState(false);
+  const [marketingData] = useState<BrochureOutput | null>(null);
   const [isGeneratingBody, startGeneratingBody] = useTransition();
 
   const form = useForm<FormValues>({
@@ -142,8 +119,8 @@ export function QuotationBuilder() {
       customerName: 'The Head of Department',
       companyName: 'Department of Biotechnology, Panjab University',
       address: 'Sector 14, Chandigarh',
-      subject: 'Submission of Quotation for Server, Network, Storage, Firewall & Video Conferencing Solution',
-      letterBody: 'With reference to the requirements for advanced computing and networking infrastructure, we are pleased to submit our formal quotation for the supply and installation of HP Enterprise Servers, Storage, Networking, and Video Conferencing solutions. Our proposed solutions are engineered to provide maximum reliability, scalability, and high-performance computing required for your departmental needs. We ensure that all components are fully compatible and backed by professional OEM onsite warranty and technical support services.',
+      subject: 'Submission of Quotation for HP Enterprise Servers and Storage Solution',
+      letterBody: 'With reference to your requirement for high-performance computing infrastructure, we are pleased to submit our formal technical and commercial proposal. Our solution is engineered to deliver maximum reliability, scalability, and security, tailored specifically for mission-critical academic and research workloads. We ensure that all proposed components are fully backed by HP OEM onsite warranty and professional technical support services.',
       lineItems: [],
     },
   });
@@ -175,7 +152,6 @@ export function QuotationBuilder() {
     if (selectedProduct) {
       setPendingPrice(selectedProduct.price);
       setPendingQuantity(1);
-      setIsPriceOverridden(false);
     }
   }, [selectedProduct]);
 
@@ -199,7 +175,6 @@ export function QuotationBuilder() {
     const batch = writeBatch(firestore);
 
     try {
-      // 1. Mark previous ACTIVE deals as ARCHIVED
       const q = query(
         collection(firestore, 'quotations'),
         where('createdBy', '==', user.uid),
@@ -210,7 +185,6 @@ export function QuotationBuilder() {
         batch.update(doc.ref, { status: 'ARCHIVED' });
       });
 
-      // 2. Save new quotation
       const newDocRef = doc(collection(firestore, 'quotations'), quotationId);
       batch.set(newDocRef, {
         quotationId,
@@ -269,7 +243,7 @@ export function QuotationBuilder() {
       margin: 0, 
       filename, 
       image: { type: 'jpeg', quality: 1.0 }, 
-      html2canvas: { scale: 3, useCORS: true }, 
+      html2canvas: { scale: 3, useCORS: true, logging: false }, 
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -277,6 +251,23 @@ export function QuotationBuilder() {
       await html2pdf().from(element).set(opt).save();
     } finally { setIsDownloading(false); }
   };
+
+  const PageHeader = () => (
+    <div className="print-header">
+      <img src={HP_LOGO_URL} alt="HP" className="h-[12mm] w-auto" />
+      <div className="text-right">
+        <h2 className="text-[12pt] font-black uppercase tracking-tight">DEEQASA</h2>
+        <p className="text-[7pt] text-primary font-bold uppercase tracking-[0.2em]">HP Authorized Enterprise Partner</p>
+      </div>
+    </div>
+  );
+
+  const PageFooter = ({ pageNum }: { pageNum: number }) => (
+    <div className="print-footer">
+      <p>Secure. Sustainable. Scalable. HP Enterprise Solutions.</p>
+      <p>Page {pageNum.toString().padStart(2, '0')}</p>
+    </div>
+  );
 
   return (
     <div className="flex flex-col lg:flex-row gap-0 min-h-[calc(100vh-80px)] bg-black overflow-hidden font-body">
@@ -329,19 +320,19 @@ export function QuotationBuilder() {
               {currentStep === 'customer' && (
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <FormField control={form.control} name="customerName" render={({ field }) => (
-                    <FormItem onFocus={() => setActiveField('customerName')} onBlur={() => setActiveField(null)}>
+                    <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Attention To</FormLabel>
                       <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="The Head of Department" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="companyName" render={({ field }) => (
-                    <FormItem onFocus={() => setActiveField('companyName')} onBlur={() => setActiveField(null)}>
+                    <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Organization</FormLabel>
                       <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="Panjab University" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="address" render={({ field }) => (
-                    <FormItem onFocus={() => setActiveField('address')} onBlur={() => setActiveField(null)}>
+                    <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Address</FormLabel>
                       <FormControl><Textarea rows={3} className="bg-white/5 border-white/10 focus:ring-primary/30 text-xs" {...field} /></FormControl>
                     </FormItem>
@@ -352,13 +343,13 @@ export function QuotationBuilder() {
               {currentStep === 'letter' && (
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <FormField control={form.control} name="subject" render={({ field }) => (
-                    <FormItem onFocus={() => setActiveField('subject')} onBlur={() => setActiveField(null)}>
+                    <FormItem>
                       <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Subject Line</FormLabel>
                       <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="letterBody" render={({ field }) => (
-                    <FormItem onFocus={() => setActiveField('letterBody')} onBlur={() => setActiveField(null)}>
+                    <FormItem>
                       <div className="flex justify-between items-center mb-1">
                         <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Body Text</FormLabel>
                         <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20" onClick={handleAiGenerateBody} disabled={isGeneratingBody}>
@@ -443,12 +434,12 @@ export function QuotationBuilder() {
         <div className="h-20 bg-card/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 shrink-0 no-print">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white/5 rounded-full p-1">
             <TabsList className="bg-transparent">
-              <TabsTrigger value="quotation" className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">Proposal</TabsTrigger>
+              <TabsTrigger value="quotation" className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">Proposal Pack</TabsTrigger>
               <TabsTrigger value="brochure" disabled={!marketingData} className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">AI Brochure</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Proposal.pdf')} size="sm" className="rounded-full h-9 bg-white text-black hover:bg-white/90 font-bold" disabled={isDownloading}>
-            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export A4 PDF</>}
+          <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Enterprise_Proposal.pdf')} size="sm" className="rounded-full h-9 bg-white text-black hover:bg-white/90 font-bold" disabled={isDownloading}>
+            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export Tender PDF</>}
           </Button>
         </div>
 
@@ -456,58 +447,123 @@ export function QuotationBuilder() {
           <div className="py-20 flex flex-col items-center">
             {activeTab === 'quotation' ? (
               <div id="quotation-export-root" className="document-canvas">
+                {/* PAGE 1: EXECUTIVE COVER LETTER */}
                 <div className="quotation-page">
-                  <div className="flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
-                    <img src="/hp-logo.png" alt="HP" className="h-[18mm] w-auto" />
-                    <div className="text-right">
-                      <h2 className="text-[14pt] font-bold uppercase">DEEQASA</h2>
-                      <p className="text-[8pt] text-gray-400 font-bold uppercase">Authorized Partner</p>
+                  <PageHeader />
+                  <div className="print-body">
+                    <div className="mb-10 text-[11pt] space-y-1">
+                      <p className="font-bold">To,</p>
+                      <p className="text-[12pt] font-black uppercase">{watchedCustomer}</p>
+                      <p className="font-bold text-gray-700">{watchedCompany}</p>
+                      <p className="text-gray-500 italic">{watchedAddress}</p>
+                    </div>
+                    <div className="font-bold bg-gray-50 p-6 border-l-[6pt] border-gray-900 mb-10">
+                      <p className="text-[11pt] leading-tight"><span className="underline uppercase mr-3 text-gray-400 text-[8pt] font-black">Subject:</span> {watchedSubject}</p>
+                    </div>
+                    <div className="space-y-8 text-[11.5pt] justified-text">
+                      <p className="font-bold">Respected Sir/Madam,</p>
+                      <div className="whitespace-pre-wrap leading-[1.8] text-gray-800 font-medium">{watchedLetterBody}</div>
                     </div>
                   </div>
-                  <div className="mb-10 text-[11pt] space-y-1">
-                    <p className="font-bold">To,</p>
-                    <p className="text-[12pt] uppercase">{watchedCustomer}</p>
-                    <p className="font-medium text-gray-600">{watchedCompany}</p>
-                    <p className="text-gray-500 italic">{watchedAddress}</p>
-                  </div>
-                  <div className="font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8">
-                    <p className="text-[#111827]"><span className="underline uppercase mr-3 text-gray-400 text-[8pt]">Subject:</span> {watchedSubject}</p>
-                  </div>
-                  <div className="space-y-6 text-[11.5pt] justified-text">
-                    <p className="font-bold">Respected Sir/Madam,</p>
-                    <div className="whitespace-pre-wrap leading-[1.7]">{watchedLetterBody}</div>
-                  </div>
-                  <div className="mt-auto pt-10 flex justify-between items-end border-t border-gray-50">
-                    <p className="text-[7pt] font-bold uppercase tracking-widest text-gray-300">Proposal Page 01</p>
-                    <div className="text-right">
-                      <div className="h-10 w-40 border-b border-gray-300 mb-2"></div>
-                      <p className="text-[8pt] font-black uppercase">Authorized Signature</p>
-                    </div>
-                  </div>
+                  <PageFooter pageNum={1} />
                 </div>
-                {/* Simplified dynamic pages for pack */}
+
+                {/* PAGE 2: COMMERCIAL SCHEDULE */}
                 <div className="quotation-page">
-                  <h3 className="text-center font-black text-xl mb-10 uppercase tracking-widest">Commercial Schedule</h3>
-                  <table className="quotation-table">
-                    <thead><tr><th>Sr.</th><th>Configuration</th><th>Qty</th><th>Unit (₹)</th><th>Total (₹)</th></tr></thead>
-                    <tbody>
-                      {watchedLineItems?.map((item, idx) => (
-                        <tr key={idx}>
-                          <td className="text-center">{idx + 1}</td>
-                          <td className="p-2"><strong>{item.product.model}</strong><br/><span className="text-[8pt] italic text-gray-500">{item.product.processor}</span></td>
-                          <td className="text-center">{item.quantity}</td>
-                          <td className="text-right">{item.unitPrice.toLocaleString('en-IN')}</td>
-                          <td className="text-right font-bold">{(item.quantity * item.unitPrice).toLocaleString('en-IN')}</td>
+                  <PageHeader />
+                  <div className="print-body">
+                    <h3 className="text-center font-black text-xl mb-10 uppercase tracking-[0.2em] border-b-2 border-gray-900 pb-2">Commercial Schedule</h3>
+                    <table className="quotation-table">
+                      <thead>
+                        <tr>
+                          <th className="w-[10%]">Sr.</th>
+                          <th className="w-[50%]">Item Description & Configuration</th>
+                          <th className="w-[10%]">Qty</th>
+                          <th className="w-[15%]">Unit (₹)</th>
+                          <th className="w-[15%]">Total (₹)</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="mt-10 flex justify-end">
-                    <div className="w-[85mm] bg-gray-50 p-6 rounded-xl border border-gray-100 space-y-2">
-                      <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
-                      <div className="flex justify-between text-lg font-black pt-4 border-t-2 border-gray-200 uppercase"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
+                      </thead>
+                      <tbody>
+                        {watchedLineItems?.map((item, idx) => (
+                          <tr key={idx}>
+                            <td className="text-center font-bold text-gray-400">{idx + 1}</td>
+                            <td className="font-bold text-gray-900">
+                              {item.product.model}
+                              <p className="text-[7.5pt] text-gray-500 italic font-medium mt-1 uppercase tracking-tight">{item.product.processor}</p>
+                            </td>
+                            <td className="text-center font-bold">{item.quantity}</td>
+                            <td className="text-right font-medium">{item.unitPrice.toLocaleString('en-IN')}</td>
+                            <td className="text-right font-black">{(item.quantity * item.unitPrice).toLocaleString('en-IN')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    <div className="mt-8 flex justify-end">
+                      <div className="w-[90mm] bg-gray-50 p-8 rounded-2xl border-2 border-gray-100 space-y-3">
+                        <div className="flex justify-between text-[8pt] font-black text-gray-400 uppercase tracking-widest">
+                          <span>Sub-Total</span>
+                          <span>₹{totals.subTotal.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="flex justify-between text-[8pt] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-3">
+                          <span>GST (18%)</span>
+                          <span>₹{totals.totalGst.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="flex justify-between text-[14pt] font-black text-gray-900 pt-2 uppercase tracking-tight">
+                          <span>Grand Total</span>
+                          <span>₹{totals.grandTotal.toLocaleString('en-IN')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-10 p-6 bg-blue-50/30 rounded-xl border border-blue-100">
+                      <p className="text-[8pt] font-black text-blue-400 uppercase tracking-widest mb-2">Amount in Words</p>
+                      <p className="text-[10pt] text-blue-900 italic font-serif leading-relaxed">{numberToWords(totals.grandTotal)}</p>
                     </div>
                   </div>
+                  <PageFooter pageNum={2} />
+                </div>
+
+                {/* PAGE 3: OEM TRUST & WARRANTY */}
+                <div className="quotation-page">
+                  <PageHeader />
+                  <div className="print-body">
+                    <h3 className="text-center font-black text-xl mb-12 uppercase tracking-[0.2em]">OEM Authorization & Compliance</h3>
+                    
+                    <div className="grid grid-cols-2 gap-8 mb-12">
+                      <div className="p-8 bg-gray-50 rounded-3xl border border-gray-100">
+                        <CheckCircle2 className="text-primary mb-4" size={32} />
+                        <h4 className="font-black text-[10pt] uppercase mb-2 tracking-widest">Certified Partner</h4>
+                        <p className="text-[9pt] text-gray-600 leading-relaxed italic">Authorized to supply, install, and maintain HP Enterprise Infrastructure across North India.</p>
+                      </div>
+                      <div className="p-8 bg-gray-50 rounded-3xl border border-gray-100">
+                        <BrainCircuit className="text-primary mb-4" size={32} />
+                        <h4 className="font-black text-[10pt] uppercase mb-2 tracking-widest">Technical Support</h4>
+                        <p className="text-[9pt] text-gray-600 leading-relaxed italic">Direct OEM L2/L3 onsite support with 4-hour response time for critical server infrastructure.</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="p-10 border-2 border-dashed border-gray-200 rounded-[40px] text-center">
+                        <h4 className="font-black text-[12pt] uppercase mb-4 tracking-tighter">Sustainability Commitment</h4>
+                        <p className="text-[10pt] text-gray-500 leading-relaxed max-w-md mx-auto">All proposed HP Enterprise hardware is EPEAT Silver/Gold certified and Energy Star 8.0 compliant, supporting your green IT initiatives.</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto mb-10 border-t-4 border-gray-900 pt-8 flex justify-between items-start">
+                      <div className="max-w-[60%]">
+                        <p className="text-[8pt] font-black uppercase text-gray-400 mb-2">Authorized Signatory</p>
+                        <div className="h-16 w-48 border-b border-gray-200 mb-4"></div>
+                        <p className="text-[10pt] font-black uppercase tracking-tight">System Architect</p>
+                        <p className="text-[8pt] text-gray-400 font-bold uppercase">DEEQASA TECH | HP Partner ID: 1029384</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[8pt] font-black uppercase text-gray-400 mb-4">Company Seal</p>
+                        <div className="w-24 h-24 rounded-full border-2 border-gray-100 flex items-center justify-center text-[8pt] font-black text-gray-200 uppercase tracking-widest">Seal Area</div>
+                      </div>
+                    </div>
+                  </div>
+                  <PageFooter pageNum={3} />
                 </div>
               </div>
             ) : (
