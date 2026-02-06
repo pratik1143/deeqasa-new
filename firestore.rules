@@ -1,27 +1,12 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
      * CORE PHILOSOPHY
-     * This ruleset implements a strict user-ownership model designed for a high-performance quotation 
-     * and AI analysis system. It prioritizes authorization security while maintaining flexibility 
-     * for data payloads during the prototyping phase.
-     *
-     * DATA STRUCTURE
-     * - /quotations/{quotationId}: Top-level collection containing all quotation records.
-     * 
-     * KEY SECURITY DECISIONS
-     * - Authorization Independence: Every quotation document explicitly stores a 'createdBy' field. 
-     *   This allows the security rules to verify ownership instantly without performing 
-     *   additional cross-document lookups (get() calls), ensuring low latency for AI queries.
-     * - Ownership-Based Access: Users are restricted to viewing and managing only the quotations 
-     *   they created. Global listing of quotations is strictly prohibited.
-     * - Relational Integrity: The 'createdBy' field is enforced as immutable. Once a quotation 
-     *   is created, its ownership cannot be transferred to another user.
-     * - Prototyping Flexibility: While ownership is strictly enforced, the specific schema of 
-     *   the 'clientDetails', 'products', and 'pricing' maps is not validated at the rules level 
-     *   to allow for rapid UI/UX iteration.
+     * This ruleset implements a strict user-ownership model.
+     * Users can only access their own profile data and the quotations they created.
      */
 
     // --- GLOBAL HELPER FUNCTIONS ---
@@ -52,28 +37,31 @@ service cloud.firestore {
     // --- COLLECTION RULES ---
 
     /**
-     * @description Rules for the Quotation collection. Enforces that users can only create, 
-     * read, update, or delete quotations where they are the designated creator.
-     * @path /quotations/{quotationId}
-     * @allow (create) if authenticated and request.resource.data.createdBy matches auth.uid.
-     * @deny (list) if the user attempts to query quotations created by others.
-     * @principle Ownership-based access control with enforced relational integrity.
+     * @description Rules for the User collection.
+     * Users can only read or create their own profile document.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId);
+      // Updates are allowed only by the owner
+      allow update: if isOwner(userId);
+    }
+
+    /**
+     * @description Rules for the Quotation collection.
+     * Enforces that users can only manage quotations where they are the creator.
      */
     match /quotations/{quotationId} {
       
-      // Allow user to retrieve a specific quotation if they are the creator.
-      allow get: if isOwner(resource.data.createdBy);
-
-      // Allow user to list/query quotations they created. 
-      // This supports the AI Intelligence query: status == 'ACTIVE' && createdBy == UID.
-      allow list: if isOwner(resource.data.createdBy);
+      // Allow user to retrieve or list specific quotations if they are the creator.
+      allow get, list: if isOwner(resource.data.createdBy);
 
       // Ensure that when a quotation is created, the 'createdBy' field 
       // correctly identifies the authenticated user.
       allow create: if isSignedIn() 
                     && request.resource.data.createdBy == request.auth.uid;
 
-      // Allow updates only by the owner and prevent transferring the document to another user.
+      // Allow updates only by the owner and prevent transferring ownership.
       allow update: if isExistingOwner(resource.data.createdBy) 
                     && request.resource.data.createdBy == resource.data.createdBy;
 
@@ -82,7 +70,6 @@ service cloud.firestore {
     }
 
     // --- DEFAULT DENY ---
-    // Explicitly deny access to any other paths not defined above.
     match /{path=**} {
       allow read, write: if false;
     }

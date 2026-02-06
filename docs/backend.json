@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Quotation": {
@@ -50,6 +51,36 @@
         "createdBy",
         "status"
       ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile and system role.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The user's corporate email address."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "user"
+          ],
+          "description": "The assigned access level for the user."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the user profile was created."
+        }
+      },
+      "required": [
+        "email",
+        "role",
+        "createdAt"
+      ]
     }
   },
   "auth": {
@@ -75,8 +106,24 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile data and roles. Restricted to owner-access.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Auth UID of the user."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure that the quotation lifecycle supports AI intelligence by persisting quotation data and managing the active/archived status effectively. The structure enforces Authorization Independence by storing all necessary data, including the 'createdBy' field, directly within the quotation document. This eliminates the need for security rules to fetch data from other documents, ensuring atomic operations and easy debugging.\n\nThe structure supports the required QAPs (Query, Aggregation, and Pagination) as follows:\n\n*   Secure List Operations (QAP): The structure uses structural segregation by storing quotations in a flat collection (`/quotations`). Access control is managed via the 'createdBy' field combined with the 'status' field, ensuring that only authorized users can list and query quotations based on their 'createdBy' and 'status'.\n\nTo enforce the 'ACTIVE DEAL RULE' (only one active quotation per user/session), a transaction or batched write operation will be used to atomically update the status of previously active quotations to 'ARCHIVED' when a new quotation is created with 'ACTIVE' status.\n\nDenormalization Strategy: The 'createdBy' field is included in the quotation document to avoid dependency on the user document for authorization. This allows for secure list operations and avoids complex security rules that require fetching data from other documents.\n\nThe AI Intelligence page queries the `quotations` collection where `status == 'ACTIVE'` and orders by `createdAt DESC` with a `LIMIT 1`, which is directly supported by this structure. This setup supports easy querying and filtering based on the status of the quotation."
+    "reasoning": "The Firestore structure supports owner-based access control for both user profiles and quotations. The 'users' collection stores roles (like 'admin') required for accessing protected routes and administrative features. Quotations are stored at the top level to facilitate efficient AI-driven queries for active deals based on creator UID."
   }
 }
