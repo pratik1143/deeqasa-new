@@ -42,16 +42,28 @@ service cloud.firestore {
      */
     match /quotations/{quotationId} {
       
-      // Allow user to read (get/list) quotations if they are the creator.
-      // resource.data is used for existing docs; for list, it filters the query.
-      allow read: if isSignedIn() && (resource == null || resource.data.createdBy == request.auth.uid);
+      /**
+       * @description Allow individual document retrieval if the user is the owner.
+       * The 'resource == null' check handles existence checks without leaking data.
+       */
+      allow get: if isSignedIn() && (resource == null || resource.data.createdBy == request.auth.uid);
 
-      // Ensure that when a quotation is created, the 'createdBy' field 
-      // correctly identifies the authenticated user.
+      /**
+       * @description Allow collection queries (list) if the user filters by their own UID.
+       * This is strictly required for the query coverage check in Firestore.
+       */
+      allow list: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+
+      /**
+       * @description Ensure that when a quotation is created, the 'createdBy' field 
+       * correctly identifies the authenticated user.
+       */
       allow create: if isSignedIn() 
                     && request.resource.data.createdBy == request.auth.uid;
 
-      // Allow updates/deletes only by the owner.
+      /**
+       * @description Allow updates/deletes only by the owner.
+       */
       allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
     }
 
