@@ -26,14 +26,6 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Verifies ownership of an existing document before modification or deletion.
-     * @param userId The UID stored in the existing document's ownership field.
-     */
-    function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
-    }
-
     // --- COLLECTION RULES ---
 
     /**
@@ -41,10 +33,7 @@ service cloud.firestore {
      * Users can only read or create their own profile document.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow create: if isOwner(userId);
-      // Updates are allowed only by the owner
-      allow update: if isOwner(userId);
+      allow read, create, update: if isOwner(userId);
     }
 
     /**
@@ -53,20 +42,17 @@ service cloud.firestore {
      */
     match /quotations/{quotationId} {
       
-      // Allow user to retrieve or list specific quotations if they are the creator.
-      allow get, list: if isOwner(resource.data.createdBy);
+      // Allow user to read (get/list) quotations if they are the creator.
+      // resource.data is used for existing docs; for list, it filters the query.
+      allow read: if isSignedIn() && (resource == null || resource.data.createdBy == request.auth.uid);
 
       // Ensure that when a quotation is created, the 'createdBy' field 
       // correctly identifies the authenticated user.
       allow create: if isSignedIn() 
                     && request.resource.data.createdBy == request.auth.uid;
 
-      // Allow updates only by the owner and prevent transferring ownership.
-      allow update: if isExistingOwner(resource.data.createdBy) 
-                    && request.resource.data.createdBy == resource.data.createdBy;
-
-      // Allow deletion only by the owner.
-      allow delete: if isExistingOwner(resource.data.createdBy);
+      // Allow updates/deletes only by the owner.
+      allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
     }
 
     // --- DEFAULT DENY ---

@@ -13,7 +13,7 @@
         },
         "clientDetails": {
           "type": "string",
-          "description": "JSON string containing the client's details."
+          "description": "JSON string containing the client's details (name, company, address)."
         },
         "products": {
           "type": "string",
@@ -21,24 +21,29 @@
         },
         "pricing": {
           "type": "string",
-          "description": "JSON string representing the pricing details for the quotation."
+          "description": "JSON string representing the pricing details for the quotation items."
         },
         "totals": {
           "type": "string",
-          "description": "JSON string representing the total costs for the quotation."
+          "description": "JSON string representing the subtotal, GST, and grand total."
         },
         "createdAt": {
           "type": "string",
-          "description": "Timestamp indicating when the quotation was created, represented as an ISO 8601 date-time string.",
+          "description": "ISO 8601 date-time string indicating when the quotation was created.",
           "format": "date-time"
         },
         "createdBy": {
           "type": "string",
-          "description": "Identifier of the user who created the quotation."
+          "description": "The Firebase Auth UID of the user who created the quotation."
         },
         "status": {
           "type": "string",
-          "description": "The status of the quotation (e.g., ACTIVE, ARCHIVED)."
+          "enum": ["ACTIVE", "ARCHIVED"],
+          "description": "The current status of the quotation."
+        },
+        "subject": {
+          "type": "string",
+          "description": "The subject line of the quotation."
         }
       },
       "required": [
@@ -85,45 +90,21 @@
   },
   "auth": {
     "providers": [
-      "password",
-      "anonymous"
+      "password"
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/quotations/{quotationId}",
-        "definition": {
-          "entityName": "Quotation",
-          "schema": {
-            "$ref": "#/backend/entities/Quotation"
-          },
-          "description": "Stores quotation data. Includes denormalized 'createdBy' field for authorization independence.",
-          "params": [
-            {
-              "name": "quotationId",
-              "description": "Unique identifier for the quotation."
-            }
-          ]
-        }
+    "/quotations/{quotationId}": {
+      "schema": {
+        "$ref": "#/backend/entities/Quotation"
       },
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "UserProfile",
-          "schema": {
-            "$ref": "#/backend/entities/UserProfile"
-          },
-          "description": "Stores user profile data and roles. Restricted to owner-access.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The Firebase Auth UID of the user."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The Firestore structure supports owner-based access control for both user profiles and quotations. The 'users' collection stores roles (like 'admin') required for accessing protected routes and administrative features. Quotations are stored at the top level to facilitate efficient AI-driven queries for active deals based on creator UID."
+      "description": "Stores individual quotation records created by users."
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/backend/entities/UserProfile"
+      },
+      "description": "Stores role-based profile information for registered users."
+    }
   }
 }
