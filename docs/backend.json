@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "Quotation": {
@@ -98,13 +97,13 @@
       "schema": {
         "$ref": "#/backend/entities/Quotation"
       },
-      "description": "Stores individual quotation records created by users."
+      "description": "Stores individual quotation records. Admin (deeqasa@admin.in) has full access."
     },
     "/users/{userId}": {
       "schema": {
         "$ref": "#/backend/entities/UserProfile"
       },
-      "description": "Stores role-based profile information for registered users."
+      "description": "Stores role-based profile information. Users can access their own, Admin has full access."
     }
   }
 }

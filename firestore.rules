@@ -1,70 +1,52 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * CORE PHILOSOPHY
-     * This ruleset implements a strict user-ownership model.
-     * Users can only access their own profile data and the quotations they created.
-     */
-
-    // --- GLOBAL HELPER FUNCTIONS ---
-
-    /**
-     * @description Checks if the request is from an authenticated user.
+     * @description Checks if the user is authenticated.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * @description Checks if the provided UID matches the authenticated user's UID.
-     * @param userId The UID to verify against the current session.
+     * @description Checks if the user is the system admin by email.
      */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == "deeqasa@admin.in";
     }
 
     // --- COLLECTION RULES ---
 
     /**
      * @description Rules for the User collection.
-     * Users can only read or create their own profile document.
+     * Users can access their own profile, or admin can access all.
      */
     match /users/{userId} {
-      allow read, create, update: if isOwner(userId);
+      allow read, create, update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
     }
 
     /**
      * @description Rules for the Quotation collection.
-     * Enforces that users can only manage quotations where they are the creator.
+     * Enforces admin overrides and user-ownership filters.
      */
     match /quotations/{quotationId} {
       
       /**
-       * @description Allow individual document retrieval if the user is the owner.
-       * The 'resource == null' check handles existence checks without leaking data.
+       * @description Allow read (get and list) if the user is an admin or the creator.
+       * Firestore query filters must match this ownership check.
        */
-      allow get: if isSignedIn() && (resource == null || resource.data.createdBy == request.auth.uid);
+      allow read: if isSignedIn() && (isAdmin() || resource.data.createdBy == request.auth.uid);
 
       /**
-       * @description Allow collection queries (list) if the user filters by their own UID.
-       * This is strictly required for the query coverage check in Firestore.
+       * @description Allow creation if the user is an admin or is correctly identifying themselves as creator.
        */
-      allow list: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow create: if isSignedIn() && (isAdmin() || request.resource.data.createdBy == request.auth.uid);
 
       /**
-       * @description Ensure that when a quotation is created, the 'createdBy' field 
-       * correctly identifies the authenticated user.
+       * @description Allow updates and deletions only by the owner or admin.
        */
-      allow create: if isSignedIn() 
-                    && request.resource.data.createdBy == request.auth.uid;
-
-      /**
-       * @description Allow updates/deletes only by the owner.
-       */
-      allow update, delete: if isSignedIn() && resource.data.createdBy == request.auth.uid;
+      allow update, delete: if isSignedIn() && (isAdmin() || resource.data.createdBy == request.auth.uid);
     }
 
     // --- DEFAULT DENY ---
