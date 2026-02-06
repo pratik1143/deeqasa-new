@@ -24,7 +24,6 @@ import {
   Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { analyzeDealIntelligence, type DealIntelligenceOutput } from "@/ai/flows/ai-deal-intelligence";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -37,30 +36,34 @@ export default function DealIntelligencePage() {
     const [dealData, setDealData] = useState<any>(null);
 
     useEffect(() => {
-        const storedData = localStorage.getItem('current_quotation_analysis');
+        const storedData = typeof window !== 'undefined' ? localStorage.getItem('current_quotation_analysis') : null;
         if (storedData) {
-            setDealData(JSON.parse(storedData));
+            try {
+                setDealData(JSON.parse(storedData));
+            } catch (e) {
+                console.error("Failed to parse deal data", e);
+            }
         }
     }, []);
 
     const runAnalysis = async () => {
-        if (!dealData) return;
+        if (!dealData || !dealData.lineItems) return;
         setIsAnalyzing(true);
         try {
             const result = await analyzeDealIntelligence({
-                customerName: dealData.customerName,
-                companyName: dealData.companyName,
-                totalAmount: dealData.totalAmount,
-                subject: dealData.subject,
+                customerName: dealData.customerName || 'Unknown',
+                companyName: dealData.companyName || 'Unknown',
+                totalAmount: dealData.totalAmount || 0,
+                subject: dealData.subject || 'Enterprise Quotation',
                 products: dealData.lineItems.map((item: any) => ({
-                    model: item.product.model,
-                    quantity: item.quantity,
-                    unitPrice: item.unitPrice
+                    model: item.product?.model || 'Item',
+                    quantity: item.quantity || 1,
+                    unitPrice: item.unitPrice || 0
                 }))
             });
             setReport(result);
         } catch (error) {
-            console.error(error);
+            console.error("Analysis synthesis failed:", error);
         } finally {
             setIsAnalyzing(false);
         }
@@ -101,7 +104,6 @@ export default function DealIntelligencePage() {
         <div className="flex flex-col min-h-screen bg-black font-code selection:bg-primary/30">
             <Header />
             <main className="flex-1 pt-24 pb-12 relative overflow-hidden">
-                {/* Immersive Layers */}
                 <div className="fixed inset-0 command-grid pointer-events-none opacity-20" />
                 <div className="scanline" />
                 <div className="fixed top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(0,224,255,0.02)_0%,transparent_70%)] pointer-events-none" />
@@ -149,8 +151,6 @@ export default function DealIntelligencePage() {
                         </div>
                     ) : report && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            
-                            {/* LEFT COLUMN: PRIMARY METRICS */}
                             <div className="lg:col-span-1 space-y-8">
                                 <IntelligenceModule title="Deal Health Matrix" icon={Activity}>
                                     <div className="text-center py-6">
@@ -159,7 +159,7 @@ export default function DealIntelligencePage() {
                                                 <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
                                                 <motion.circle 
                                                     initial={{ strokeDashoffset: 440 }}
-                                                    animate={{ strokeDashoffset: 440 - (440 * report.dealHealth.score) / 100 }}
+                                                    animate={{ strokeDashoffset: 440 - (440 * (report.dealHealth?.score || 0)) / 100 }}
                                                     transition={{ duration: 2, ease: "easeOut" }}
                                                     cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="8" fill="transparent" 
                                                     strokeDasharray="440"
@@ -167,20 +167,20 @@ export default function DealIntelligencePage() {
                                                 />
                                             </svg>
                                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                                <span className="text-4xl font-black text-white">{report.dealHealth.score}</span>
+                                                <span className="text-4xl font-black text-white">{report.dealHealth?.score || 0}</span>
                                                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Index</span>
                                             </div>
                                         </div>
                                         <div className="mt-6 space-y-2">
                                             <div className={cn(
                                                 "inline-block px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] border",
-                                                report.dealHealth.status === 'HIGH-CONFIDENCE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                                                report.dealHealth.status === 'STRONG' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                report.dealHealth?.status === 'HIGH-CONFIDENCE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                                report.dealHealth?.status === 'STRONG' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                                                 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                             )}>
-                                                {report.dealHealth.status}
+                                                {report.dealHealth?.status || 'MODERATE'}
                                             </div>
-                                            <p className="text-[11px] text-white/60 italic leading-relaxed px-4">"{report.dealHealth.reason}"</p>
+                                            <p className="text-[11px] text-white/60 italic leading-relaxed px-4">"{report.dealHealth?.reason || 'Awaiting full telemetry data.'}"</p>
                                         </div>
                                     </div>
                                 </IntelligenceModule>
@@ -189,40 +189,39 @@ export default function DealIntelligencePage() {
                                     <div className="space-y-6">
                                         <div className="flex justify-between items-end">
                                             <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Success Logic</span>
-                                            <span className="text-2xl font-black text-primary">{report.winProbability}%</span>
+                                            <span className="text-2xl font-black text-primary">{report.winProbability || 0}%</span>
                                         </div>
                                         <div className="h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                                             <motion.div 
                                                 initial={{ width: 0 }}
-                                                animate={{ width: `${report.winProbability}%` }}
+                                                animate={{ width: `${report.winProbability || 0}%` }}
                                                 className="h-full bg-primary shadow-[0_0_15px_rgba(0,224,255,0.5)]"
                                             />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="p-3 bg-white/5 rounded-lg border border-white/5">
                                                 <div className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Target Org</div>
-                                                <div className="text-[10px] font-bold text-white truncate uppercase">{dealData.companyName}</div>
+                                                <div className="text-[10px] font-bold text-white truncate uppercase">{dealData.companyName || 'N/A'}</div>
                                             </div>
                                             <div className="p-3 bg-white/5 rounded-lg border border-white/5">
                                                 <div className="text-[8px] font-bold text-white/30 uppercase tracking-widest mb-1">Valuation</div>
-                                                <div className="text-[10px] font-bold text-white truncate uppercase">₹{(dealData.totalAmount / 100000).toFixed(2)}L</div>
+                                                <div className="text-[10px] font-bold text-white truncate uppercase">₹{((dealData.totalAmount || 0) / 100000).toFixed(2)}L</div>
                                             </div>
                                         </div>
                                     </div>
                                 </IntelligenceModule>
                             </div>
 
-                            {/* CENTER COLUMN: TACTICAL ADVICE */}
                             <div className="lg:col-span-2 space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <IntelligenceModule title="Risk Factors Detected" icon={ShieldAlert}>
                                         <div className="space-y-4">
-                                            {report.riskFactors.map((risk, i) => (
+                                            {report.riskFactors?.map((risk, i) => (
                                                 <div key={i} className="flex gap-3 items-start group">
                                                     <AlertTriangle size={14} className="text-amber-500 mt-0.5 shrink-0" />
                                                     <span className="text-[11px] text-white/70 font-medium leading-relaxed group-hover:text-white transition-colors">{risk}</span>
                                                 </div>
-                                            ))}
+                                            )) || <span className="text-[11px] text-white/30 italic">No critical risks identified.</span>}
                                         </div>
                                     </IntelligenceModule>
 
@@ -230,7 +229,7 @@ export default function DealIntelligencePage() {
                                         <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 relative overflow-hidden">
                                             <div className="absolute top-0 right-0 p-2 opacity-10"><Lock size={40} /></div>
                                             <p className="text-[11px] text-primary leading-relaxed font-bold italic">
-                                                {report.discountIntelligence}
+                                                {report.discountIntelligence || "Pricing parameters within safe margins."}
                                             </p>
                                         </div>
                                         <div className="mt-4 flex items-center gap-2 text-[9px] font-black text-white/30 uppercase tracking-widest">
@@ -247,7 +246,7 @@ export default function DealIntelligencePage() {
                                         <div className="space-y-4">
                                             <h3 className="text-sm font-black text-white uppercase tracking-widest">Next Phase Protocol:</h3>
                                             <p className="text-[12px] text-white/70 leading-relaxed font-medium border-l-2 border-primary/30 pl-4 py-1 italic">
-                                                {report.salesAdvice}
+                                                {report.salesAdvice || "Awaiting strategic synthesis."}
                                             </p>
                                         </div>
                                     </div>
@@ -258,7 +257,7 @@ export default function DealIntelligencePage() {
                                         <div className="space-y-4">
                                             <div className="flex items-center justify-between mb-4">
                                                 <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Target Engagement</span>
-                                                <span className="text-xs font-bold text-primary font-mono">{report.followUpStrategy.suggestedDate}</span>
+                                                <span className="text-xs font-bold text-primary font-mono">{report.followUpStrategy?.suggestedDate || 'TBD'}</span>
                                             </div>
                                             <div className="bg-black/40 p-4 rounded-xl border border-white/5">
                                                 <div className="flex items-center gap-2 mb-2">
@@ -266,7 +265,7 @@ export default function DealIntelligencePage() {
                                                     <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Script Draft</span>
                                                 </div>
                                                 <p className="text-[10px] text-white/60 leading-relaxed font-serif italic">
-                                                    "{report.followUpStrategy.message}"
+                                                    "{report.followUpStrategy?.message || 'Ready for client dispatch.'}"
                                                 </p>
                                             </div>
                                         </div>
@@ -276,7 +275,7 @@ export default function DealIntelligencePage() {
                                         <div className="space-y-4">
                                             <div className="p-4 rounded-xl border border-white/5 bg-gradient-to-br from-white/5 to-transparent">
                                                 <p className="text-[11px] text-white/70 leading-relaxed font-medium italic">
-                                                    {report.buyingSignals}
+                                                    {report.buyingSignals || "Analyzing historical organizational patterns."}
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-2">
