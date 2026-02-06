@@ -17,8 +17,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
 import { getProductData } from '@/ai/flows/get-product-data';
+import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText } from 'lucide-react';
+import { ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
@@ -126,6 +127,8 @@ export function QuotationBuilder() {
   const [manualPrice, setManualPrice] = useState<number>(0);
   const [manualQty, setManualQty] = useState<number>(1);
 
+  const [isGeneratingBody, startGeneratingBody] = useTransition();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -178,6 +181,7 @@ export function QuotationBuilder() {
     );
   }, [products, searchQuery]);
 
+  // Robust reactive calculation engine
   const totals = useMemo(() => {
     const items = watchedLineItems || [];
     const subTotal = items.reduce((acc, item) => {
@@ -222,6 +226,28 @@ export function QuotationBuilder() {
       };
       append({ product: customProduct, quantity: Number(manualQty) || 1, unitPrice: Number(manualPrice) || 0 });
       setManualModel(''); setManualSpec(''); setManualPrice(0); setManualQty(1);
+  };
+
+  const handleAiGenerateBody = () => {
+    if (!watchedSubject) {
+      toast({ variant: 'destructive', title: 'Subject Required', description: 'Please enter a subject line first.' });
+      return;
+    }
+
+    startGeneratingBody(async () => {
+      try {
+        const result = await generateLetterBody({
+          subject: watchedSubject,
+          customerName: watchedCustomer,
+          companyName: watchedCompany,
+          address: watchedAddress,
+        });
+        form.setValue('letterBody', result.letterBody);
+        toast({ title: 'Magic Applied', description: 'Professional letter body generated using AI.' });
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'AI Generation Failed', description: error.message });
+      }
+    });
   };
 
   const handleDownloadPdf = async () => {
@@ -321,6 +347,33 @@ export function QuotationBuilder() {
                 )} />
                 <FormField control={form.control} name="address" render={({ field }) => (
                   <FormItem><FormLabel>Full Address</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl></FormItem>
+                )} />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Wand2 size={16} /> Cover Letter Body
+                </h3>
+                <FormField control={form.control} name="subject" render={({ field }) => (
+                  <FormItem><FormLabel>Subject Line</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                )} />
+                <FormField control={form.control} name="letterBody" render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between items-center mb-1">
+                      <FormLabel>Body Text</FormLabel>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20"
+                        onClick={handleAiGenerateBody}
+                        disabled={isGeneratingBody}
+                      >
+                        {isGeneratingBody ? <LineLoader className="w-8 h-0.5" /> : <><Sparkles size={10} className="mr-1 text-primary"/> Magic Write</>}
+                      </Button>
+                    </div>
+                    <FormControl><Textarea rows={6} className="text-xs" {...field} /></FormControl>
+                  </FormItem>
                 )} />
               </div>
 
