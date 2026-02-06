@@ -32,7 +32,7 @@ const ProductMarketingSchema = z.object({
   trustStatement: z.string().describe('A formal closing statement on HP Partner excellence and OEM support.'),
   
   // Image metadata
-  imageSearchQueries: z.array(z.string()).describe('Exactly 3 specific Google search queries for official HP product images of this EXACT model (e.g., "HP Z1 G11 Tower front view official").'),
+  imageSearchQueries: z.array(z.string()).describe('Exactly 3 specific Google search queries for official HP product images of this EXACT model.'),
 });
 
 const BrochureOutputSchema = z.object({
@@ -60,15 +60,12 @@ const brochurePrompt = ai.definePrompt({
   - Highlights: Focus on the specific hardware build configuration.
 
   Page 2:
-  - Technical Overview: Explain why this specific configuration (CPU/RAM/SSD) is optimal.
-  - Use Cases: Tailor for Corporate, Education, or Government sectors.
+  - Technical Overview: Explain why this specific configuration (CPU/RAM/SSD) is optimal for high-stakes environments.
+  - Use Cases: Detailed "Where to use" section. Tailor for Corporate, Education, Healthcare, or Government sectors.
   - Business Value: Emphasize HP Wolf Security, EPEAT certification, and 24/7 reliability.
-  - Trust Statement: Focus on HP's industry-leading standards and local partner support.
+  - Trust Statement: Focus on HP's industry-leading standards and Deeqasa Tech's local partner excellence.
 
-  Image Verification:
-  - Generate 3 precise search queries to find official HP assets for these specific models.
-
-  No placeholders. Generate full, professional text for every field.`,
+  No placeholders. Generate full, professional text for every field. Ensure the content is sufficient to fill two A4 pages.`,
 });
 
 export async function generateBrochureContent(input: BrochureInput): Promise<BrochureOutput> {

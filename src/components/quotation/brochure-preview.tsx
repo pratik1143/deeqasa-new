@@ -12,9 +12,12 @@ import {
   Zap, 
   Settings, 
   Award, 
-  Info,
   Layers,
-  Server
+  Server,
+  Building2,
+  Stethoscope,
+  GraduationCap,
+  Briefcase
 } from 'lucide-react';
 
 interface BrochurePreviewProps {
@@ -22,6 +25,14 @@ interface BrochurePreviewProps {
   marketingData: BrochureOutput;
   companyName: string;
 }
+
+const UseCaseIcon = ({ text }: { text: string }) => {
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes('medical') || lowerText.includes('health')) return <Stethoscope size={20} />;
+  if (lowerText.includes('education') || lowerText.includes('university') || lowerText.includes('school')) return <GraduationCap size={20} />;
+  if (lowerText.includes('corporate') || lowerText.includes('business')) return <Briefcase size={20} />;
+  return <Building2 size={20} />;
+};
 
 export function BrochurePreview({ products, marketingData }: BrochurePreviewProps) {
   return (
@@ -33,7 +44,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
         return (
           <React.Fragment key={product.id}>
             {/* PAGE 1: STRATEGIC SOLUTION BRIEF */}
-            <div className="brochure-page bg-white text-gray-900">
+            <div className="brochure-page bg-white text-gray-900 shadow-none border-none">
               {/* Premium Header */}
               <div className="flex justify-between items-start mb-12 border-b-[3pt] border-primary pb-6">
                 <div className="flex flex-col">
@@ -113,12 +124,12 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
               </div>
             </div>
 
-            {/* PAGE 2: TECHNICAL SPECIFICATIONS & ENTERPRISE COMPLIANCE */}
-            <div className="brochure-page bg-white text-gray-900">
+            {/* PAGE 2: TECHNICAL SPECIFICATIONS & USE CASES */}
+            <div className="brochure-page bg-white text-gray-900 shadow-none border-none">
               {/* Header P2 */}
               <div className="flex justify-between items-center mb-10 opacity-70">
                 <div className="text-[20pt] font-black text-gray-900 leading-none">hp</div>
-                <p className="text-[10pt] font-bold uppercase tracking-[0.4em] text-primary">{product.model} | Compliance & Data</p>
+                <p className="text-[10pt] font-bold uppercase tracking-[0.4em] text-primary">{product.model} | Deployment Details</p>
               </div>
 
               {/* Detailed Technical Narrative */}
@@ -166,22 +177,39 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                 </div>
               </div>
 
+              {/* Where to use this product */}
+              <div className="mb-10">
+                <h3 className="text-[10pt] font-bold uppercase tracking-[0.3em] text-primary mb-6 flex items-center gap-2">
+                  <Building2 size={20} /> Strategic Use Cases
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {marketing.useCases.map((useCase, idx) => (
+                    <div key={idx} className="flex items-center gap-4 bg-gray-50 p-5 rounded-[1.5rem] border border-gray-100">
+                      <div className="text-primary bg-white p-2 rounded-full shadow-sm border border-gray-100 shrink-0">
+                        <UseCaseIcon text={useCase} />
+                      </div>
+                      <span className="text-[10pt] font-bold text-gray-700 leading-tight">{useCase}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Vertical Pillars */}
               <div className="grid grid-cols-3 gap-6 mb-10">
                 <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 flex flex-col items-center text-center">
                   <ShieldCheck size={28} className="text-primary mb-3" />
                   <h4 className="text-[9pt] font-black uppercase mb-2 tracking-widest">Security</h4>
-                  <p className="text-[8.5pt] leading-relaxed text-gray-500">{marketing.businessValue.security}</p>
+                  <p className="text-[8pt] leading-relaxed text-gray-500">{marketing.businessValue.security}</p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 flex flex-col items-center text-center">
                   <Zap size={28} className="text-primary mb-3" />
                   <h4 className="text-[9pt] font-black uppercase mb-2 tracking-widest">Reliability</h4>
-                  <p className="text-[8.5pt] leading-relaxed text-gray-500">{marketing.businessValue.reliability}</p>
+                  <p className="text-[8pt] leading-relaxed text-gray-500">{marketing.businessValue.reliability}</p>
                 </div>
                 <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 flex flex-col items-center text-center">
                   <Globe size={28} className="text-green-600 mb-3" />
                   <h4 className="text-[9pt] font-black uppercase mb-2 tracking-widest">Sustainable</h4>
-                  <p className="text-[8.5pt] leading-relaxed text-gray-500">{marketing.businessValue.sustainability}</p>
+                  <p className="text-[8pt] leading-relaxed text-gray-500">{marketing.businessValue.sustainability}</p>
                 </div>
               </div>
 
@@ -192,7 +220,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                     <div className="h-8 w-[4pt] bg-primary"></div>
                     <span className="text-[9pt] font-bold uppercase text-primary tracking-[0.4em]">Enterprise Partner Commitment</span>
                   </div>
-                  <p className="text-[12pt] leading-[1.6] text-gray-200 italic font-medium max-w-[95%] mb-6">
+                  <p className="text-[11pt] leading-[1.6] text-gray-200 italic font-medium max-w-[95%] mb-6">
                     {marketing.trustStatement}
                   </p>
                   <div className="flex items-center gap-6">
