@@ -42,17 +42,17 @@ export function Printers() {
         loop
         muted
         playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover -z-20 opacity-40"
+        className="absolute top-0 left-0 w-full h-full object-cover -z-20 opacity-100"
         poster={posterImage}
       >
         <source src="/printer.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      <div className="absolute inset-0 bg-white/40 -z-10" />
+      <div className="absolute inset-0 bg-white/20 -z-10" />
 
       <motion.div
-        className="relative z-10 flex flex-col items-center text-center p-4 container mx-auto"
+        className="relative z-10 flex flex-col items-center text-center p-4 container mx-auto bg-white/40 backdrop-blur-sm rounded-3xl"
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={containerVariants}
