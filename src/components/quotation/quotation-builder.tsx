@@ -15,14 +15,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
+import { generateBrochureContent, type BrochureOutput } from '@/ai/flows/ai-brochure-generation';
+import { storeBrochureLog } from '@/ai/flows/store-brochure-data';
 import { type Product, ProductSchema } from '@/lib/quotation-schemas';
-import { ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText, Wand2 } from 'lucide-react';
+import { ChevronsUpDown, Plus, Trash2, Sparkles, Download, Image as ImageIcon, FileText, Wand2, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { LineLoader } from '../ui/line-loader';
+import { BrochurePreview } from './brochure-preview';
 
 const FormSchema = z.object({
   customerName: z.string().min(1, 'Customer name is required'),
@@ -48,68 +52,33 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-IN', {
 function numberToWords(num: number): string {
     const roundedNum = Math.round(num * 100) / 100;
     if (roundedNum === 0) return 'Zero rupees only';
-    
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-
     const inWords = (n: number): string => {
         let str = '';
-        if (n > 99) {
-            str += a[Math.floor(n / 100)] + 'hundred ';
-            n %= 100;
-        }
-        if (n > 19) {
-            str += b[Math.floor(n / 10)] + ' ' + a[n % 10];
-        } else {
-            str += a[n];
-        }
+        if (n > 99) { str += a[Math.floor(n / 100)] + 'hundred '; n %= 100; }
+        if (n > 19) { str += b[Math.floor(n / 10)] + ' ' + a[n % 10]; } else { str += a[n]; }
         return str;
     };
-    
     const numStr = roundedNum.toFixed(2);
     const [rupees, paisa] = numStr.split('.').map(Number);
-
     let rupeesInWords = '';
     if (rupees > 0) {
         let n = rupees;
-        if (n >= 10000000) {
-            rupeesInWords += inWords(Math.floor(n / 10000000)) + 'crore ';
-            n %= 10000000;
-        }
-        if (n >= 100000) {
-            rupeesInWords += inWords(Math.floor(n / 100000)) + 'lakh ';
-            n %= 100000;
-        }
-        if (n >= 1000) {
-            rupeesInWords += inWords(Math.floor(n / 1000)) + 'thousand ';
-            n %= 1000;
-        }
+        if (n >= 10000000) { rupeesInWords += inWords(Math.floor(n / 10000000)) + 'crore '; n %= 10000000; }
+        if (n >= 100000) { rupeesInWords += inWords(Math.floor(n / 100000)) + 'lakh '; n %= 100000; }
+        if (n >= 1000) { rupeesInWords += inWords(Math.floor(n / 1000)) + 'thousand '; n %= 1000; }
         rupeesInWords += inWords(n);
     }
-    
     let paisaInWords = '';
-    if (paisa > 0) {
-        paisaInWords = ' and ' + inWords(paisa) + 'paisa';
-    }
-
+    if (paisa > 0) { paisaInWords = ' and ' + inWords(paisa) + 'paisa'; }
     const result = (rupeesInWords ? rupeesInWords.trim() + ' rupees' : '') + (paisaInWords ? paisaInWords.trim() : '');
     return result.charAt(0).toUpperCase() + result.slice(1) + ' only.';
 };
 
 const getLongDescription = (product: Product): string => {
-  if (product.id.startsWith('MAN-')) {
-    return product.processor;
-  }
-  const parts = [
-    product.processor,
-    product.memory,
-    product.hdd !== '-' ? product.hdd : null,
-    product.hdd2 !== '-' ? product.hdd2 : null,
-    product.gfx !== '-' ? product.gfx : null,
-    product.os !== '-' ? product.os : null,
-    product.warranty !== '-' ? product.warranty : null,
-  ];
-  return parts.filter(Boolean).join(' | ');
+  if (product.id.startsWith('MAN-')) return product.processor;
+  return [product.processor, product.memory, product.hdd !== '-' ? product.hdd : null, product.hdd2 !== '-' ? product.hdd2 : null, product.gfx !== '-' ? product.gfx : null, product.os !== '-' ? product.os : null, product.warranty !== '-' ? product.warranty : null].filter(Boolean).join(' | ');
 };
 
 export function QuotationBuilder() {
@@ -120,12 +89,16 @@ export function QuotationBuilder() {
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("quotation");
 
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualModel, setManualModel] = useState('');
   const [manualSpec, setManualSpec] = useState('');
   const [manualPrice, setManualPrice] = useState<number>(0);
   const [manualQty, setManualQty] = useState<number>(1);
+
+  const [marketingData, setMarketingData] = useState<BrochureOutput | null>(null);
+  const [isGeneratingBrochure, setIsGeneratingBrochure] = useState(false);
 
   const [isGeneratingBody, startGeneratingBody] = useTransition();
 
@@ -141,16 +114,8 @@ export function QuotationBuilder() {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'lineItems',
-  });
-
-  const watchedLineItems = useWatch({
-    control: form.control,
-    name: 'lineItems',
-  });
-  
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: 'lineItems' });
+  const watchedLineItems = useWatch({ control: form.control, name: 'lineItems' });
   const watchedSubject = useWatch({ control: form.control, name: 'subject' });
   const watchedCustomer = useWatch({ control: form.control, name: 'customerName' });
   const watchedCompany = useWatch({ control: form.control, name: 'companyName' });
@@ -174,14 +139,9 @@ export function QuotationBuilder() {
   const filteredProducts = useMemo(() => {
     if (!searchQuery) return products;
     const q = searchQuery.toLowerCase();
-    return products.filter(p => 
-      p.id.toLowerCase().includes(q) ||
-      p.model.toLowerCase().includes(q) ||
-      p.processor.toLowerCase().includes(q)
-    );
+    return products.filter(p => p.id.toLowerCase().includes(q) || p.model.toLowerCase().includes(q) || p.processor.toLowerCase().includes(q));
   }, [products, searchQuery]);
 
-  // Robust reactive calculation engine
   const totals = useMemo(() => {
     const items = watchedLineItems || [];
     const subTotal = items.reduce((acc, item) => {
@@ -189,10 +149,8 @@ export function QuotationBuilder() {
       const price = parseFloat(String(item?.unitPrice || 0));
       return acc + (qty * price);
     }, 0);
-    
     const totalGst = subTotal * 0.18;
     const grandTotal = subTotal + totalGst;
-    
     return { subTotal, totalGst, grandTotal };
   }, [watchedLineItems]);
 
@@ -208,21 +166,7 @@ export function QuotationBuilder() {
       if (!manualModel) return;
       const customProduct: Product = {
           id: `MAN-${Date.now()}`,
-          model: manualModel,
-          plant: '-',
-          chassis: '-',
-          processor: manualSpec || '-',
-          memory: '-',
-          hdd: '-',
-          hdd2: '-',
-          gfx: '-',
-          os: '-',
-          odd: '-',
-          wlan: '-',
-          warranty: '-',
-          name: manualModel,
-          price: Number(manualPrice) || 0,
-          gstRate: 18,
+          model: manualModel, plant: '-', chassis: '-', processor: manualSpec || '-', memory: '-', hdd: '-', hdd2: '-', gfx: '-', os: '-', odd: '-', wlan: '-', warranty: '-', name: manualModel, price: Number(manualPrice) || 0, gstRate: 18,
       };
       append({ product: customProduct, quantity: Number(manualQty) || 1, unitPrice: Number(manualPrice) || 0 });
       setManualModel(''); setManualSpec(''); setManualPrice(0); setManualQty(1);
@@ -233,15 +177,9 @@ export function QuotationBuilder() {
       toast({ variant: 'destructive', title: 'Subject Required', description: 'Please enter a subject line first.' });
       return;
     }
-
     startGeneratingBody(async () => {
       try {
-        const result = await generateLetterBody({
-          subject: watchedSubject,
-          customerName: watchedCustomer,
-          companyName: watchedCompany,
-          address: watchedAddress,
-        });
+        const result = await generateLetterBody({ subject: watchedSubject, customerName: watchedCustomer, companyName: watchedCompany, address: watchedAddress });
         form.setValue('letterBody', result.letterBody);
         toast({ title: 'Magic Applied', description: 'Professional letter body generated using AI.' });
       } catch (error: any) {
@@ -250,49 +188,66 @@ export function QuotationBuilder() {
     });
   };
 
-  const handleDownloadPdf = async () => {
+  const handleGenerateBrochure = async () => {
+    if (!watchedLineItems?.length) {
+      toast({ variant: 'destructive', title: 'No Products', description: 'Add products to the quotation first.' });
+      return;
+    }
+    setIsGeneratingBrochure(true);
+    try {
+      const distinctProducts = Array.from(new Set(watchedLineItems.map(item => item.product.id)))
+        .map(id => watchedLineItems.find(item => item.product.id === id)!.product);
+
+      const brochureData = await generateBrochureContent({ products: distinctProducts });
+      setMarketingData(brochureData);
+      
+      // Log to Sheet
+      await storeBrochureLog({
+        customerName: watchedCustomer,
+        companyName: watchedCompany,
+        products: distinctProducts.map(p => p.model),
+        quotationRef: `DQT/2024/${format(new Date(), 'MM/yy')}`
+      });
+
+      setActiveTab("brochure");
+      toast({ title: 'AI Brochure Ready', description: 'Enterprise marketing materials generated and logged.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Generation Failed', description: e.message });
+    } finally {
+      setIsGeneratingBrochure(false);
+    }
+  };
+
+  const handleDownloadPdf = async (rootId: string, filename: string) => {
     setIsDownloading(true);
     const html2pdf = (await import('html2pdf.js')).default;
-    const element = document.getElementById('quotation-export-root');
+    const element = document.getElementById(rootId);
     if (!element) return;
-
-    const opt = {
-      margin: 0,
-      filename: `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}.pdf`,
-      image: { type: 'jpeg', quality: 1.0 },
-      html2canvas: { scale: 3, useCORS: true, letterRendering: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
+    const opt = { margin: 0, filename, image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 3, useCORS: true, letterRendering: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
     try {
       await html2pdf().from(element).set(opt).save();
       toast({ title: 'Success', description: 'PDF generated successfully.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Export Failed', description: e.message });
-    } finally {
-      setIsDownloading(false);
-    }
+    } finally { setIsDownloading(false); }
   };
 
-  const handleDownloadPng = async () => {
+  const handleDownloadPng = async (className: string, filenamePrefix: string) => {
     setIsDownloading(true);
     try {
         const { toPng } = await import('html-to-image');
-        const pages = document.querySelectorAll('.quotation-page');
-        
+        const pages = document.querySelectorAll(`.${className}`);
         for (let i = 0; i < pages.length; i++) {
             const dataUrl = await toPng(pages[i] as HTMLElement, { quality: 1.0, pixelRatio: 3, backgroundColor: '#ffffff' });
             const link = document.createElement('a');
-            link.download = `Quotation_${watchedCompany.replace(/[^a-z0-9]/gi, '_')}_Page_${i + 1}.png`;
+            link.download = `${filenamePrefix}_Page_${i + 1}.png`;
             link.href = dataUrl;
             link.click();
         }
         toast({ title: 'Success', description: 'All pages exported as PNG.' });
     } catch (e: any) {
         toast({ variant: 'destructive', title: 'PNG Export Failed', description: e.message });
-    } finally {
-        setIsDownloading(false);
-    }
+    } finally { setIsDownloading(false); }
   };
 
   const QuotationHeader = () => (
@@ -309,18 +264,6 @@ export function QuotationBuilder() {
     </div>
   );
 
-  const BankDetails = () => (
-    <div className="space-y-3 mt-8 pt-6 border-t border-gray-100">
-      <h4 className="font-bold uppercase text-[7.5pt] tracking-widest text-gray-400">Company Bank Details:</h4>
-      <div className="grid grid-cols-2 gap-4 text-[9.5pt] text-gray-700 font-bold">
-        <p><span className="text-gray-400 font-medium mr-2">A/c Name:</span> DEE QASA</p>
-        <p><span className="text-gray-400 font-medium mr-2">Bank:</span> State Bank of India</p>
-        <p><span className="text-gray-400 font-medium mr-2">A/c No:</span> 44562745640</p>
-        <p><span className="text-gray-400 font-medium mr-2">IFSC:</span> SBIN0001443</p>
-      </div>
-    </div>
-  );
-
   return (
     <div className="flex flex-col xl:flex-row gap-8 p-6 max-w-[1600px] mx-auto items-start bg-background">
       {/* Editor Panel */}
@@ -330,7 +273,7 @@ export function QuotationBuilder() {
             <CardTitle className="font-headline text-2xl text-primary flex items-center gap-2">
               <Sparkles size={24} /> Quotation Studio
             </CardTitle>
-            <CardDescription>Enterprise IT Proposals (A4 Portrait)</CardDescription>
+            <CardDescription>Enterprise IT Proposals & AI Brochures</CardDescription>
           </CardHeader>
           
           <Form {...form}>
@@ -361,14 +304,7 @@ export function QuotationBuilder() {
                   <FormItem>
                     <div className="flex justify-between items-center mb-1">
                       <FormLabel>Body Text</FormLabel>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20"
-                        onClick={handleAiGenerateBody}
-                        disabled={isGeneratingBody}
-                      >
+                      <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20" onClick={handleAiGenerateBody} disabled={isGeneratingBody}>
                         {isGeneratingBody ? <LineLoader className="w-8 h-0.5" /> : <><Sparkles size={10} className="mr-1 text-primary"/> Magic Write</>}
                       </Button>
                     </div>
@@ -385,7 +321,6 @@ export function QuotationBuilder() {
                   <Switch checked={isManualMode} onCheckedChange={setIsManualMode} />
                   <Label>Manual Entry Mode</Label>
                 </div>
-                
                 {!isManualMode ? (
                   <div className="space-y-3">
                     <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
@@ -426,23 +361,10 @@ export function QuotationBuilder() {
                 )}
               </div>
 
-              <div className="space-y-3">
-                {fields.map((field, index) => (
-                  <div key={field.id} className="p-3 bg-secondary/40 rounded border border-border flex flex-col gap-2">
-                    <div className="flex justify-between items-start">
-                      <p className="font-bold text-[10px] uppercase text-primary truncate max-w-[200px]">{field.product.model}</p>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => remove(index)}><Trash2 size={12}/></Button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
-                        <FormItem><FormLabel className="text-[9px]">Qty</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
-                      )} />
-                      <FormField control={form.control} name={`lineItems.${index}.unitPrice`} render={({ field }) => (
-                        <FormItem><FormLabel className="text-[9px]">Price (₹)</FormLabel><FormControl><Input type="number" {...field} className="h-8 text-xs" /></FormControl></FormItem>
-                      )} />
-                    </div>
-                  </div>
-                ))}
+              <div className="pt-4 border-t border-primary/10">
+                <Button variant="outline" className="w-full gap-2 border-primary/50 text-primary hover:bg-primary/10" onClick={handleGenerateBrochure} disabled={isGeneratingBrochure || !watchedLineItems?.length}>
+                  {isGeneratingBrochure ? <LineLoader className="w-12 h-0.5" /> : <><BookOpen size={18}/> Generate AI Product Brochure</>}
+                </Button>
               </div>
             </div>
           </Form>
@@ -451,129 +373,102 @@ export function QuotationBuilder() {
 
       {/* Preview Panel */}
       <div className="flex-1 flex flex-col items-center">
-        <div className="sticky top-20 right-0 no-print z-20 w-full flex justify-end gap-3 mb-6 max-w-[210mm]">
-          <Button onClick={handleDownloadPdf} size="lg" disabled={isDownloading} className="rounded-full shadow-lg">
-            {isDownloading ? <LineLoader className="w-12 h-0.5"/> : <><Download size={18} className="mr-2"/> Download PDF</>}
-          </Button>
-          <Button onClick={handleDownloadPng} size="lg" variant="outline" disabled={isDownloading} className="rounded-full shadow-lg border-primary text-primary">
-            {isDownloading ? <LineLoader className="w-12 h-0.5"/> : <><ImageIcon size={18} className="mr-2"/> Download PNGs</>}
-          </Button>
-        </div>
-
-        <div id="quotation-export-root" className="w-full flex flex-col items-center">
-          {/* Page 1: Cover Letter */}
-          <div className="quotation-page">
-            <QuotationHeader />
-            <div className="flex justify-between items-start mb-10 text-[11pt]">
-              <div className="font-bold space-y-1">
-                <p>To,</p>
-                <p className="text-[12pt] uppercase">{watchedCustomer}</p>
-                <p>{watchedCompany}</p>
-                <p className="text-gray-500 italic">{watchedAddress}</p>
-              </div>
-              <div className="text-right text-gray-500 font-bold text-[9pt]">
-                <p>Ref: DQT/2024/{format(new Date(), 'MM/yy')}</p>
-                <p>Date: {format(new Date(), 'dd-MM-yyyy')}</p>
-              </div>
-            </div>
-
-            <div className="font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8">
-              <p className="leading-tight"><span className="underline uppercase mr-2 text-gray-400 font-medium">Subject:</span> {watchedSubject}</p>
-            </div>
-
-            <div className="space-y-6 text-[11.5pt] justified-text text-gray-800">
-              <p className="font-bold">Respected Sir/Madam,</p>
-              <div className="whitespace-pre-wrap">{form.watch('letterBody')}</div>
-              <div className="pt-4 space-y-4">
-                <h4 className="font-bold uppercase text-[8pt] tracking-widest text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
-                <div className="grid grid-cols-1 gap-2 text-[10pt] text-gray-700">
-                  <p>• <strong>Taxes:</strong> GST at 18% extra over quoted prices.</p>
-                  <p>• <strong>Delivery:</strong> 4-6 weeks from official PO receipt.</p>
-                  <p>• <strong>Validity:</strong> 7 days from date of issuance.</p>
-                  <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty and technical support.</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="absolute bottom-[20mm] left-[18mm] right-[18mm] flex justify-between items-end border-t border-gray-100 pt-4 no-print">
-               <p className="text-[8pt] text-gray-400 uppercase tracking-widest font-bold">Page 1 of 2</p>
-               <p className="text-[7pt] text-gray-300 italic">Computer generated - No signature required</p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col items-center">
+          <div className="sticky top-20 right-0 no-print z-20 w-full flex justify-between items-center mb-6 max-w-[210mm] bg-background/80 backdrop-blur-md p-4 rounded-2xl border border-primary/10 shadow-2xl">
+            <TabsList className="bg-secondary/50">
+              <TabsTrigger value="quotation" className="gap-2"><FileText size={16}/> Quotation</TabsTrigger>
+              <TabsTrigger value="brochure" className="gap-2" disabled={!marketingData}><BookOpen size={16}/> AI Brochure</TabsTrigger>
+            </TabsList>
+            <div className="flex gap-3">
+              <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', activeTab === 'quotation' ? 'Quotation.pdf' : 'Product_Brochure.pdf')} size="sm" disabled={isDownloading} className="rounded-full">
+                {isDownloading ? <LineLoader className="w-8 h-0.5" /> : <><Download size={14} className="mr-2"/> PDF</>}
+              </Button>
+              <Button onClick={() => handleDownloadPng('quotation-page', activeTab === 'quotation' ? 'Quotation' : 'Brochure')} size="sm" variant="outline" disabled={isDownloading} className="rounded-full border-primary text-primary">
+                {isDownloading ? <LineLoader className="w-8 h-0.5" /> : <><ImageIcon size={14} className="mr-2"/> PNG</>}
+              </Button>
             </div>
           </div>
 
-          {/* Page 2: Table & Summary */}
-          <div className="quotation-page">
-            <QuotationHeader />
-            <h3 className="text-center font-bold text-[12pt] uppercase tracking-widest mb-6 border-y border-gray-900 py-2">Technical & Commercial Quotation</h3>
-            
-            <table className="quotation-table">
-              <thead>
-                <tr>
-                  <th className="col-sr">Sr.</th>
-                  <th>Specifications</th>
-                  <th className="col-qty">Qty</th>
-                  <th className="col-price">Unit Price (₹)</th>
-                  <th className="col-total">Total (₹)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {watchedLineItems?.map((item, idx) => {
-                  const qty = parseFloat(String(item.quantity || 0));
-                  const price = parseFloat(String(item.unitPrice || 0));
-                  return (
-                    <tr key={idx}>
-                      <td className="text-center font-bold text-gray-400">{idx + 1}</td>
-                      <td>
-                        <p className="font-bold uppercase text-gray-900 text-[10pt] mb-1">{item.product.model}</p>
-                        <p className="text-[9pt] text-gray-500 leading-relaxed">{getLongDescription(item.product)}</p>
-                      </td>
-                      <td className="text-center font-bold">{qty}</td>
-                      <td className="text-right">{CURRENCY_FORMATTER.format(price)}</td>
-                      <td className="text-right font-bold text-gray-900">{CURRENCY_FORMATTER.format(qty * price)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <TabsContent value="quotation" className="w-full">
+            <div id="quotation-export-root" className="w-full flex flex-col items-center">
+              {/* Page 1: Cover Letter */}
+              <div className="quotation-page">
+                <QuotationHeader />
+                <div className="flex justify-between items-start mb-10 text-[11pt]">
+                  <div className="font-bold space-y-1">
+                    <p>To,</p>
+                    <p className="text-[12pt] uppercase">{watchedCustomer}</p>
+                    <p>{watchedCompany}</p>
+                    <p className="text-gray-500 italic">{watchedAddress}</p>
+                  </div>
+                  <div className="text-right text-gray-500 font-bold text-[9pt]">
+                    <p>Ref: DQT/2024/{format(new Date(), 'MM/yy')}</p>
+                    <p>Date: {format(new Date(), 'dd-MM-yyyy')}</p>
+                  </div>
+                </div>
+                <div className="font-bold bg-gray-50 p-4 border-l-4 border-gray-900 mb-8">
+                  <p className="leading-tight"><span className="underline uppercase mr-2 text-gray-400 font-medium">Subject:</span> {watchedSubject}</p>
+                </div>
+                <div className="space-y-6 text-[11.5pt] justified-text text-gray-800">
+                  <p className="font-bold">Respected Sir/Madam,</p>
+                  <div className="whitespace-pre-wrap">{form.watch('letterBody')}</div>
+                  <div className="pt-4 space-y-4">
+                    <h4 className="font-bold uppercase text-[8pt] tracking-widest text-gray-400 border-b border-gray-100 pb-2">Commercial Terms & Conditions:</h4>
+                    <div className="grid grid-cols-1 gap-2 text-[10pt] text-gray-700">
+                      <p>• <strong>Taxes:</strong> GST at 18% extra over quoted prices.</p>
+                      <p>• <strong>Delivery:</strong> 4-6 weeks from official PO receipt.</p>
+                      <p>• <strong>Validity:</strong> 7 days from date of issuance.</p>
+                      <p>• <strong>Warranty:</strong> Comprehensive OEM onsite warranty and technical support.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <div className="mt-8 flex justify-end">
-              <div className="w-[80mm] space-y-2 border-t-2 border-gray-900 pt-4">
-                <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase tracking-widest">
-                  <span>Sub Total</span>
-                  <span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span>
+              {/* Page 2: Table & Summary */}
+              <div className="quotation-page">
+                <QuotationHeader />
+                <h3 className="text-center font-bold text-[12pt] uppercase tracking-widest mb-6 border-y border-gray-900 py-2">Technical & Commercial Quotation</h3>
+                <table className="quotation-table">
+                  <thead>
+                    <tr><th className="col-sr">Sr.</th><th>Specifications</th><th className="col-qty">Qty</th><th className="col-price">Unit Price (₹)</th><th className="col-total">Total (₹)</th></tr>
+                  </thead>
+                  <tbody>
+                    {watchedLineItems?.map((item, idx) => (
+                      <tr key={idx}>
+                        <td className="text-center font-bold text-gray-400">{idx + 1}</td>
+                        <td><p className="font-bold uppercase text-gray-900 text-[10pt] mb-1">{item.product.model}</p><p className="text-[9pt] text-gray-500 leading-relaxed">{getLongDescription(item.product)}</p></td>
+                        <td className="text-center font-bold">{item.quantity}</td>
+                        <td className="text-right">{CURRENCY_FORMATTER.format(item.unitPrice)}</td>
+                        <td className="text-right font-bold text-gray-900">{CURRENCY_FORMATTER.format(item.quantity * item.unitPrice)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="mt-8 flex justify-end">
+                  <div className="w-[80mm] space-y-2 border-t-2 border-gray-900 pt-4">
+                    <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase tracking-widest"><span>Sub Total</span><span>{CURRENCY_FORMATTER.format(totals.subTotal)}</span></div>
+                    <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase tracking-widest"><span>GST @ 18%</span><span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span></div>
+                    <div className="flex justify-between text-[13pt] font-bold text-gray-900 border-t border-gray-100 pt-3"><span className="tracking-tighter uppercase">Grand Total</span><span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span></div>
+                  </div>
                 </div>
-                <div className="flex justify-between text-[8pt] font-bold text-gray-400 uppercase tracking-widest">
-                  <span>GST @ 18%</span>
-                  <span>{CURRENCY_FORMATTER.format(totals.totalGst)}</span>
-                </div>
-                <div className="flex justify-between text-[13pt] font-bold text-gray-900 border-t border-gray-100 pt-3">
-                  <span className="tracking-tighter uppercase">Grand Total</span>
-                  <span>{CURRENCY_FORMATTER.format(totals.grandTotal)}</span>
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg border-l-4 border-gray-900">
+                  <p className="font-bold text-[7pt] uppercase tracking-widest text-gray-400 mb-1">Amount In Words:</p>
+                  <p className="italic text-[11pt] font-bold text-gray-900">{numberToWords(totals.grandTotal)}</p>
                 </div>
               </div>
             </div>
+          </TabsContent>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border-l-4 border-gray-900">
-              <p className="font-bold text-[7pt] uppercase tracking-widest text-gray-400 mb-1">Amount In Words:</p>
-              <p className="italic text-[11pt] font-bold text-gray-900">{numberToWords(totals.grandTotal)}</p>
-            </div>
-
-            <BankDetails />
-
-            <div className="mt-16 flex justify-between items-end">
-               <div className="text-[8pt] text-gray-400 font-bold uppercase tracking-widest">Authorized Partner: HP Enterprise</div>
-               <div className="text-right space-y-12">
-                 <p className="font-bold uppercase tracking-widest text-[9.5pt]">For M/s DeeQasa-Tech</p>
-                 <div className="pt-2 font-bold uppercase text-[8.5pt] border-t border-gray-200 px-8 text-gray-400">Authorized Signatory</div>
-               </div>
-            </div>
-            
-            <div className="absolute bottom-[20mm] left-[18mm] right-[18mm] flex justify-between items-end border-t border-gray-100 pt-4 no-print">
-               <p className="text-[8pt] text-gray-400 uppercase tracking-widest font-bold">Page 2 of 2</p>
-               <p className="text-[7pt] text-gray-300 italic">This is a system generated document</p>
-            </div>
-          </div>
-        </div>
+          <TabsContent value="brochure" className="w-full">
+            {marketingData && watchedLineItems && (
+              <BrochurePreview 
+                products={Array.from(new Set(watchedLineItems.map(i => i.product.id))).map(id => watchedLineItems.find(i => i.product.id === id)!.product)} 
+                marketingData={marketingData} 
+                companyName={watchedCompany}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

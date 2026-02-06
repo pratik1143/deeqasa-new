@@ -9,3 +9,5 @@ import '@/ai/flows/get-sheet-data.ts';
 import '@/ai/flows/update-sheet-data.ts';
 import '@/ai/flows/get-product-data.ts';
 import '@/ai/flows/ai-quotation-letter-generation.ts';
+import '@/ai/flows/ai-brochure-generation.ts';
+import '@/ai/flows/store-brochure-data.ts';
