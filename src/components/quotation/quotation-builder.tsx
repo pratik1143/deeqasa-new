@@ -279,11 +279,8 @@ export function QuotationBuilder() {
 
   const QuotationHeader = () => (
     <div className="flex justify-between items-start mb-8 pb-4 border-b border-gray-100">
-      <div className="flex flex-col items-start">
-        <span className="text-[28pt] font-black tracking-[0.2em] text-gray-900 uppercase leading-none">
-          DEEQASA
-        </span>
-        <span className="text-[7pt] font-bold text-gray-400 tracking-widest uppercase mt-2">HP Connect Partner</span>
+      <div className="flex items-center">
+        <img src="/hp-logo.png" alt="HP Connect" className="h-[14mm] w-auto object-contain" />
       </div>
       <div className="text-right">
         <h2 className="text-[14pt] font-bold text-gray-900 uppercase">DEEQASA</h2>
