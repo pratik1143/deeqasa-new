@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -50,13 +51,13 @@ export function Header() {
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b",
       isScrolled || pathname !== '/' 
-        ? "bg-black/95 border-white/10 shadow-2xl backdrop-blur-md" 
+        ? "bg-black border-white/10 shadow-2xl" 
         : "bg-transparent border-transparent"
     )}>
       <div className="container mx-auto px-4 flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
-          <Link href="/" className="group transition-transform duration-250 hover:scale-[1.03] flex items-center">
-            <span className="text-2xl font-black tracking-[0.25em] text-white uppercase">
+          <Link href="/" className="flex items-center">
+            <span className="text-2xl font-extrabold tracking-tight text-white uppercase">
               DEEQASA
             </span>
           </Link>
