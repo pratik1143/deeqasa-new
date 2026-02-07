@@ -89,7 +89,11 @@ export function Header() {
         </nav>
         
         <div className="flex items-center gap-3">
-            <Button variant="ghost" className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-white/5 hover:text-white">
+            <Button 
+              variant="ghost" 
+              className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-white/5 hover:text-white"
+              onClick={() => router.push('/contact')}
+            >
               Contact Sales
             </Button>
             
