@@ -1,0 +1,65 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "case-study-1",
+      "description": "City skyline at night representing a global finance corporation.",
+      "imageUrl": "https://images.unsplash.com/photo-1575380591643-b2c92368dc6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaXR5JTIwc2t5bGluZXxlbnwwfHx8fDE3Njk4NjYwNzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city skyline"
+    },
+    {
+      "id": "case-study-2",
+      "description": "A modern data center for a health tech company.",
+      "imageUrl": "https://images.unsplash.com/photo-16833322499436-f4383dd59f5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxkYXRhJTIwY2VudGVyfGVufDB8fHx8MTc2OTg5NjA2NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "data center"
+    },
+    {
+      "id": "hero-poster",
+      "description": "A close-up of a high-performance laptop, representing modern technology.",
+      "imageUrl": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjB0ZWNoJTIwZGFya3xlbnwwfHx8fDE3Njk5NTI1ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "laptop technology"
+    },
+    {
+      "id": "company-logo",
+      "description": "Professional technology company logo placeholder for DeeQasa Tech.",
+      "imageUrl": "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=300&h=150&fit=crop",
+      "imageHint": "company logo"
+    },
+    {
+      "id": "service-cloud",
+      "description": "Enterprise cloud infrastructure and virtualized networks.",
+      "imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1080&q=80",
+      "imageHint": "cloud data"
+    },
+    {
+      "id": "service-datacenter",
+      "description": "High-performance server racks in a modern facility.",
+      "imageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1080&q=80",
+      "imageHint": "server room"
+    },
+    {
+      "id": "service-cybersecurity",
+      "description": "Global cyber defense monitoring and digital shields.",
+      "imageUrl": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1080&q=80",
+      "imageHint": "cyber security"
+    },
+    {
+      "id": "service-ai",
+      "description": "Artificial intelligence neural network visualization.",
+      "imageUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1080&q=80",
+      "imageHint": "artificial intelligence"
+    },
+    {
+      "id": "service-sustainability",
+      "description": "Green technology integration in urban infrastructure.",
+      "imageUrl": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1080&q=80",
+      "imageHint": "green technology"
+    },
+    {
+      "id": "service-managed",
+      "description": "Professional IT operation center monitoring team.",
+      "imageUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1080&q=80",
+      "imageHint": "it office"
+    }
+  ]
+}
