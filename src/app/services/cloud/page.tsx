@@ -1,3 +1,4 @@
+'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
 import { Cloud, Layers, ShieldCheck, TrendingUp, Zap, Globe } from "lucide-react";

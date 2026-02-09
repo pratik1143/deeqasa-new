@@ -1,3 +1,4 @@
+'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
 import { Database, Cpu, Layout, Activity, ShieldCheck, Zap } from "lucide-react";

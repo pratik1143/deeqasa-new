@@ -1,3 +1,4 @@
+'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
 import { Leaf, Globe, Zap, Activity, Layers, ShieldCheck } from "lucide-react";

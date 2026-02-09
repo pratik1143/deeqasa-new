@@ -1,3 +1,4 @@
+'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
 import { ShieldCheck, Lock, Eye, Terminal, Activity, Zap } from "lucide-react";

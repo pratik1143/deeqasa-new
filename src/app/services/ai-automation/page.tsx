@@ -1,3 +1,4 @@
+'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
 import { Bot, Cpu, TrendingUp, Zap, Layers, Activity } from "lucide-react";
