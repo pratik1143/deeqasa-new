@@ -101,11 +101,21 @@ export default {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-50%)' },
         },
+        scanline: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100%)' },
+        },
+        draw: {
+          to: { strokeDashoffset: '0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'marquee-infinite': 'marquee 30s linear infinite',
+        'spin-slow': 'spin 8s linear infinite',
+        'scanline': 'scanline 8s linear infinite',
+        'draw': 'draw 2s ease-out forwards',
       },
     },
   },

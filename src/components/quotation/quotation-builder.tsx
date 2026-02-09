@@ -109,7 +109,7 @@ export function QuotationBuilder() {
   const [pendingPrice, setPendingPrice] = useState<number>(0);
   const [pendingQuantity, setPendingQuantity] = useState<number>(1);
 
-  const [marketingData] = useState<BrochureOutput | null>(null);
+  const [marketingData, setMarketingData] = useState<BrochureOutput | null>(null);
   const [isGeneratingBody, startGeneratingBody] = useTransition();
 
   const form = useForm<FormValues>({
@@ -243,7 +243,6 @@ export function QuotationBuilder() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-0 min-h-[calc(100vh-80px)] bg-black overflow-hidden font-body">
-      {/* Editor Panel */}
       <div className="w-full lg:w-[420px] bg-card border-r border-white/5 flex flex-col no-print shrink-0 relative z-20 overflow-y-auto">
         <div className="p-6 pb-0">
           <div className="flex items-center gap-3 mb-8">
@@ -418,7 +417,6 @@ export function QuotationBuilder() {
         </ScrollArea>
       </div>
 
-      {/* Preview Panel */}
       <div className="flex-1 bg-black flex flex-col relative z-10 overflow-hidden">
         <div className="h-20 bg-card/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 shrink-0 no-print">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white/5 rounded-full p-1">
@@ -436,7 +434,6 @@ export function QuotationBuilder() {
           <div className="py-20 flex flex-col items-center">
             {activeTab === 'quotation' ? (
               <div id="quotation-export-root" className="document-canvas">
-                {/* PAGE 1: EXECUTIVE COVER LETTER */}
                 <div className="a4-page">
                   <PageHeader />
                   <div className="a4-content">
@@ -457,7 +454,6 @@ export function QuotationBuilder() {
                   <PageFooter pageNum={1} />
                 </div>
 
-                {/* PAGE 2: COMMERCIAL SCHEDULE */}
                 <div className="a4-page">
                   <PageHeader />
                   <div className="a4-content">

@@ -6,8 +6,6 @@ import { Footer } from "@/components/layout/footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Radio, 
-  Signal, 
-  MessageSquare, 
   MapPin, 
   Phone, 
   Mail, 
@@ -15,7 +13,6 @@ import {
   Terminal, 
   ShieldCheck, 
   Activity, 
-  Cpu,
   ArrowRight,
   Loader2,
   Zap,
@@ -26,8 +23,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+
+const InfoBlock = ({ icon: Icon, label, value, subValue }: any) => (
+    <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group">
+        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+            <Icon size={20} />
+        </div>
+        <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">{label}</p>
+            <p className="text-sm font-bold text-white uppercase">{value}</p>
+            {subValue && <p className="text-[10px] font-medium text-white/20 uppercase tracking-tighter mt-0.5">{subValue}</p>}
+        </div>
+    </div>
+);
 
 export default function ContactPage() {
     const { toast } = useToast();
@@ -36,7 +45,6 @@ export default function ContactPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate secure uplink transmission
         setTimeout(() => {
             setIsSubmitting(false);
             toast({
@@ -46,24 +54,10 @@ export default function ContactPage() {
         }, 2000);
     };
 
-    const InfoBlock = ({ icon: Icon, label, value, subValue }: any) => (
-        <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/20 transition-all group">
-            <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                <Icon size={20} />
-            </div>
-            <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">{label}</p>
-                <p className="text-sm font-bold text-white uppercase">{value}</p>
-                {subValue && <p className="text-[10px] font-medium text-white/20 uppercase tracking-tighter mt-0.5">{subValue}</p>}
-            </div>
-        </div>
-    );
-
     return (
         <div className="flex flex-col min-h-screen bg-black font-code selection:bg-primary/30">
             <Header />
             <main className="flex-1 pt-32 pb-24 relative overflow-hidden">
-                {/* JARVIS BACKGROUND ELEMENTS */}
                 <div className="fixed inset-0 command-grid pointer-events-none opacity-20" />
                 <div className="scanline" />
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full pointer-events-none">
@@ -74,7 +68,6 @@ export default function ContactPage() {
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                         
-                        {/* LEFT COLUMN: TELEMETRY & SYSTEM INFO */}
                         <div className="lg:col-span-5 space-y-12">
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
@@ -138,7 +131,6 @@ export default function ContactPage() {
                             </Card>
                         </div>
 
-                        {/* RIGHT COLUMN: COMMAND TERMINAL (FORM) */}
                         <div className="lg:col-span-7">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
