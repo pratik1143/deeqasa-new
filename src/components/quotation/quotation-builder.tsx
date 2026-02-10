@@ -105,6 +105,7 @@ export function QuotationBuilder() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState("quotation");
   const [currentStep, setCurrentStep] = useState('customer');
+  const [savedId, setSavedId] = useState<string | null>(null);
 
   const [pendingPrice, setPendingPrice] = useState<number>(0);
   const [pendingQuantity, setPendingQuantity] = useState<number>(1);
@@ -192,6 +193,7 @@ export function QuotationBuilder() {
       });
 
       await batch.commit();
+      setSavedId(quotationId);
       toast({ title: "Quotation Saved", description: "Ready for Intelligence synthesis." });
       return quotationId;
     } catch (e: any) {
@@ -203,8 +205,8 @@ export function QuotationBuilder() {
   };
 
   const handleDownloadPdf = async (rootId: string, filename: string) => {
-    const savedId = await saveQuotationToFirestore();
-    if (!savedId) return;
+    const id = await saveQuotationToFirestore();
+    if (!id) return;
 
     setIsDownloading(true);
     const html2pdf = (await import('html2pdf.js')).default;
