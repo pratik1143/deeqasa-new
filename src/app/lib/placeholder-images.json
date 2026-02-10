@@ -20,46 +20,52 @@
       "imageHint": "laptop technology"
     },
     {
-      "id": "company-logo",
-      "description": "Professional technology company logo placeholder for DeeQasa Tech.",
-      "imageUrl": "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=300&h=150&fit=crop",
-      "imageHint": "company logo"
+      "id": "cloud-hero",
+      "description": "Enterprise cloud infrastructure visualization.",
+      "imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80",
+      "imageHint": "cloud infrastructure"
     },
     {
-      "id": "service-cloud",
-      "description": "Enterprise cloud infrastructure and virtualized networks.",
-      "imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1080&q=80",
-      "imageHint": "cloud data"
+      "id": "cloud-arch",
+      "description": "Cloud network architecture diagram style.",
+      "imageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80",
+      "imageHint": "network topology"
     },
     {
-      "id": "service-datacenter",
-      "description": "High-performance server racks in a modern facility.",
-      "imageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1080&q=80",
+      "id": "dc-hero",
+      "description": "High-density data center server racks.",
+      "imageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1920&q=80",
       "imageHint": "server room"
     },
     {
-      "id": "service-cybersecurity",
-      "description": "Global cyber defense monitoring and digital shields.",
-      "imageUrl": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1080&q=80",
+      "id": "cyber-hero",
+      "description": "Cybersecurity operations center monitoring.",
+      "imageUrl": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1920&q=80",
       "imageHint": "cyber security"
     },
     {
-      "id": "service-ai",
-      "description": "Artificial intelligence neural network visualization.",
-      "imageUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1080&q=80",
+      "id": "ai-hero",
+      "description": "Artificial intelligence neural network and data analytics.",
+      "imageUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920&q=80",
       "imageHint": "artificial intelligence"
     },
     {
-      "id": "service-sustainability",
-      "description": "Green technology integration in urban infrastructure.",
-      "imageUrl": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1080&q=80",
+      "id": "green-hero",
+      "description": "Sustainable green data center and clean energy.",
+      "imageUrl": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=1920&q=80",
       "imageHint": "green technology"
     },
     {
-      "id": "service-managed",
-      "description": "Professional IT operation center monitoring team.",
-      "imageUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1080&q=80",
+      "id": "managed-hero",
+      "description": "Managed IT services operations center team.",
+      "imageUrl": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=1920&q=80",
       "imageHint": "it office"
+    },
+    {
+      "id": "env-strip",
+      "description": "Engineers working in a modern deployment environment.",
+      "imageUrl": "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=1920&q=80",
+      "imageHint": "engineering team"
     }
   ]
 }

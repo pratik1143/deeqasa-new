@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
@@ -8,21 +9,23 @@ export default function AiAutomationPage() {
     <ServiceDetailView 
       title="AI & Automation"
       tagline="Intelligent Systems. Accelerated Outcomes. Predictive Insights."
-      heroImage="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1080&q=80"
-      overview="Harness the power of machine learning and process automation to drive efficiency. We integrate GenAI and predictive analytics into your existing workflows to turn raw data into strategic decision-making assets."
+      heroImage="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920&q=80"
+      overviewImage="https://images.unsplash.com/photo-1551288049-bbbda5366fd9?w=1200&q=80"
+      archImage="https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=1200&q=80"
+      overview="Harness machine learning and process automation to drive exponential efficiency. We integrate enterprise-ready GenAI into your existing workflows to turn raw data into strategic assets."
       capabilities={[
-        { title: "Generative AI Ops", description: "Deploying secure, enterprise-ready Large Language Models.", icon: Bot },
-        { title: "Predictive Analytics", description: "Forecasting market trends and operational failures before they happen.", icon: TrendingUp },
-        { title: "Robotic Process Automation", description: "Automating routine high-volume tasks with 100% accuracy.", icon: Zap },
-        { title: "AI-Ready Compute", description: "High-performance GPU clusters for training and inference.", icon: Cpu },
-        { title: "Data Pipeline Automation", description: "Intelligent ETL processes for real-time data readiness.", icon: Layers },
-        { title: "Computer Vision", description: "Automated visual inspection and security analytics.", icon: Activity }
+        { title: "Generative AI Ops", description: "Deploying secure, enterprise-ready Large Language Models behind your firewall.", icon: Bot },
+        { title: "Predictive Analytics", description: "Forecasting market trends and operational failures before they impact business.", icon: TrendingUp },
+        { title: "Process Automation", description: "Automating routine high-volume tasks with 100% accuracy and scalability.", icon: Zap },
+        { title: "AI-Ready Compute", description: "High-performance GPU clusters for model training and real-time inference.", icon: Cpu },
+        { title: "Data Pipeline Ops", description: "Intelligent ETL processes for real-time data readiness across the organization.", icon: Layers },
+        { title: "Computer Vision", description: "Automated visual inspection and security analytics for physical facilities.", icon: Activity }
       ]}
       useCases={[
-        { sector: "Retail", description: "AI-driven inventory optimization and demand forecasting." },
-        { sector: "Tech", description: "Automated code review and DevOps pipeline acceleration." },
-        { sector: "Customer Service", description: "Intelligent agent assistants for enterprise support desks." },
-        { sector: "Manufacturing", description: "Predictive maintenance for heavy machinery and assembly lines." }
+        { sector: "Retail", description: "AI-driven inventory optimization and demand forecasting for global chains." },
+        { sector: "Tech", description: "Automated code review and DevOps pipeline acceleration for development teams." },
+        { sector: "Customer Service", description: "Intelligent agent assistants for large-scale enterprise support desks." },
+        { sector: "Manufacturing", description: "Predictive maintenance for heavy machinery and automated assembly lines." }
       ]}
       benefits={[
         "Exponential Productivity Gains",
