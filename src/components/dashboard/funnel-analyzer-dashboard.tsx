@@ -367,37 +367,42 @@ export function FunnelAnalyzerDashboard() {
       <div className="scanline" />
       <div className="fixed top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(0,224,255,0.03)_0%,transparent_70%)] pointer-events-none" />
 
-      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-6">
-          <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
-                <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Mission Control Alpha</span>
-              </div>
-              <h1 className="text-4xl font-black tracking-tighter text-white uppercase flex items-center gap-4">
-                Funnel Intelligence <span className="text-white/10">|</span> <span className="text-white/40 font-light">v4.0.1</span>
-              </h1>
-              <div className="flex items-center gap-4 text-white/30 text-[10px] font-bold uppercase tracking-widest">
-                <div className="flex items-center gap-1.5"><ShieldCheck size={12} className="text-emerald-500/50"/> Secure Terminal</div>
-                <div className="flex items-center gap-1.5"><Activity size={12} className="text-primary/50"/> System Online</div>
-                <div className="flex items-center gap-1.5"><Globe size={12} className="text-blue-500/50"/> Data Synced</div>
-              </div>
-          </div>
-          <Button 
-            onClick={handleRefresh} 
-            variant="outline" 
-            disabled={isRefreshing}
-            className="group relative h-14 px-8 border-white/10 bg-black/40 backdrop-blur-xl hover:bg-primary/5 hover:border-primary/30 transition-all overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className={cn("mr-3 h-5 w-5 flex items-center justify-center", isRefreshing && "radar-spin")}>
-              <RefreshCw className="h-4 w-4 text-primary" />
+      {/* Main Content Container - Restricted to 1280px Grid */}
+      <div className="max-w-[1280px] mx-auto px-6 relative z-10">
+        
+        {/* Header Section: Aligned with Nav Grid */}
+        <header className="pt-12 pb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
+                  <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Mission Control Alpha</span>
+                </div>
+                <h1 className="text-4xl font-black tracking-tighter text-white uppercase flex items-center gap-4">
+                  Funnel Intelligence <span className="text-white/10">|</span> <span className="text-white/40 font-light">v4.0.1</span>
+                </h1>
+                <div className="flex items-center gap-4 text-white/30 text-[10px] font-bold uppercase tracking-widest">
+                  <div className="flex items-center gap-1.5"><ShieldCheck size={12} className="text-emerald-500/50"/> Secure Terminal</div>
+                  <div className="flex items-center gap-1.5"><Activity size={12} className="text-primary/50"/> System Online</div>
+                  <div className="flex items-center gap-1.5"><Globe size={12} className="text-blue-500/50"/> Data Synced</div>
+                </div>
             </div>
-            <span className="font-bold text-xs uppercase tracking-[0.2em]">{isRefreshing ? "Calibrating..." : "Refresh Matrix"}</span>
-          </Button>
-        </div>
+            <Button 
+              onClick={handleRefresh} 
+              variant="outline" 
+              disabled={isRefreshing}
+              className="group relative h-14 px-8 border-white/10 bg-black/40 backdrop-blur-xl hover:bg-primary/5 hover:border-primary/30 transition-all overflow-hidden shrink-0"
+            >
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className={cn("mr-3 h-5 w-5 flex items-center justify-center", isRefreshing && "radar-spin")}>
+                <RefreshCw className="h-4 w-4 text-primary" />
+              </div>
+              <span className="font-bold text-xs uppercase tracking-[0.2em]">{isRefreshing ? "Calibrating..." : "Refresh Matrix"}</span>
+            </Button>
+          </div>
+        </header>
 
-        {/* Command Controls */}
+        {/* Command Controls (Filters) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-12 p-6 bg-black/40 backdrop-blur-2xl rounded-2xl border border-white/5 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-2 opacity-10"><Terminal size={40} /></div>
           <h3 className="text-[10px] font-black col-span-full uppercase tracking-[0.4em] text-primary/60 mb-2">Filter Parameters</h3>
@@ -770,7 +775,7 @@ export function FunnelAnalyzerDashboard() {
         )}
 
         {/* Detailed Data Table */}
-        <Card className="mt-16 bg-black/40 border-white/5 overflow-hidden holographic-edge">
+        <Card className="mt-16 mb-24 bg-black/40 border-white/5 overflow-hidden holographic-edge">
           <CardHeader className="bg-white/5 border-b border-white/5">
             <div className="flex justify-between items-center">
               <div>
