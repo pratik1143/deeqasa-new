@@ -215,7 +215,7 @@ export function QuotationBuilder() {
       margin: 0, 
       filename, 
       image: { type: 'jpeg', quality: 1.0 }, 
-      html2canvas: { scale: 3, useCORS: true, logging: false }, 
+      html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1200 }, 
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
@@ -224,20 +224,17 @@ export function QuotationBuilder() {
     } finally { setIsDownloading(false); }
   };
 
-  const PageHeader = () => (
-    <div className="print-header">
-      <img src={HP_LOGO_URL} alt="HP" className="h-[10mm] w-auto" />
-      <div className="text-right">
-        <h2 className="text-[11pt] font-black uppercase tracking-tighter">DEEQASA</h2>
-        <p className="text-[6pt] text-primary font-bold uppercase tracking-[0.2em]">HP Authorized Enterprise Partner</p>
+  const LetterheadHeader = () => (
+    <div className="flex justify-between items-start mb-10 border-b border-gray-100 pb-6 shrink-0">
+      <div className="flex flex-col gap-2">
+        <img src={HP_LOGO_URL} alt="HP CONNECT" className="h-[12mm] w-auto mb-2" />
+        <span className="text-[10pt] font-black text-gray-900 tracking-widest uppercase">HP CONNECT PARTNER</span>
       </div>
-    </div>
-  );
-
-  const PageFooter = ({ pageNum }: { pageNum: number }) => (
-    <div className="print-footer">
-      <p>Secure. Sustainable. Scalable. HP Enterprise Solutions.</p>
-      <p>Page {pageNum.toString().padStart(2, '0')} of 02</p>
+      <div className="text-right flex flex-col">
+        <h2 className="text-[14pt] font-black uppercase tracking-tighter text-gray-900 leading-tight">M/S DEEQASA-TECH</h2>
+        <p className="text-[8pt] font-medium text-gray-500 italic">Smart. Secure. Sustainable. IT Solutions.</p>
+        <p className="text-[8pt] font-bold text-gray-400 mt-1 uppercase tracking-widest">GSTIN: 04XXXXX0000X1ZX</p>
+      </div>
     </div>
   );
 
@@ -434,79 +431,110 @@ export function QuotationBuilder() {
           <div className="py-20 flex flex-col items-center">
             {activeTab === 'quotation' ? (
               <div id="quotation-export-root" className="document-canvas">
-                <div className="a4-page">
-                  <PageHeader />
-                  <div className="a4-content">
-                    <div className="mb-8 text-[10.5pt] space-y-1">
-                      <p className="font-bold">To,</p>
-                      <p className="text-[11.5pt] font-black uppercase">{watchedCustomer}</p>
-                      <p className="font-bold text-gray-700">{watchedCompany}</p>
-                      <p className="text-gray-500 italic text-[9pt]">{watchedAddress}</p>
-                    </div>
-                    <div className="font-bold bg-gray-50 p-5 border-l-[5pt] border-gray-900 mb-8 no-break">
-                      <p className="text-[10.5pt] leading-tight"><span className="underline uppercase mr-3 text-gray-400 text-[7.5pt] font-black">Subject:</span> {watchedSubject}</p>
-                    </div>
-                    <div className="space-y-6 text-[11pt] justified-text">
-                      <p className="font-bold">Respected Sir/Madam,</p>
-                      <div className="whitespace-pre-wrap leading-[1.7] text-gray-800 font-medium">{watchedLetterBody}</div>
+                <div className="a4-container">
+                  {/* PAGE 1: COVER LETTER */}
+                  <div className="a4-page page-break">
+                    <LetterheadHeader />
+                    
+                    <div className="flex-1 flex flex-col">
+                      <div className="mb-10 text-[12pt] space-y-1.5 text-gray-800">
+                        <p className="font-bold text-gray-400 text-[10pt] uppercase tracking-widest mb-2">To,</p>
+                        <p className="text-[13pt] font-black uppercase text-gray-900">{watchedCustomer}</p>
+                        <p className="font-bold text-gray-700">{watchedCompany}</p>
+                        <p className="text-gray-500 italic text-[10pt]">{watchedAddress}</p>
+                      </div>
+
+                      <div className="highlight-bar mb-10">
+                        <p className="text-[11pt] font-bold text-gray-900">
+                          <span className="uppercase text-[8pt] font-black text-gray-400 mr-4 tracking-tighter">Subject:</span>
+                          {watchedSubject}
+                        </p>
+                      </div>
+
+                      <div className="space-y-8 text-[12pt] justified-text text-gray-800">
+                        <p className="font-bold">Respected Sir/Madam,</p>
+                        <div className="whitespace-pre-wrap leading-[1.8] font-medium">{watchedLetterBody}</div>
+                      </div>
+
+                      <div className="mt-auto pt-10">
+                        <h4 className="text-[9pt] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 border-b border-gray-100 pb-2">Commercial Terms & Conditions</h4>
+                        <ul className="grid grid-cols-2 gap-x-10 gap-y-2 text-[9pt] text-gray-600 font-medium italic">
+                          <li className="flex gap-2"><span>•</span> Validity: 30 Days from date of issue</li>
+                          <li className="flex gap-2"><span>•</span> Delivery: Within 4-6 weeks of PO</li>
+                          <li className="flex gap-2"><span>•</span> Warranty: As per OEM Standards</li>
+                          <li className="flex gap-2"><span>•</span> Taxes: GST @ 18% as applicable</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
-                  <PageFooter pageNum={1} />
-                </div>
 
-                <div className="a4-page">
-                  <PageHeader />
-                  <div className="a4-content">
-                    <h3 className="text-center font-black text-lg mb-8 uppercase tracking-[0.15em] border-b border-gray-900 pb-2">Commercial Schedule</h3>
-                    <table className="quotation-table">
-                      <thead>
-                        <tr>
-                          <th className="w-[10%]">Sr.</th>
-                          <th className="w-[50%]">Item Description</th>
-                          <th className="w-[10%]">Qty</th>
-                          <th className="w-[15%]">Unit (₹)</th>
-                          <th className="w-[15%]">Total (₹)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {watchedLineItems?.map((item, idx) => (
-                          <tr key={idx} className="no-break">
-                            <td className="text-center font-bold text-gray-400">{idx + 1}</td>
-                            <td className="font-bold text-gray-900">
-                              {item.product.model}
-                              <p className="text-[7pt] text-gray-500 italic font-medium mt-1 uppercase tracking-tight">{item.product.processor}</p>
-                            </td>
-                            <td className="text-center font-bold">{item.quantity}</td>
-                            <td className="text-right font-medium">{item.unitPrice.toLocaleString('en-IN')}</td>
-                            <td className="text-right font-black">{(item.quantity * item.unitPrice).toLocaleString('en-IN')}</td>
+                  {/* PAGE 2: TECHNICAL & COMMERCIAL SCHEDULE */}
+                  <div className="a4-page">
+                    <LetterheadHeader />
+                    
+                    <div className="flex-1 flex flex-col">
+                      <h3 className="text-center font-black text-[14pt] mb-10 uppercase tracking-[0.2em] border-y border-gray-900 py-3">Technical & Commercial Quotation</h3>
+                      
+                      <table className="quotation-table">
+                        <thead>
+                          <tr>
+                            <th className="w-[8%]">SR</th>
+                            <th className="w-[52%] text-left">Specifications</th>
+                            <th className="w-[10%]">QTY</th>
+                            <th className="w-[15%] text-right">Unit Price (₹)</th>
+                            <th className="w-[15%] text-right">Total (₹)</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {watchedLineItems?.map((item, idx) => (
+                            <tr key={idx} className="zebra-row">
+                              <td className="text-center font-bold text-gray-400">{String(idx + 1).padStart(2, '0')}</td>
+                              <td className="font-bold text-gray-900">
+                                <span className="text-[11pt] uppercase">{item.product.model}</span>
+                                <p className="text-[8pt] text-gray-500 font-medium mt-1 uppercase tracking-tight leading-relaxed">{item.product.processor} | {item.product.memory} | {item.product.warranty}</p>
+                              </td>
+                              <td className="text-center font-bold text-gray-900">{item.quantity}</td>
+                              <td className="text-right font-medium text-gray-700">{item.unitPrice.toLocaleString('en-IN')}</td>
+                              <td className="text-right font-black text-gray-900">{(item.quantity * item.unitPrice).toLocaleString('en-IN')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
 
-                    <div className="mt-6 flex justify-end no-break">
-                      <div className="w-[85mm] bg-gray-50 p-6 rounded-xl border border-gray-100 space-y-2">
-                        <div className="flex justify-between text-[7.5pt] font-black text-gray-400 uppercase tracking-widest">
-                          <span>Sub-Total</span>
-                          <span>₹{totals.subTotal.toLocaleString('en-IN')}</span>
+                      <div className="mt-8 flex justify-end">
+                        <div className="w-[90mm] space-y-2 border-t-2 border-gray-900 pt-4">
+                          <div className="flex justify-between text-[9pt] font-black text-gray-400 uppercase tracking-widest">
+                            <span>Sub-Total Impact</span>
+                            <span>₹{totals.subTotal.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="flex justify-between text-[9pt] font-black text-gray-400 uppercase tracking-widest pb-3 border-b border-gray-100">
+                            <span>GST Components (18%)</span>
+                            <span>₹{totals.totalGst.toLocaleString('en-IN')}</span>
+                          </div>
+                          <div className="flex justify-between text-[14pt] font-black text-gray-900 pt-2 uppercase tracking-tight">
+                            <span>Grand Total</span>
+                            <span>₹{totals.grandTotal.toLocaleString('en-IN')}</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between text-[7.5pt] font-black text-gray-400 uppercase tracking-widest border-b border-gray-200 pb-2">
-                          <span>GST (18%)</span>
-                          <span>₹{totals.totalGst.toLocaleString('en-IN')}</span>
+                      </div>
+
+                      <div className="mt-10 highlight-bar">
+                        <p className="text-[8pt] font-black text-gray-400 uppercase tracking-widest mb-1">Amount in Words</p>
+                        <p className="text-[11pt] text-gray-900 italic font-serif font-bold">{numberToWords(totals.grandTotal)}</p>
+                      </div>
+
+                      <div className="mt-auto flex justify-between items-end border-t border-gray-100 pt-10">
+                        <div className="text-[8pt] text-gray-400 font-bold uppercase tracking-widest">
+                          <p>Authorized Signature</p>
+                          <p className="mt-10 text-gray-900">For Deeqasa-Tech</p>
                         </div>
-                        <div className="flex justify-between text-[12pt] font-black text-gray-900 pt-1 uppercase tracking-tight">
-                          <span>Grand Total</span>
-                          <span>₹{totals.grandTotal.toLocaleString('en-IN')}</span>
+                        <div className="text-right text-[7pt] text-gray-300 font-black uppercase">
+                          <p>Document Ref: {savedId || 'DQT-PENDING'}</p>
+                          <p>Generated: {new Date().toLocaleDateString()}</p>
                         </div>
                       </div>
                     </div>
-
-                    <div className="mt-8 p-5 bg-blue-50/20 rounded-xl border border-blue-100 no-break">
-                      <p className="text-[7.5pt] font-black text-blue-400 uppercase tracking-widest mb-1">Amount in Words</p>
-                      <p className="text-[9.5pt] text-blue-900 italic font-serif leading-relaxed">{numberToWords(totals.grandTotal)}</p>
-                    </div>
                   </div>
-                  <PageFooter pageNum={2} />
                 </div>
               </div>
             ) : (
