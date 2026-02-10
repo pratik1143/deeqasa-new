@@ -56,7 +56,7 @@ export function Services() {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="font-headline text-4xl md:text-6xl font-bold tracking-tighter">
+            <h2 className="font-headline text-4xl md:text-6xl font-bold tracking-tighter text-foreground">
               Solutions Overview
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
@@ -83,7 +83,7 @@ export function Services() {
                     <div className="w-16 h-16 flex items-center justify-center rounded-lg bg-primary/10 text-primary mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-105">
                       {service.icon}
                     </div>
-                    <CardTitle className="font-headline text-white">{service.title}</CardTitle>
+                    <CardTitle className="font-headline text-foreground">{service.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">{service.description}</p>
