@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -16,10 +16,14 @@ import { Printers } from '@/components/sections/printers';
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleLoaded = useCallback(() => {
+    setIsLoading(false);
+  }, []);
+
   return (
     <>
-      <AnimatePresence>
-        {isLoading && <Preloader onLoaded={() => setIsLoading(false)} />}
+      <AnimatePresence mode="wait">
+        {isLoading && <Preloader onLoaded={handleLoaded} />}
       </AnimatePresence>
       
       <CustomCursor />

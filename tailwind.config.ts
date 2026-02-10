@@ -108,6 +108,10 @@ export default {
         draw: {
           to: { strokeDashoffset: '0' },
         },
+        'line-loader': {
+          '0%': { backgroundPosition: '200% 0' },
+          '100%': { backgroundPosition: '-200% 0' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -116,6 +120,7 @@ export default {
         'spin-slow': 'spin 8s linear infinite',
         'scanline': 'scanline 8s linear infinite',
         'draw': 'draw 2s ease-out forwards',
+        'line-loader': 'line-loader 2s linear infinite',
       },
     },
   },

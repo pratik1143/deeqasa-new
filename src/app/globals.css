@@ -209,13 +209,3 @@
   from { transform: translateY(-100%); }
   to { transform: translateY(100vh); }
 }
-
-@layer utilities {
-  .animate-line-loader {
-    animation: line-loader 2s linear infinite;
-  }
-  @keyframes line-loader {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-}
