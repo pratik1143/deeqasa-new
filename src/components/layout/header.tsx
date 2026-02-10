@@ -10,7 +10,11 @@ import { useRouter, usePathname } from "next/navigation";
 
 const baseNavLinks = [
   { name: "Home", href: "/" },
-  { name: "Solutions", href: "/#solutions" },
+  { name: "Solutions", href: "/solutions" },
+  { name: "Industries", href: "/industries" },
+  { name: "Case Studies", href: "/case-studies" },
+  { name: "Resources", href: "/resources" },
+  { name: "Support", href: "/support" },
 ];
 
 const protectedLinks = [
@@ -84,7 +88,7 @@ export function Header() {
           </div>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-8 h-full">
+        <nav className="hidden lg:flex items-center gap-6 h-full">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -92,7 +96,7 @@ export function Header() {
                 key={link.name} 
                 href={link.href} 
                 className={cn(
-                  "relative h-full flex items-center text-sm font-semibold tracking-tight transition-colors duration-200 py-2",
+                  "relative h-full flex items-center text-xs font-bold uppercase tracking-widest transition-colors duration-200 py-2",
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
