@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Pure Dark Mode Variables */
+    /* DEFAULT: DARK MODE */
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
@@ -34,6 +34,28 @@
     --chart-4: 210 100% 50%;
     --chart-5: 280 100% 50%;
   }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 188 100% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 188 100% 42%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 188 100% 42%;
+  }
 }
 
 @layer base {
@@ -56,7 +78,6 @@
   align-items: center;
 }
 
-/* The A4 Page Wrapper */
 .a4-page {
   width: 210mm !important;
   height: 297mm !important;
@@ -65,7 +86,7 @@
   margin: 0 auto 40px auto !important;
   background: white !important;
   color: black !important;
-  padding: 15mm !important; /* Strict 15mm margin */
+  padding: 15mm !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -76,7 +97,6 @@
   page-break-after: always !important;
 }
 
-/* The 180mm Content Wrapper (210mm - 15mm - 15mm) */
 .a4-content {
   width: 180mm !important;
   flex-grow: 1 !important;
@@ -112,7 +132,6 @@
   letter-spacing: 0.1em !important;
 }
 
-/* Layout Utilities */
 .no-break {
   break-inside: avoid !important;
   page-break-inside: avoid !important;
@@ -129,7 +148,6 @@
   line-height: 1.6 !important;
 }
 
-/* Table Architecture */
 .quotation-table {
   width: 100% !important;
   border-collapse: collapse !important;
@@ -157,7 +175,7 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0 !important; /* Managed by .a4-page padding */
+    margin: 0 !important;
   }
   
   body {
@@ -181,12 +199,6 @@
   }
 }
 
-/* 
-   ==========================================================================
-   FUTURISTIC COMMAND CENTER ENHANCEMENTS
-   ==========================================================================
-*/
-
 .command-grid {
   background-size: 40px 40px;
   background-image: 
@@ -208,4 +220,13 @@
 @keyframes scan {
   from { transform: translateY(-100%); }
   to { transform: translateY(100vh); }
+}
+
+@keyframes line-loader {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-line-loader {
+  animation: line-loader 2s linear infinite;
 }

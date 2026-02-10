@@ -32,7 +32,7 @@ const InfoBlock = ({ icon: Icon, label, value, subValue }: any) => (
         </div>
         <div>
             <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">{label}</p>
-            <p className="text-sm font-bold text-white uppercase">{value}</p>
+            <p className="text-sm font-bold text-foreground uppercase">{value}</p>
             {subValue && <p className="text-[10px] font-medium text-white/20 uppercase tracking-tighter mt-0.5">{subValue}</p>}
         </div>
     </div>
@@ -55,7 +55,7 @@ export default function ContactPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-black font-code selection:bg-primary/30">
+        <div className="flex flex-col min-h-screen bg-background font-code selection:bg-primary/30">
             <Header />
             <main className="flex-1 pt-32 pb-24 relative overflow-hidden">
                 <div className="fixed inset-0 command-grid pointer-events-none opacity-20" />
@@ -78,10 +78,10 @@ export default function ContactPage() {
                                     <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
                                     <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Uplink Module Alpha</span>
                                 </div>
-                                <h1 className="text-5xl font-black tracking-tighter text-white uppercase leading-none mb-6">
+                                <h1 className="text-5xl font-black tracking-tighter text-foreground uppercase leading-none mb-6">
                                     System <br /> <span className="text-primary">Uplink</span>
                                 </h1>
-                                <p className="text-white/40 text-sm leading-relaxed max-w-sm font-medium italic">
+                                <p className="text-muted-foreground text-sm leading-relaxed max-w-sm font-medium italic">
                                     "Direct communication protocols for enterprise infrastructure deployment. Establishing a secure bridge to our technical architects."
                                 </p>
                             </motion.div>
@@ -107,13 +107,13 @@ export default function ContactPage() {
                                 />
                             </div>
 
-                            <Card className="bg-black/40 border-white/5 backdrop-blur-xl p-6 border-l-2 border-l-primary/30">
+                            <Card className="bg-card/40 border-white/5 backdrop-blur-xl p-6 border-l-2 border-l-primary/30">
                                 <h3 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
                                     <Activity size={12}/> Network Status
                                 </h3>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-                                        <span className="text-white/30">System Load</span>
+                                        <span className="text-muted-foreground">System Load</span>
                                         <span className="text-emerald-400">Nominal (12%)</span>
                                     </div>
                                     <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
@@ -123,7 +123,7 @@ export default function ContactPage() {
                                             className="h-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                                         />
                                     </div>
-                                    <div className="flex items-center gap-4 text-white/30 text-[8px] font-black uppercase">
+                                    <div className="flex items-center gap-4 text-muted-foreground text-[8px] font-black uppercase">
                                         <div className="flex items-center gap-1"><ShieldCheck size={10} className="text-emerald-500/50"/> AES-256 Enabled</div>
                                         <div className="flex items-center gap-1"><Lock size={10} className="text-primary/50"/> Secure Tunnel</div>
                                     </div>
@@ -137,50 +137,50 @@ export default function ContactPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8, delay: 0.2 }}
                             >
-                                <Card className="bg-black/60 border-primary/20 backdrop-blur-3xl overflow-hidden holographic-edge">
+                                <Card className="bg-card/60 border-primary/20 backdrop-blur-3xl overflow-hidden holographic-edge">
                                     <CardHeader className="bg-primary/5 border-b border-primary/10 p-8 relative">
                                         <div className="absolute top-0 right-0 p-4 opacity-10"><Terminal size={80}/></div>
                                         <CardTitle className="text-lg font-black uppercase tracking-[0.2em] text-primary flex items-center gap-3">
                                             <Radio className="animate-pulse" /> Secure Uplink Protocol
                                         </CardTitle>
-                                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+                                        <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                                             Transmission Port: SEC-COM-01
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="p-8">
                                         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                             <div className="space-y-2 group">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 group-focus-within:text-primary transition-colors">Asset Identity</Label>
+                                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Asset Identity</Label>
                                                 <Input 
                                                     placeholder="Full Name" 
                                                     required
-                                                    className="bg-white/5 border-white/10 h-12 focus:bg-white/10 focus:ring-primary/30 transition-all text-white placeholder:text-white/10 font-bold"
+                                                    className="bg-white/5 border-white/10 h-12 focus:bg-white/10 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground/30 font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-2 group">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 group-focus-within:text-primary transition-colors">Corporate Node</Label>
+                                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Corporate Node</Label>
                                                 <Input 
                                                     type="email" 
                                                     placeholder="Email Address" 
                                                     required
-                                                    className="bg-white/5 border-white/10 h-12 focus:bg-white/10 focus:ring-primary/30 transition-all text-white placeholder:text-white/10 font-bold"
+                                                    className="bg-white/5 border-white/10 h-12 focus:bg-white/10 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground/30 font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-2 group md:col-span-2">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 group-focus-within:text-primary transition-colors">Mission Objective</Label>
+                                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Mission Objective</Label>
                                                 <Input 
                                                     placeholder="Subject of Consultation" 
                                                     required
-                                                    className="bg-white/5 border-white/10 h-12 focus:bg-white/10 focus:ring-primary/30 transition-all text-white placeholder:text-white/10 font-bold"
+                                                    className="bg-white/5 border-white/10 h-12 focus:bg-white/10 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground/30 font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-2 group md:col-span-2">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-white/30 group-focus-within:text-primary transition-colors">Mission Parameters</Label>
+                                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground group-focus-within:text-primary transition-colors">Mission Parameters</Label>
                                                 <Textarea 
                                                     placeholder="Describe your enterprise requirements..." 
                                                     rows={6}
                                                     required
-                                                    className="bg-white/5 border-white/10 focus:bg-white/10 focus:ring-primary/30 transition-all text-white placeholder:text-white/10 font-bold resize-none"
+                                                    className="bg-white/5 border-white/10 focus:bg-white/10 focus:ring-primary/30 transition-all text-foreground placeholder:text-muted-foreground/30 font-bold resize-none"
                                                 />
                                             </div>
                                             
@@ -188,7 +188,7 @@ export default function ContactPage() {
                                                 <Button 
                                                     type="submit" 
                                                     disabled={isSubmitting}
-                                                    className="w-full h-16 bg-primary text-black font-black uppercase tracking-[0.4em] text-xs shadow-[0_0_30px_rgba(0,224,255,0.2)] hover:shadow-primary/40 transition-all group overflow-hidden relative"
+                                                    className="w-full h-16 bg-primary text-primary-foreground font-black uppercase tracking-[0.4em] text-xs shadow-[0_0_30px_rgba(0,224,255,0.2)] hover:shadow-primary/40 transition-all group overflow-hidden relative"
                                                 >
                                                     <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                                                     {isSubmitting ? (
@@ -202,7 +202,7 @@ export default function ContactPage() {
                                             </div>
                                         </form>
                                     </CardContent>
-                                    <div className="bg-white/5 border-t border-white/5 p-6 flex justify-between items-center text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">
+                                    <div className="bg-white/5 border-t border-white/5 p-6 flex justify-between items-center text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
                                         <div className="flex items-center gap-2"><Globe size={10} className="text-primary/40"/> Universal Traffic Relay</div>
                                         <div className="flex items-center gap-2"><Zap size={10} className="text-primary/40"/> Instant Synthesis</div>
                                     </div>

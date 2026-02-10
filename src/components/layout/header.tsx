@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search, LogIn, LogOut, Menu, BrainCircuit } from "lucide-react";
+import { Search, LogIn, LogOut, Menu, Sun, Moon } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 
@@ -21,18 +21,36 @@ const protectedLinks = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    // Initialize theme from localStorage or system preference
+    const savedTheme = localStorage.getItem("theme") as "dark" | "light" | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle("light", savedTheme === "light");
+    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+      setTheme("light");
+      document.documentElement.classList.add("light");
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("light", newTheme === "light");
+  };
 
   const handleSignOut = async () => {
     await auth.signOut();
@@ -51,13 +69,13 @@ export function Header() {
     <header className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b",
       isScrolled || pathname !== '/' 
-        ? "bg-black border-white/10 shadow-2xl" 
+        ? "bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl" 
         : "bg-transparent border-transparent"
     )}>
       <div className="container mx-auto px-4 flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-black tracking-tight text-white uppercase">
+            <span className="text-2xl font-black tracking-tight text-foreground uppercase">
               DEEQASA
             </span>
           </Link>
@@ -75,7 +93,7 @@ export function Header() {
                 href={link.href} 
                 className={cn(
                   "relative h-full flex items-center text-sm font-semibold tracking-tight transition-colors duration-200 py-2",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-white"
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {link.name}
@@ -91,7 +109,7 @@ export function Header() {
         <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
-              className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-white/5 hover:text-white"
+              className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-white/5 hover:text-foreground"
               onClick={() => router.push('/contact')}
             >
               Contact Sales
@@ -120,6 +138,15 @@ export function Header() {
                 <span className="hidden sm:inline">Admin Access</span>
               </Button>
             )}
+
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleTheme}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </Button>
 
             <Button size="icon" className="bg-primary hover:bg-primary/90 text-white rounded-full h-10 w-10 transition-shadow hover:shadow-lg hover:shadow-primary/20">
                 <Search className="h-4 w-4" />

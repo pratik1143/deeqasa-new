@@ -60,7 +60,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-black font-body">
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-background font-body">
       {/* Immersive Background Video */}
       <video
         autoPlay

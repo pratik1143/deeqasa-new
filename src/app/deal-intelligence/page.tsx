@@ -150,11 +150,11 @@ export default function DealIntelligencePage() {
     if (!profile || profile.role !== 'admin') return <AccessDenied />;
 
     const StatCard = ({ label, value, icon: Icon, colorClass }: any) => (
-        <Card className="bg-black/40 border-white/5 holographic-edge overflow-hidden group">
+        <Card className="bg-card/40 border-white/5 holographic-edge overflow-hidden group">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">{label}</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">{label}</p>
                         <p className={cn("text-2xl font-black tracking-tighter", colorClass)}>{value}</p>
                     </div>
                     <div className={cn("p-3 rounded-xl bg-white/5 group-hover:scale-110 transition-transform", colorClass)}>
@@ -166,7 +166,7 @@ export default function DealIntelligencePage() {
     );
 
     return (
-        <div className="flex flex-col min-h-screen bg-black font-code selection:bg-primary/30">
+        <div className="flex flex-col min-h-screen bg-background font-code selection:bg-primary/30">
             <Header />
             <main className="flex-1 pt-24 pb-24 relative overflow-hidden">
                 <div className="fixed inset-0 command-grid pointer-events-none opacity-20" />
@@ -180,8 +180,8 @@ export default function DealIntelligencePage() {
                                 <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
                                 <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Intelligence Center Alpha</span>
                             </div>
-                            <h1 className="text-4xl font-black tracking-tighter text-white uppercase flex items-center gap-4">
-                                Deal Intelligence <span className="text-white/10">|</span> <span className="text-white/40 font-light">System v4.5</span>
+                            <h1 className="text-4xl font-black tracking-tighter text-foreground uppercase flex items-center gap-4">
+                                Deal Intelligence <span className="text-muted-foreground/10">|</span> <span className="text-muted-foreground/40 font-light">System v4.5</span>
                             </h1>
                         </div>
                         {processedData?.activeQuotation && (
@@ -189,14 +189,14 @@ export default function DealIntelligencePage() {
                                 <Button 
                                     variant="outline"
                                     onClick={() => setSelectedQuotationId(null)}
-                                    className="h-14 border-white/10 bg-white/5 text-white font-bold uppercase tracking-widest px-6"
+                                    className="h-14 border-white/10 bg-white/5 text-foreground font-bold uppercase tracking-widest px-6"
                                 >
                                     Reset to Latest
                                 </Button>
                                 <Button 
                                     onClick={runAnalysis}
                                     disabled={isAnalyzing}
-                                    className="h-14 bg-primary text-black font-black uppercase tracking-widest px-10 hover:shadow-[0_0_20px_rgba(0,224,255,0.4)] transition-all"
+                                    className="h-14 bg-primary text-primary-foreground font-black uppercase tracking-widest px-10 hover:shadow-[0_0_20px_rgba(0,224,255,0.4)] transition-all"
                                 >
                                     {isAnalyzing ? <RefreshCw className="mr-2 h-5 w-5 animate-spin" /> : <BrainCircuit className="mr-2 h-5 w-5" />}
                                     Run AI Analysis
@@ -206,11 +206,11 @@ export default function DealIntelligencePage() {
                     </div>
 
                     {!processedData ? (
-                        <div className="h-[60vh] flex flex-col items-center justify-center text-center p-8 bg-black/40 border border-white/5 rounded-3xl backdrop-blur-xl">
-                            <ShieldAlert size={64} className="text-white/10 mb-6" />
-                            <h2 className="text-xl font-bold text-white uppercase tracking-widest">Database Offline or Empty</h2>
-                            <p className="text-white/30 text-sm mt-2 max-w-sm">No quotation records found in the mission registry. Generate a proposal in the Studio first.</p>
-                            <Button className="mt-8 bg-primary text-black font-bold uppercase tracking-widest px-8" onClick={() => router.push('/quotation-builder')}>
+                        <div className="h-[60vh] flex flex-col items-center justify-center text-center p-8 bg-card/40 border border-white/5 rounded-3xl backdrop-blur-xl">
+                            <ShieldAlert size={64} className="text-muted-foreground/10 mb-6" />
+                            <h2 className="text-xl font-bold text-foreground uppercase tracking-widest">Database Offline or Empty</h2>
+                            <p className="text-muted-foreground/30 text-sm mt-2 max-w-sm">No quotation records found in the mission registry. Generate a proposal in the Studio first.</p>
+                            <Button className="mt-8 bg-primary text-primary-foreground font-bold uppercase tracking-widest px-8" onClick={() => router.push('/quotation-builder')}>
                                 Return to Studio
                             </Button>
                         </div>
@@ -235,16 +235,16 @@ export default function DealIntelligencePage() {
                                         label="Historical Log" 
                                         value={processedData.archivedCount} 
                                         icon={History} 
-                                        colorClass="text-white/40" 
+                                        colorClass="text-muted-foreground/40" 
                                     />
 
-                                    <Card className="bg-black/40 border-white/5 backdrop-blur-xl p-6 border-l-2 border-l-primary/30">
+                                    <Card className="bg-card/40 border-white/5 backdrop-blur-xl p-6 border-l-2 border-l-primary/30">
                                         <h3 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2">
                                             <Target size={12}/> Analysis Target
                                         </h3>
                                         <div className="space-y-2">
-                                            <p className="text-xs font-black text-white uppercase truncate">{processedData.activeQuotation.quotationId}</p>
-                                            <p className="text-[10px] font-bold text-white/40 uppercase">
+                                            <p className="text-xs font-black text-foreground uppercase truncate">{processedData.activeQuotation.quotationId}</p>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase">
                                                 {new Date(processedData.activeQuotation.createdAt).toLocaleDateString()}
                                             </p>
                                             <Badge variant="outline" className="text-[8px] font-black tracking-widest border-primary/20 text-primary">
@@ -263,7 +263,7 @@ export default function DealIntelligencePage() {
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
-                                                className="h-[500px] flex flex-col items-center justify-center bg-black/40 border border-primary/20 rounded-3xl backdrop-blur-xl"
+                                                className="h-[500px] flex flex-col items-center justify-center bg-card/40 border border-primary/20 rounded-3xl backdrop-blur-xl"
                                             >
                                                 <div className="relative mb-8">
                                                     <div className="w-24 h-24 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
@@ -282,7 +282,7 @@ export default function DealIntelligencePage() {
                                             >
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                     {/* Health Matrix */}
-                                                    <Card className="bg-black/40 border-white/5 overflow-hidden holographic-edge">
+                                                    <Card className="bg-card/40 border-white/5 overflow-hidden holographic-edge">
                                                         <CardHeader className="bg-white/5 border-b border-white/5 flex flex-row items-center justify-between">
                                                             <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                                                                 <Activity size={14} className="text-primary"/> Deal Health
@@ -302,7 +302,7 @@ export default function DealIntelligencePage() {
                                                                     />
                                                                 </svg>
                                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                                    <span className="text-2xl font-black text-white">{report.dealHealth?.score}</span>
+                                                                    <span className="text-2xl font-black text-foreground">{report.dealHealth?.score}</span>
                                                                 </div>
                                                             </div>
                                                             <div className={cn(
@@ -311,14 +311,14 @@ export default function DealIntelligencePage() {
                                                             )}>
                                                                 {report.dealHealth?.status}
                                                             </div>
-                                                            <p className="text-xs text-white/60 text-center italic leading-relaxed px-4">
+                                                            <p className="text-xs text-muted-foreground text-center italic leading-relaxed px-4">
                                                                 "{report.dealHealth?.reason}"
                                                             </p>
                                                         </CardContent>
                                                     </Card>
 
                                                     {/* Risk Scanner */}
-                                                    <Card className="bg-black/40 border-white/5 overflow-hidden holographic-edge">
+                                                    <Card className="bg-card/40 border-white/5 overflow-hidden holographic-edge">
                                                         <CardHeader className="bg-white/5 border-b border-white/5">
                                                             <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                                                                 <ShieldAlert size={14} className="text-red-500"/> Risk Telemetry
@@ -329,7 +329,7 @@ export default function DealIntelligencePage() {
                                                                 {report.riskFactors?.map((risk, i) => (
                                                                     <div key={i} className="flex gap-3 items-start border-l-2 border-red-500/30 pl-4 py-1">
                                                                         <AlertTriangle size={12} className="text-red-500 mt-0.5 shrink-0" />
-                                                                        <span className="text-[11px] text-white/70 font-medium leading-relaxed uppercase">{risk}</span>
+                                                                        <span className="text-[11px] text-muted-foreground/70 font-medium leading-relaxed uppercase">{risk}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -354,15 +354,15 @@ export default function DealIntelligencePage() {
 
                                                 {/* Sub-Intelligence Grid */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                                    <Card className="bg-black/40 border-white/5 p-6">
+                                                    <Card className="bg-card/40 border-white/5 p-6">
                                                         <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4 flex items-center gap-2"><Zap size={12}/> Client Buying Signals</h4>
-                                                        <p className="text-xs text-white/60 leading-relaxed font-medium italic border-l border-primary/30 pl-4">
+                                                        <p className="text-xs text-muted-foreground leading-relaxed font-medium italic border-l border-primary/30 pl-4">
                                                             {report.buyingSignals}
                                                         </p>
                                                     </Card>
-                                                    <Card className="bg-black/40 border-white/5 p-6">
-                                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-4 flex items-center gap-2"><Lock size={12}/> Margin Integrity</h4>
-                                                        <p className="text-xs text-white/60 leading-relaxed font-medium italic border-l border-white/10 pl-4">
+                                                    <Card className="bg-card/40 border-white/5 p-6">
+                                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 mb-4 flex items-center gap-2"><Lock size={12}/> Margin Integrity</h4>
+                                                        <p className="text-xs text-muted-foreground leading-relaxed font-medium italic border-l border-white/10 pl-4">
                                                             {report.discountIntelligence}
                                                         </p>
                                                     </Card>
@@ -375,9 +375,9 @@ export default function DealIntelligencePage() {
                                                 animate={{ opacity: 1 }}
                                                 className="h-[500px] flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-3xl group hover:border-primary/20 transition-all"
                                             >
-                                                <BrainCircuit className="h-16 w-16 text-white/10 group-hover:text-primary/40 transition-all mb-6" />
-                                                <h3 className="text-xl font-black text-white uppercase tracking-[0.3em] mb-2">Logic Standby</h3>
-                                                <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Ready to analyze target: {processedData.activeQuotation.quotationId}</p>
+                                                <BrainCircuit className="h-16 w-16 text-muted-foreground/10 group-hover:text-primary/40 transition-all mb-6" />
+                                                <h3 className="text-xl font-black text-foreground uppercase tracking-[0.3em] mb-2">Logic Standby</h3>
+                                                <p className="text-[10px] font-bold text-muted-foreground/20 uppercase tracking-[0.2em]">Ready to analyze target: {processedData.activeQuotation.quotationId}</p>
                                                 <Button 
                                                     onClick={runAnalysis}
                                                     className="mt-8 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 px-8 h-12 uppercase font-black tracking-widest text-xs"
@@ -394,7 +394,7 @@ export default function DealIntelligencePage() {
                             <div className="space-y-6">
                                 <div className="flex items-center gap-4">
                                     <div className="h-px flex-1 bg-white/5" />
-                                    <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 flex items-center gap-3 whitespace-nowrap">
+                                    <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-muted-foreground/30 flex items-center gap-3 whitespace-nowrap">
                                         <History size={14} /> Mission Registry Full History
                                     </h2>
                                     <div className="h-px flex-1 bg-white/5" />
@@ -411,7 +411,7 @@ export default function DealIntelligencePage() {
                                                 key={q.quotationId}
                                                 whileHover={{ y: -4 }}
                                                 className={cn(
-                                                    "group cursor-pointer bg-black/40 border rounded-2xl p-6 transition-all duration-300",
+                                                    "group cursor-pointer bg-card/40 border rounded-2xl p-6 transition-all duration-300",
                                                     isSelected ? "border-primary bg-primary/5 shadow-[0_0_30px_rgba(0,224,255,0.1)]" : "border-white/5 hover:border-white/20"
                                                 )}
                                                 onClick={() => setSelectedQuotationId(q.quotationId)}
@@ -421,7 +421,7 @@ export default function DealIntelligencePage() {
                                                         <div className="flex items-center gap-2">
                                                             <span className={cn(
                                                                 "text-[9px] font-black uppercase tracking-widest",
-                                                                isSelected ? "text-primary" : "text-white/40"
+                                                                isSelected ? "text-primary" : "text-muted-foreground/40"
                                                             )}>
                                                                 {q.quotationId}
                                                             </span>
@@ -429,13 +429,13 @@ export default function DealIntelligencePage() {
                                                                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                                             )}
                                                         </div>
-                                                        <h4 className="text-sm font-bold text-white uppercase truncate max-w-[200px]">
+                                                        <h4 className="text-sm font-bold text-foreground uppercase truncate max-w-[200px]">
                                                             {client.companyName || 'Unknown Entity'}
                                                         </h4>
                                                     </div>
                                                     <Badge variant="outline" className={cn(
                                                         "text-[8px] font-black uppercase tracking-tighter px-2 border-none",
-                                                        q.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-white/30"
+                                                        q.status === 'ACTIVE' ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-muted-foreground/30"
                                                     )}>
                                                         {q.status}
                                                     </Badge>
@@ -443,12 +443,12 @@ export default function DealIntelligencePage() {
 
                                                 <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/5 mb-4">
                                                     <div className="space-y-1">
-                                                        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Impact</span>
-                                                        <p className="text-xs font-mono font-bold text-white/80">₹{(totals.grandTotal / 100000).toFixed(1)}L</p>
+                                                        <span className="text-[8px] font-black text-muted-foreground/20 uppercase tracking-widest">Impact</span>
+                                                        <p className="text-xs font-mono font-bold text-foreground/80">₹{(totals.grandTotal / 100000).toFixed(1)}L</p>
                                                     </div>
                                                     <div className="space-y-1">
-                                                        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Date</span>
-                                                        <p className="text-xs font-bold text-white/40 uppercase">
+                                                        <span className="text-[8px] font-black text-muted-foreground/20 uppercase tracking-widest">Date</span>
+                                                        <p className="text-xs font-bold text-muted-foreground/40 uppercase">
                                                             {new Date(q.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                                                         </p>
                                                     </div>
@@ -469,11 +469,11 @@ export default function DealIntelligencePage() {
                                                     <div className="flex items-center gap-2 group-hover:translate-x-1 transition-transform">
                                                         <span className={cn(
                                                             "text-[9px] font-black uppercase tracking-widest",
-                                                            isSelected ? "text-primary" : "text-white/20"
+                                                            isSelected ? "text-primary" : "text-muted-foreground/20"
                                                         )}>
                                                             {isSelected ? "Focused" : "Load Matrix"}
                                                         </span>
-                                                        <ChevronRight size={14} className={isSelected ? "text-primary" : "text-white/20"} />
+                                                        <ChevronRight size={14} className={isSelected ? "text-primary" : "text-muted-foreground/20"} />
                                                     </div>
                                                 </div>
                                             </motion.div>
@@ -488,7 +488,7 @@ export default function DealIntelligencePage() {
 
             {/* TECHNICAL BREAKDOWN MODAL */}
             <Dialog open={!!viewingQuotation} onOpenChange={(open) => !open && setViewingQuotation(null)}>
-                <DialogContent className="max-w-4xl bg-black/95 border-primary/20 p-0 overflow-hidden font-code text-white">
+                <DialogContent className="max-w-4xl bg-card border-primary/20 p-0 overflow-hidden font-code text-foreground">
                     {viewingQuotation && (() => {
                         const client = JSON.parse(viewingQuotation.clientDetails || '{}');
                         const products = JSON.parse(viewingQuotation.products || '[]');
@@ -508,11 +508,11 @@ export default function DealIntelligencePage() {
                                             <DialogTitle className="text-3xl font-black uppercase tracking-tighter mb-2">
                                                 {viewingQuotation.quotationId}
                                             </DialogTitle>
-                                            <DialogDescription className="text-white/40 text-xs font-bold uppercase tracking-widest max-w-xl line-clamp-1">
+                                            <DialogDescription className="text-muted-foreground/40 text-xs font-bold uppercase tracking-widest max-w-xl line-clamp-1">
                                                 Subject: {viewingQuotation.subject}
                                             </DialogDescription>
                                         </div>
-                                        <Badge className="bg-primary text-black font-black uppercase tracking-widest px-4 py-1">
+                                        <Badge className="bg-primary text-primary-foreground font-black uppercase tracking-widest px-4 py-1">
                                             {viewingQuotation.status}
                                         </Badge>
                                     </div>
@@ -521,7 +521,7 @@ export default function DealIntelligencePage() {
                                 <ScrollArea className="flex-1 p-8">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
                                         <div className="space-y-6">
-                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 border-b border-white/5 pb-2 flex items-center gap-2">
+                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 border-b border-white/5 pb-2 flex items-center gap-2">
                                                 <Building2 size={12}/> Client Entity Details
                                             </h4>
                                             <div className="space-y-4">
@@ -535,7 +535,7 @@ export default function DealIntelligencePage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Address Matrix</p>
-                                                    <div className="flex items-start gap-2 text-white/60">
+                                                    <div className="flex items-start gap-2 text-muted-foreground/60">
                                                         <MapPin size={14} className="mt-0.5 shrink-0" />
                                                         <p className="text-xs font-medium leading-relaxed italic">{client.address || 'N/A'}</p>
                                                     </div>
@@ -544,7 +544,7 @@ export default function DealIntelligencePage() {
                                         </div>
 
                                         <div className="space-y-6">
-                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 border-b border-white/5 pb-2 flex items-center gap-2">
+                                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 border-b border-white/5 pb-2 flex items-center gap-2">
                                                 <Calendar size={12}/> Temporal Stamps
                                             </h4>
                                             <div className="grid grid-cols-2 gap-6">
@@ -562,32 +562,32 @@ export default function DealIntelligencePage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-[8px] font-black text-primary uppercase tracking-widest mb-1">Agent Controller</p>
-                                                    <p className="text-xs font-bold text-white/40 uppercase">DEEQASA ADMIN</p>
+                                                    <p className="text-xs font-bold text-muted-foreground/40 uppercase">DEEQASA ADMIN</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="space-y-6">
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 border-b border-white/5 pb-2 flex items-center gap-2">
+                                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 border-b border-white/5 pb-2 flex items-center gap-2">
                                             <Package size={12}/> Technical Bill of Materials
                                         </h4>
                                         <div className="border border-white/5 rounded-2xl overflow-hidden bg-white/5">
                                             <Table>
                                                 <TableHeader className="bg-white/5">
                                                     <TableRow className="border-white/10">
-                                                        <TableHead className="text-[9px] font-black text-white/40 uppercase">Item Description</TableHead>
-                                                        <TableHead className="text-[9px] font-black text-white/40 uppercase">SKU Identity</TableHead>
-                                                        <TableHead className="text-center text-[9px] font-black text-white/40 uppercase">Qty</TableHead>
-                                                        <TableHead className="text-right text-[9px] font-black text-white/40 uppercase">Unit (₹)</TableHead>
-                                                        <TableHead className="text-right text-[9px] font-black text-white/40 uppercase">Impact (₹)</TableHead>
+                                                        <TableHead className="text-[9px] font-black text-muted-foreground/40 uppercase">Item Description</TableHead>
+                                                        <TableHead className="text-[9px] font-black text-muted-foreground/40 uppercase">SKU Identity</TableHead>
+                                                        <TableHead className="text-center text-[9px] font-black text-muted-foreground/40 uppercase">Qty</TableHead>
+                                                        <TableHead className="text-right text-[9px] font-black text-muted-foreground/40 uppercase">Unit (₹)</TableHead>
+                                                        <TableHead className="text-right text-[9px] font-black text-muted-foreground/40 uppercase">Impact (₹)</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
                                                     {products.map((p: any, i: number) => (
                                                         <TableRow key={i} className="border-white/5 hover:bg-white/5 transition-colors">
-                                                            <TableCell className="text-[11px] font-bold text-white uppercase">{p.model}</TableCell>
-                                                            <TableCell className="text-[10px] font-mono text-white/40">{p.sku}</TableCell>
+                                                            <TableCell className="text-[11px] font-bold text-foreground uppercase">{p.model}</TableCell>
+                                                            <TableCell className="text-[10px] font-mono text-muted-foreground/40">{p.sku}</TableCell>
                                                             <TableCell className="text-center text-[11px] font-bold">{p.quantity}</TableCell>
                                                             <TableCell className="text-right text-[11px] font-mono">
                                                                 {pricing[i]?.unitPrice?.toLocaleString('en-IN')}
@@ -610,21 +610,21 @@ export default function DealIntelligencePage() {
                                                 <Activity size={12}/>
                                                 <span className="text-[8px] font-black uppercase tracking-widest">Pricing Matrix Verified</span>
                                             </div>
-                                            <p className="text-[10px] text-white/20 italic max-w-sm">"Financial integrity locked. All pricing values converted to INR standard for local compliance."</p>
+                                            <p className="text-[10px] text-muted-foreground/20 italic max-w-sm">"Financial integrity locked. All pricing values converted to INR standard for local compliance."</p>
                                         </div>
                                         
                                         <div className="w-full md:w-80 bg-black/40 p-6 rounded-2xl border border-white/10 space-y-3 shadow-2xl">
-                                            <div className="flex justify-between text-[10px] font-bold uppercase text-white/40">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-muted-foreground/40">
                                                 <span>Sub-Total Impact</span>
                                                 <span>₹{totals.subTotal?.toLocaleString('en-IN')}</span>
                                             </div>
-                                            <div className="flex justify-between text-[10px] font-bold uppercase text-white/40 border-b border-white/10 pb-3">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-muted-foreground/40 border-b border-white/10 pb-3">
                                                 <span>Tax Component (18%)</span>
                                                 <span>₹{totals.totalGst?.toLocaleString('en-IN')}</span>
                                             </div>
                                             <div className="flex justify-between items-end pt-2">
                                                 <span className="text-[10px] font-black uppercase text-primary tracking-widest mb-1">Grand Valuation</span>
-                                                <span className="text-2xl font-black text-white font-mono tracking-tighter">
+                                                <span className="text-2xl font-black text-foreground font-mono tracking-tighter">
                                                     ₹{totals.grandTotal?.toLocaleString('en-IN')}
                                                 </span>
                                             </div>
@@ -639,7 +639,7 @@ export default function DealIntelligencePage() {
                                             Close Terminal
                                         </Button>
                                         <Button 
-                                            className="bg-primary text-black font-black uppercase tracking-widest text-[10px] h-12 px-10 shadow-[0_0_20px_rgba(0,224,255,0.3)]"
+                                            className="bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] h-12 px-10 shadow-[0_0_20px_rgba(0,224,255,0.3)]"
                                             onClick={() => {
                                                 setSelectedQuotationId(viewingQuotation.quotationId);
                                                 setViewingQuotation(null);
