@@ -99,7 +99,7 @@ export default function LoginPage() {
               DEEQASA
             </span>
             <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
-              HP AUTHORIZED RESELLER
+              HP CONNECT
             </div>
           </Link>
         </motion.div>

@@ -62,7 +62,7 @@ export function Header() {
             </span>
           </Link>
           <div className="hidden lg:flex items-center gap-1 border-l border-white/10 pl-8 h-8">
-              <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">HP AUTHORIZED RESELLER</span>
+              <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">HP CONNECT</span>
           </div>
         </div>
 
