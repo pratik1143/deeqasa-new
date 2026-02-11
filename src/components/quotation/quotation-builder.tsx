@@ -36,7 +36,8 @@ import {
   Loader2,
   Save,
   BrainCircuit,
-  Eye
+  Eye,
+  Landmark
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -250,7 +251,7 @@ export function QuotationBuilder() {
       <div className="text-right flex flex-col">
         <h2 className="text-[14pt] font-black uppercase tracking-tighter text-gray-900 leading-tight">M/S DEEQASA-TECH</h2>
         <p className="text-[8pt] font-medium text-gray-500 italic">Smart. Secure. Sustainable. IT Solutions.</p>
-        <p className="text-[8pt] font-bold text-gray-400 mt-1 uppercase tracking-widest">GSTIN: 04XXXXX0000X1ZX</p>
+        <p className="text-[8pt] font-bold text-gray-400 mt-1 uppercase tracking-widest">GSTIN: 03EPIPK0093E1Z7</p>
       </div>
     </div>
   );
@@ -528,19 +529,32 @@ export function QuotationBuilder() {
                         </tbody>
                       </table>
 
-                      <div className="mt-8 flex justify-end">
-                        <div className="w-[90mm] space-y-2 border-t-2 border-gray-900 pt-4">
-                          <div className="flex justify-between text-[9pt] font-black text-gray-400 uppercase tracking-widest">
-                            <span>Sub-Total Impact</span>
-                            <span>₹{totals.subTotal.toLocaleString('en-IN')}</span>
+                      <div className="mt-8 grid grid-cols-2 gap-10">
+                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                          <h4 className="text-[8pt] font-black text-gray-400 uppercase tracking-widest mb-3 border-b border-gray-200 pb-1 flex items-center gap-2">
+                            <Landmark size={12}/> Banking Coordinates
+                          </h4>
+                          <div className="space-y-1 text-[8pt] text-gray-700 font-medium">
+                            <p><span className="text-gray-400 uppercase text-[7pt] w-20 inline-block">Beneficiary:</span> DEE QASA</p>
+                            <p><span className="text-gray-400 uppercase text-[7pt] w-20 inline-block">Bank:</span> State Bank of India - CC Limit</p>
+                            <p><span className="text-gray-400 uppercase text-[7pt] w-20 inline-block">Account:</span> 44562745640</p>
+                            <p><span className="text-gray-400 uppercase text-[7pt] w-20 inline-block">IFS Code:</span> SBIN0001443</p>
                           </div>
-                          <div className="flex justify-between text-[9pt] font-black text-gray-400 uppercase tracking-widest pb-3 border-b border-gray-100">
-                            <span>GST Components (18%)</span>
-                            <span>₹{totals.totalGst.toLocaleString('en-IN')}</span>
-                          </div>
-                          <div className="flex justify-between text-[14pt] font-black text-gray-900 pt-2 uppercase tracking-tight">
-                            <span>Grand Total</span>
-                            <span>₹{totals.grandTotal.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div className="flex justify-end">
+                          <div className="w-[90mm] space-y-2 border-t-2 border-gray-900 pt-4">
+                            <div className="flex justify-between text-[9pt] font-black text-gray-400 uppercase tracking-widest">
+                              <span>Sub-Total Impact</span>
+                              <span>₹{totals.subTotal.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="flex justify-between text-[9pt] font-black text-gray-400 uppercase tracking-widest pb-3 border-b border-gray-100">
+                              <span>GST Components (18%)</span>
+                              <span>₹{totals.totalGst.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="flex justify-between text-[14pt] font-black text-gray-900 pt-2 uppercase tracking-tight">
+                              <span>Grand Total</span>
+                              <span>₹{totals.grandTotal.toLocaleString('en-IN')}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
