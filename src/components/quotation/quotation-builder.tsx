@@ -16,6 +16,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandList, Command
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
@@ -37,7 +38,8 @@ import {
   Save,
   BrainCircuit,
   Eye,
-  Landmark
+  Landmark,
+  PencilLine
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -108,6 +110,12 @@ export function QuotationBuilder() {
   const [activeTab, setActiveTab] = useState("quotation");
   const [currentStep, setCurrentStep] = useState('customer');
   const [savedId, setSavedId] = useState<string | null>(null);
+
+  // Manual Entry States
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualModel, setManualModel] = useState('');
+  const [manualPrice, setManualPrice] = useState<number>(0);
+  const [manualQuantity, setManualQuantity] = useState<number>(1);
 
   const [pendingPrice, setPendingPrice] = useState<number>(0);
   const [pendingQuantity, setPendingQuantity] = useState<number>(1);
@@ -242,6 +250,38 @@ export function QuotationBuilder() {
     }
   };
 
+  const handleAddManualItem = () => {
+    if (!manualModel || manualPrice <= 0) {
+      toast({ variant: 'destructive', title: 'Invalid Entry', description: 'Model name and price are required.' });
+      return;
+    }
+
+    const manualProduct: Product = {
+      id: `MANUAL-${Date.now()}`,
+      model: manualModel,
+      name: manualModel,
+      price: manualPrice,
+      gstRate: 18,
+      plant: '-',
+      chassis: '-',
+      processor: '-',
+      memory: '-',
+      hdd: '-',
+      hdd2: '-',
+      gfx: '-',
+      os: '-',
+      odd: '-',
+      wlan: '-',
+      warranty: '-',
+    };
+
+    append({ product: manualProduct, quantity: manualQuantity, unitPrice: manualPrice });
+    setManualModel('');
+    setManualPrice(0);
+    setManualQuantity(1);
+    toast({ title: 'Manual Item Added', description: `${manualModel} added to list.` });
+  };
+
   const LetterheadHeader = () => (
     <div className="flex justify-between items-start mb-10 border-b border-gray-100 pb-6 shrink-0 w-full">
       <div className="flex flex-col gap-2">
@@ -364,49 +404,104 @@ export function QuotationBuilder() {
 
               {currentStep === 'items' && (
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
-                  <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between h-12 bg-background border-border text-foreground">
-                        <span>{selectedProduct?.model || "Search Product Master..."}</span>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover border-border">
-                      <Command shouldFilter={false}>
-                        <CommandInput placeholder="Type SKU or model..." value={searchQuery} onValueChange={setSearchQuery} />
-                        <CommandList>
-                          <CommandEmpty>No SKUs found.</CommandEmpty>
-                          <CommandGroup>
-                            {products.filter(p => p.model.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10).map((p) => (
-                              <CommandItem key={p.id} onSelect={() => { setSelectedProduct(p); setOpenCombobox(false); }} className="p-3">
-                                <div><p className="font-bold text-sm text-foreground">{p.model}</p></div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                  <div className="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10">
+                    <div className="flex items-center gap-2">
+                      <PencilLine size={14} className="text-primary"/>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Manual Entry Mode</span>
+                    </div>
+                    <Switch checked={isManualMode} onCheckedChange={setIsManualMode} />
+                  </div>
 
-                  {selectedProduct && (
-                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-4">
-                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Unit Price (₹)</Label>
-                      <Input type="number" value={pendingPrice} onChange={e => setPendingPrice(Number(e.target.value))} className="bg-background h-10 font-bold font-mono" />
-                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Quantity</Label>
-                      <Input type="number" value={pendingQuantity} onChange={e => setPendingQuantity(Number(e.target.value))} className="bg-background h-10 font-bold" />
-                      <Button className="w-full h-11 bg-primary text-primary-foreground font-bold" onClick={() => {
-                        append({ product: selectedProduct, quantity: pendingQuantity, unitPrice: pendingPrice });
-                        setSelectedProduct(null);
-                        setSearchQuery('');
-                        toast({ title: 'Item Added', description: `${selectedProduct.model} added.` });
-                      }}><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
+                  {!isManualMode ? (
+                    <>
+                      <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between h-12 bg-background border-border text-foreground">
+                            <span>{selectedProduct?.model || "Search Product Master..."}</span>
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover border-border">
+                          <Command shouldFilter={false}>
+                            <CommandInput placeholder="Type SKU or model..." value={searchQuery} onValueChange={setSearchQuery} />
+                            <CommandList>
+                              <CommandEmpty>No SKUs found.</CommandEmpty>
+                              <CommandGroup>
+                                {products.filter(p => p.model.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10).map((p) => (
+                                  <CommandItem key={p.id} onSelect={() => { setSelectedProduct(p); setOpenCombobox(false); }} className="p-3">
+                                    <div><p className="font-bold text-sm text-foreground">{p.model}</p></div>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+
+                      {selectedProduct && (
+                        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-4">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground">Unit Price (₹)</Label>
+                          <Input type="number" value={pendingPrice} onChange={e => setPendingPrice(Number(e.target.value))} className="bg-background h-10 font-bold font-mono" />
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground">Quantity</Label>
+                          <Input type="number" value={pendingQuantity} onChange={e => setPendingQuantity(Number(e.target.value))} className="bg-background h-10 font-bold" />
+                          <Button className="w-full h-11 bg-primary text-primary-foreground font-bold" onClick={() => {
+                            append({ product: selectedProduct, quantity: pendingQuantity, unitPrice: pendingPrice });
+                            setSelectedProduct(null);
+                            setSearchQuery('');
+                            toast({ title: 'Item Added', description: `${selectedProduct.model} added.` });
+                          }}><Plus className="mr-2 h-4 w-4" /> Add Item</Button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-bold uppercase text-muted-foreground">Item Model/Description</Label>
+                        <Input 
+                          placeholder="e.g. Custom Server Configuration" 
+                          value={manualModel} 
+                          onChange={e => setManualModel(e.target.value)} 
+                          className="bg-background h-10 font-bold"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground">Unit Price (₹)</Label>
+                          <Input 
+                            type="number" 
+                            value={manualPrice} 
+                            onChange={e => setManualPrice(Number(e.target.value))} 
+                            className="bg-background h-10 font-bold font-mono"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-bold uppercase text-muted-foreground">Quantity</Label>
+                          <Input 
+                            type="number" 
+                            value={manualQuantity} 
+                            onChange={e => setManualQuantity(Number(e.target.value))} 
+                            className="bg-background h-10 font-bold"
+                          />
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full h-11 bg-primary text-primary-foreground font-bold" 
+                        onClick={handleAddManualItem}
+                      >
+                        <Plus className="mr-2 h-4 w-4" /> Add Custom Item
+                      </Button>
                     </div>
                   )}
 
                   <div className="space-y-3">
                     {fields.map((field, index) => (
                       <div key={field.id} className="flex items-center justify-between p-3 bg-background rounded-lg border border-border">
-                        <div className="flex-1 truncate"><p className="text-[11px] font-bold text-foreground truncate">{field.product.model}</p></div>
+                        <div className="flex-1 truncate">
+                          <p className="text-[11px] font-bold text-foreground truncate">
+                            {field.product.id.startsWith('MANUAL-') && <span className="text-primary mr-2 font-black">[M]</span>}
+                            {field.product.model}
+                          </p>
+                        </div>
                         <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive/40" onClick={() => remove(index)}><Trash2 size={14} /></Button>
                       </div>
                     ))}
@@ -519,7 +614,11 @@ export function QuotationBuilder() {
                               <td className="text-center font-bold text-gray-400">{String(idx + 1).padStart(2, '0')}</td>
                               <td className="font-bold text-gray-900">
                                 <span className="text-[11pt] uppercase">{item.product.model}</span>
-                                <p className="text-[8pt] text-gray-500 font-medium mt-1 uppercase tracking-tight leading-relaxed">{item.product.processor} | {item.product.memory} | {item.product.warranty}</p>
+                                {item.product.id.startsWith('MANUAL-') ? (
+                                  <p className="text-[8pt] text-gray-400 font-medium mt-1 italic">Custom Entry Specification</p>
+                                ) : (
+                                  <p className="text-[8pt] text-gray-500 font-medium mt-1 uppercase tracking-tight leading-relaxed">{item.product.processor} | {item.product.memory} | {item.product.warranty}</p>
+                                )}
                               </td>
                               <td className="text-center font-bold text-gray-900">{item.quantity}</td>
                               <td className="text-right font-medium text-gray-700">{item.unitPrice.toLocaleString('en-IN')}</td>
