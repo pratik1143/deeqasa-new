@@ -35,7 +35,8 @@ import {
   CheckCircle2,
   Loader2,
   Save,
-  BrainCircuit
+  BrainCircuit,
+  Eye
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -194,7 +195,7 @@ export function QuotationBuilder() {
 
       await batch.commit();
       setSavedId(quotationId);
-      toast({ title: "Quotation Saved", description: "Ready for Intelligence synthesis." });
+      toast({ title: "Quotation Saved", description: "Record synchronized with Mission Control." });
       return quotationId;
     } catch (e: any) {
       toast({ variant: 'destructive', title: "Save Failed", description: e.message });
@@ -205,31 +206,50 @@ export function QuotationBuilder() {
   };
 
   const handleDownloadPdf = async (rootId: string, filename: string) => {
-    const id = await saveQuotationToFirestore();
+    if (isDownloading) return;
+    
+    // Ensure data is saved first to get ID
+    const id = savedId || await saveQuotationToFirestore();
     if (!id) return;
 
     setIsDownloading(true);
     const html2pdf = (await import('html2pdf.js')).default;
     const element = document.getElementById(rootId);
-    if (!element) return;
+    
+    if (!element) {
+      setIsDownloading(false);
+      return;
+    }
     
     const opt = { 
       margin: 0, 
-      filename, 
+      filename: `${filename}_${id}.pdf`, 
       image: { type: 'jpeg', quality: 1.0 }, 
-      html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: 1200 }, 
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        logging: false, 
+        windowWidth: 794,
+        allowTaint: true
+      }, 
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
     try {
       await html2pdf().from(element).set(opt).save();
-    } finally { setIsDownloading(false); }
+      toast({ title: "Export Complete", description: "Technical proposal generated successfully." });
+    } catch (error) {
+      console.error("PDF Export failed:", error);
+      toast({ variant: "destructive", title: "Export Error", description: "Failed to render document." });
+    } finally { 
+      setIsDownloading(false); 
+    }
   };
 
   const LetterheadHeader = () => (
-    <div className="flex justify-between items-start mb-10 border-b border-gray-100 pb-6 shrink-0">
+    <div className="flex justify-between items-start mb-10 border-b border-gray-100 pb-6 shrink-0 w-full">
       <div className="flex flex-col gap-2">
-        <img src={HP_LOGO_URL} alt="HP CONNECT" className="h-[12mm] w-auto mb-2" />
+        <img src={HP_LOGO_URL} alt="HP CONNECT" className="h-[12mm] w-auto mb-2" crossOrigin="anonymous" />
         <span className="text-[10pt] font-black text-gray-900 tracking-widest uppercase">HP CONNECT PARTNER</span>
       </div>
       <div className="text-right flex flex-col">
@@ -241,21 +261,22 @@ export function QuotationBuilder() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-0 min-h-[calc(100vh-80px)] bg-black overflow-hidden font-body">
-      <div className="w-full lg:w-[420px] bg-card border-r border-white/5 flex flex-col no-print shrink-0 relative z-20 overflow-y-auto">
+    <div className="flex flex-col lg:flex-row gap-0 min-h-[calc(100vh-80px)] bg-background overflow-hidden font-body relative">
+      {/* Sidebar Controls */}
+      <div className="w-full lg:w-[420px] bg-card border-r border-border flex flex-col no-print shrink-0 relative z-20 overflow-y-auto max-h-screen">
         <div className="p-6 pb-0">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,224,255,0.2)]">
                <Sparkles size={20} />
             </div>
             <div>
-              <h2 className="font-headline text-xl font-bold text-white leading-tight">Quotation Studio</h2>
+              <h2 className="font-headline text-xl font-bold text-foreground leading-tight">Quotation Studio</h2>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Enterprise Documentation Hub</p>
             </div>
           </div>
 
           <div className="relative mb-10 pl-2">
-            <div className="absolute left-4 top-0 bottom-0 w-px bg-white/5" />
+            <div className="absolute left-4 top-0 bottom-0 w-px bg-border" />
             <div className="space-y-6">
               {STEPS.map((step) => {
                 const isActive = currentStep === step.id;
@@ -266,12 +287,12 @@ export function QuotationBuilder() {
                     onClick={() => setCurrentStep(step.id)}
                     className={cn(
                       "flex items-center gap-4 transition-all duration-300 relative group",
-                      isActive ? "text-primary" : "text-muted-foreground hover:text-white"
+                      isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <div className={cn(
                       "w-4 h-4 rounded-full border-2 z-10 bg-card transition-all duration-300",
-                      isActive ? "border-primary scale-125 shadow-[0_0_10px_rgba(0,224,255,0.5)]" : "border-white/10 group-hover:border-white/30"
+                      isActive ? "border-primary scale-125 shadow-[0_0_10px_rgba(0,224,255,0.5)]" : "border-border group-hover:border-primary/40"
                     )} />
                     <div className="flex items-center gap-2">
                       <Icon size={14} className={cn("transition-colors", isActive ? "text-primary" : "text-muted-foreground")} />
@@ -291,20 +312,20 @@ export function QuotationBuilder() {
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <FormField control={form.control} name="customerName" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Attention To</FormLabel>
-                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="The Head of Department" {...field} /></FormControl>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Attention To</FormLabel>
+                      <FormControl><Input className="bg-background border-border h-11 focus:ring-primary/30" placeholder="The Head of Department" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="companyName" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Organization</FormLabel>
-                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" placeholder="Panjab University" {...field} /></FormControl>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Organization</FormLabel>
+                      <FormControl><Input className="bg-background border-border h-11 focus:ring-primary/30" placeholder="Panjab University" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="address" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Address</FormLabel>
-                      <FormControl><Textarea rows={3} className="bg-white/5 border-white/10 focus:ring-primary/30 text-xs" {...field} /></FormControl>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Address</FormLabel>
+                      <FormControl><Textarea rows={3} className="bg-background border-border focus:ring-primary/30 text-xs" {...field} /></FormControl>
                     </FormItem>
                   )} />
                 </motion.div>
@@ -314,14 +335,14 @@ export function QuotationBuilder() {
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <FormField control={form.control} name="subject" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Subject Line</FormLabel>
-                      <FormControl><Input className="bg-white/5 border-white/10 h-11 focus:ring-primary/30" {...field} /></FormControl>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Subject Line</FormLabel>
+                      <FormControl><Input className="bg-background border-border h-11 focus:ring-primary/30" {...field} /></FormControl>
                     </FormItem>
                   )} />
                   <FormField control={form.control} name="letterBody" render={({ field }) => (
                     <FormItem>
                       <div className="flex justify-between items-center mb-1">
-                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-white/50">Body Text</FormLabel>
+                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Body Text</FormLabel>
                         <Button type="button" variant="outline" size="sm" className="h-7 text-[10px] bg-primary/5 hover:bg-primary/10 border-primary/20" onClick={() => {
                           const subject = form.getValues('subject');
                           const customer = form.getValues('customerName');
@@ -339,7 +360,7 @@ export function QuotationBuilder() {
                           {isGeneratingBody ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Sparkles size={10} className="mr-1"/> Magic Refine</>}
                         </Button>
                       </div>
-                      <FormControl><Textarea rows={10} className="bg-white/5 border-white/10 text-[11px]" {...field} /></FormControl>
+                      <FormControl><Textarea rows={10} className="bg-background border-border text-[11px]" {...field} /></FormControl>
                     </FormItem>
                   )} />
                 </motion.div>
@@ -349,12 +370,12 @@ export function QuotationBuilder() {
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between h-12 bg-white/5 border-white/10 text-white/60">
+                      <Button variant="outline" className="w-full justify-between h-12 bg-background border-border text-foreground">
                         <span>{selectedProduct?.model || "Search Product Master..."}</span>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-card border-white/10">
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-popover border-border">
                       <Command shouldFilter={false}>
                         <CommandInput placeholder="Type SKU or model..." value={searchQuery} onValueChange={setSearchQuery} />
                         <CommandList>
@@ -362,7 +383,7 @@ export function QuotationBuilder() {
                           <CommandGroup>
                             {products.filter(p => p.model.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10).map((p) => (
                               <CommandItem key={p.id} onSelect={() => { setSelectedProduct(p); setOpenCombobox(false); }} className="p-3">
-                                <div><p className="font-bold text-sm text-white">{p.model}</p></div>
+                                <div><p className="font-bold text-sm text-foreground">{p.model}</p></div>
                               </CommandItem>
                             ))}
                           </CommandGroup>
@@ -373,11 +394,11 @@ export function QuotationBuilder() {
 
                   {selectedProduct && (
                     <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-4">
-                      <Label className="text-[10px] font-bold uppercase text-white/50">Unit Price (₹)</Label>
-                      <Input type="number" value={pendingPrice} onChange={e => setPendingPrice(Number(e.target.value))} className="bg-black/40 h-10 font-bold font-mono" />
-                      <Label className="text-[10px] font-bold uppercase text-white/50">Quantity</Label>
-                      <Input type="number" value={pendingQuantity} onChange={e => setPendingQuantity(Number(e.target.value))} className="bg-black/40 h-10 font-bold" />
-                      <Button className="w-full h-11 bg-primary text-black font-bold" onClick={() => {
+                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Unit Price (₹)</Label>
+                      <Input type="number" value={pendingPrice} onChange={e => setPendingPrice(Number(e.target.value))} className="bg-background h-10 font-bold font-mono" />
+                      <Label className="text-[10px] font-bold uppercase text-muted-foreground">Quantity</Label>
+                      <Input type="number" value={pendingQuantity} onChange={e => setPendingQuantity(Number(e.target.value))} className="bg-background h-10 font-bold" />
+                      <Button className="w-full h-11 bg-primary text-primary-foreground font-bold" onClick={() => {
                         append({ product: selectedProduct, quantity: pendingQuantity, unitPrice: pendingPrice });
                         setSelectedProduct(null);
                         setSearchQuery('');
@@ -388,8 +409,8 @@ export function QuotationBuilder() {
 
                   <div className="space-y-3">
                     {fields.map((field, index) => (
-                      <div key={field.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                        <div className="flex-1 truncate"><p className="text-[11px] font-bold text-white truncate">{field.product.model}</p></div>
+                      <div key={field.id} className="flex items-center justify-between p-3 bg-background rounded-lg border border-border">
+                        <div className="flex-1 truncate"><p className="text-[11px] font-bold text-foreground truncate">{field.product.model}</p></div>
                         <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive/40" onClick={() => remove(index)}><Trash2 size={14} /></Button>
                       </div>
                     ))}
@@ -400,8 +421,8 @@ export function QuotationBuilder() {
               {currentStep === 'summary' && (
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-2">
-                    <div className="flex justify-between text-xs text-white/60"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
-                    <div className="flex justify-between text-lg font-bold text-primary font-mono tracking-tighter pt-2 border-t border-white/10"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
+                    <div className="flex justify-between text-xs text-muted-foreground"><span>Sub-Total</span><span>₹{totals.subTotal.toLocaleString('en-IN')}</span></div>
+                    <div className="flex justify-between text-lg font-bold text-primary font-mono tracking-tighter pt-2 border-t border-border"><span>Grand Total</span><span>₹{totals.grandTotal.toLocaleString('en-IN')}</span></div>
                   </div>
                   <Button variant="outline" className="w-full h-12 gap-2 border-primary/30 text-primary" onClick={saveQuotationToFirestore} disabled={isSaving || !watchedLineItems?.length}>
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save size={16}/> Save & Sync Deal</>}
@@ -416,24 +437,32 @@ export function QuotationBuilder() {
         </ScrollArea>
       </div>
 
-      <div className="flex-1 bg-black flex flex-col relative z-10 overflow-hidden">
-        <div className="h-20 bg-card/40 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 shrink-0 no-print">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-white/5 rounded-full p-1">
+      {/* Preview Area */}
+      <div className="flex-1 bg-background flex flex-col relative z-10 overflow-hidden">
+        <div className="h-20 bg-card border-b border-border flex items-center justify-between px-8 shrink-0 no-print">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="bg-muted rounded-full p-1">
             <TabsList className="bg-transparent">
               <TabsTrigger value="quotation" className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">Proposal Pack</TabsTrigger>
               <TabsTrigger value="brochure" disabled={!marketingData} className="rounded-full px-4 h-8 text-[10px] font-bold uppercase data-[state=active]:bg-primary">AI Brochure</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Enterprise_Proposal.pdf')} size="sm" className="rounded-full h-9 bg-white text-black hover:bg-white/90 font-bold" disabled={isDownloading}>
-            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export Tender PDF</>}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Enterprise_Proposal')} 
+              size="sm" 
+              className="rounded-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-bold" 
+              disabled={isDownloading || isSaving}
+            >
+              {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export Tender PDF</>}
+            </Button>
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="py-20 flex flex-col items-center">
+          <div className="py-12 md:py-20 flex flex-col items-center">
             {activeTab === 'quotation' ? (
               <div id="quotation-export-root" className="document-canvas">
-                <div className="a4-container">
+                <div className="a4-container holographic-edge">
                   {/* PAGE 1: COVER LETTER */}
                   <div className="a4-page page-break">
                     <LetterheadHeader />
@@ -482,8 +511,8 @@ export function QuotationBuilder() {
                           <tr>
                             <th className="w-[8%]">SR</th>
                             <th className="w-[52%] text-left">Specifications</th>
-                            <th className="w-[10%]">QTY</th>
-                            <th className="w-[15%] text-right">Unit Price (₹)</th>
+                            <th className="w-[10%] text-center">QTY</th>
+                            <th className="w-[15%] text-right">Unit (₹)</th>
                             <th className="w-[15%] text-right">Total (₹)</th>
                           </tr>
                         </thead>
@@ -532,7 +561,7 @@ export function QuotationBuilder() {
                         </div>
                         <div className="text-right text-[7pt] text-gray-300 font-black uppercase">
                           <p>Document Ref: {savedId || 'DQT-PENDING'}</p>
-                          <p>Generated: {new Date().toLocaleDateString()}</p>
+                          <p>Generated: {new Date().toLocaleDateString('en-IN')}</p>
                         </div>
                       </div>
                     </div>

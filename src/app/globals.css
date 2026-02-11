@@ -60,12 +60,18 @@
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground antialiased; }
+  body { @apply bg-background text-foreground antialiased selection:bg-primary/30; }
+}
+
+@layer utilities {
+  .container-enterprise {
+    @apply max-w-[1280px] mx-auto px-4 md:px-6 w-full;
+  }
 }
 
 /* 
    ==========================================================================
-   STRICT A4 PRINT ARCHITECTURE (PERFECT PDF FIT)
+   STRICT A4 PRINT ARCHITECTURE (PDF RELIABILITY)
    ==========================================================================
 */
 
@@ -76,24 +82,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-x: hidden;
 }
 
 .a4-container {
-  width: 794px; /* A4 width at 96 DPI */
+  width: 794px; /* Exact A4 width at 96 DPI */
   background: white;
   margin: auto;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
 .a4-page {
-  width: 210mm !important;
-  height: 297mm !important;
-  min-height: 297mm !important;
-  max-height: 297mm !important;
+  width: 794px !important;
+  height: 1123px !important; /* Exact A4 height at 96 DPI */
+  min-height: 1123px !important;
+  max-height: 1123px !important;
   margin: 0 auto !important;
   background: white !important;
   color: #1a1a1a !important;
-  padding: 15mm 15mm 15mm 15mm !important;
+  padding: 20mm 20mm 20mm 20mm !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -104,6 +111,7 @@
 
 .page-break {
   page-break-after: always !important;
+  break-after: always !important;
 }
 
 .justified-text {
@@ -115,14 +123,14 @@
 .quotation-table {
   width: 100% !important;
   border-collapse: collapse !important;
-  margin: 5mm 0 !important;
+  margin: 10px 0 !important;
   table-layout: fixed !important;
 }
 
 .quotation-table th {
   background-color: #f3f4f6 !important;
   border: 0.5pt solid #d1d5db !important;
-  padding: 10px 8px !important;
+  padding: 12px 10px !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   text-transform: uppercase !important;
@@ -132,10 +140,11 @@
 
 .quotation-table td {
   border: 0.5pt solid #e5e7eb !important;
-  padding: 10px 8px !important;
+  padding: 12px 10px !important;
   font-size: 12px !important;
-  line-height: 1.4 !important;
+  line-height: 1.5 !important;
   vertical-align: top !important;
+  word-wrap: break-word !important;
 }
 
 .zebra-row:nth-child(even) {
@@ -171,9 +180,16 @@
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+    page-break-after: always !important;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
+/* DEEQASA FUTURISTIC UI ELEMENTS */
 .command-grid {
   background-size: 40px 40px;
   background-image: 
@@ -192,6 +208,24 @@
   pointer-events: none;
 }
 
+.holographic-edge {
+  position: relative;
+}
+
+.holographic-edge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 224, 255, 0.2), transparent 40%, transparent 60%, rgba(0, 224, 255, 0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
 @keyframes scan {
   from { transform: translateY(-100%); }
   to { transform: translateY(100vh); }
@@ -204,4 +238,21 @@
 
 .animate-line-loader {
   animation: line-loader 2s linear infinite;
+}
+
+/* PERSPECTIVE CLASSES */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }
