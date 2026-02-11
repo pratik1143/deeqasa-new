@@ -208,39 +208,34 @@ export function QuotationBuilder() {
   const handleDownloadPdf = async (rootId: string, filename: string) => {
     if (isDownloading) return;
     
-    // Ensure data is saved first to get ID
-    const id = savedId || await saveQuotationToFirestore();
-    if (!id) return;
-
     setIsDownloading(true);
-    const html2pdf = (await import('html2pdf.js')).default;
-    const element = document.getElementById(rootId);
-    
-    if (!element) {
-      setIsDownloading(false);
-      return;
-    }
-    
-    const opt = { 
-      margin: 0, 
-      filename: `${filename}_${id}.pdf`, 
-      image: { type: 'jpeg', quality: 1.0 }, 
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        logging: false, 
-        windowWidth: 794,
-        allowTaint: true
-      }, 
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
     try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const element = document.getElementById(rootId);
+      
+      if (!element) {
+        throw new Error("Target element not found.");
+      }
+      
+      const opt = { 
+        margin: 0, 
+        filename: `${filename}_${savedId || 'DRAFT'}.pdf`, 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: false, 
+          letterRendering: true,
+          windowWidth: 794 // Strict A4 width
+        }, 
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
       await html2pdf().from(element).set(opt).save();
       toast({ title: "Export Complete", description: "Technical proposal generated successfully." });
-    } catch (error) {
+    } catch (error: any) {
       console.error("PDF Export failed:", error);
-      toast({ variant: "destructive", title: "Export Error", description: "Failed to render document." });
+      toast({ variant: "destructive", title: "Export Error", description: error.message || "Failed to render document." });
     } finally { 
       setIsDownloading(false); 
     }
@@ -450,10 +445,11 @@ export function QuotationBuilder() {
             <Button 
               onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Enterprise_Proposal')} 
               size="sm" 
-              className="rounded-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-bold" 
-              disabled={isDownloading || isSaving}
+              className="rounded-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-6 shadow-lg shadow-primary/20" 
+              disabled={isDownloading || !watchedLineItems?.length}
             >
-              {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Download size={14} className="mr-2"/> Export Tender PDF</>}
+              {isDownloading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download size={14} className="mr-2"/>}
+              {isDownloading ? "Synthesizing PDF..." : "Export Tender PDF"}
             </Button>
           </div>
         </div>
