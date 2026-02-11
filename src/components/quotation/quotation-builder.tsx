@@ -614,9 +614,7 @@ export function QuotationBuilder() {
                               <td className="text-center font-bold text-gray-400">{String(idx + 1).padStart(2, '0')}</td>
                               <td className="font-bold text-gray-900">
                                 <span className="text-[11pt] uppercase">{item.product.model}</span>
-                                {item.product.id.startsWith('MANUAL-') ? (
-                                  <p className="text-[8pt] text-gray-400 font-medium mt-1 italic">Custom Entry Specification</p>
-                                ) : (
+                                {!item.product.id.startsWith('MANUAL-') && (
                                   <p className="text-[8pt] text-gray-500 font-medium mt-1 uppercase tracking-tight leading-relaxed">{item.product.processor} | {item.product.memory} | {item.product.warranty}</p>
                                 )}
                               </td>
