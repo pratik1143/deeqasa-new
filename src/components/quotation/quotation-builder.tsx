@@ -582,7 +582,7 @@ export function QuotationBuilder() {
                       <div className="mt-auto pt-10">
                         <h4 className="text-[9pt] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 border-b border-gray-100 pb-2">Commercial Terms & Conditions</h4>
                         <ul className="grid grid-cols-2 gap-x-10 gap-y-2 text-[9pt] text-gray-600 font-medium italic">
-                          <li className="flex gap-2"><span>•</span> Validity: 30 Days from date of issue</li>
+                          <li className="flex gap-2"><span>•</span> Validity: Valid for 72 hours from the date of issue</li>
                           <li className="flex gap-2"><span>•</span> Delivery: Within 4-6 weeks of PO</li>
                           <li className="flex gap-2"><span>•</span> Warranty: As per OEM Standards</li>
                           <li className="flex gap-2"><span>•</span> Taxes: GST @ 18% as applicable</li>
