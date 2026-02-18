@@ -40,7 +40,7 @@ const HP_LOGO_URL = "/hp-logo.png";
 export function BrochurePreview({ products, marketingData }: BrochurePreviewProps) {
   
   const PageHeader = ({ model }: { model: string }) => (
-    <div className="print-header">
+    <div className="flex justify-between items-center mb-10 border-b border-gray-100 pb-4 shrink-0 w-full">
       <div className="flex items-center gap-3">
         <img src={HP_LOGO_URL} alt="HP" className="h-[8mm] w-auto" />
         <div className="h-5 w-px bg-gray-200"></div>
@@ -54,7 +54,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
   );
 
   const PageFooter = ({ page }: { page: number }) => (
-    <div className="print-footer">
+    <div className="mt-auto pt-6 border-t border-gray-100 flex justify-between items-center text-[7pt] font-bold text-gray-400 uppercase tracking-widest">
       <p>Innovation that powers business. HP Enterprise.</p>
       <p>Page {page.toString().padStart(2, '0')} of 03</p>
     </div>
@@ -71,7 +71,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
             {/* PAGE 1: EXECUTIVE OVERVIEW */}
             <div className="a4-page">
               <PageHeader model={product.model} />
-              <div className="a4-content">
+              <div className="flex-1">
                 <div className="mb-6">
                   <h1 className="text-[28pt] font-black leading-none tracking-tighter text-gray-900 uppercase mb-3">
                     {product.model}
@@ -117,7 +117,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
             {/* PAGE 2: TECHNICAL & ARCHITECTURE */}
             <div className="a4-page">
               <PageHeader model={product.model} />
-              <div className="a4-content">
+              <div className="flex-1">
                 <div className="mb-6">
                   <h2 className="text-[16pt] font-black text-gray-900 mb-5 flex items-center gap-3 tracking-tighter uppercase">
                     <Layers size={20} className="text-primary" /> Engineering & Innovation
@@ -136,7 +136,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                       { title: 'Sustainability', icon: <Globe size={14}/>, text: marketing.businessValue.sustainability },
                       { title: 'Scalability', icon: <Layers size={14}/>, text: marketing.businessValue.scalability }
                     ].map((pillar, i) => (
-                      <div key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-100 no-break">
+                      <div key={i} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                         <div className="mb-1.5 text-primary">{pillar.icon}</div>
                         <h4 className="text-[8pt] font-black uppercase mb-0.5 tracking-widest">{pillar.title}</h4>
                         <p className="text-[7pt] leading-relaxed text-gray-500">{pillar.text}</p>
@@ -147,7 +147,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
 
                 <div className="mb-6">
                   <h3 className="text-[7.5pt] font-black uppercase tracking-[0.2em] text-gray-400 mb-3">Technical Matrix</h3>
-                  <div className="border border-gray-100 rounded-2xl overflow-hidden no-break">
+                  <div className="border border-gray-100 rounded-2xl overflow-hidden">
                      <div className="grid grid-cols-2">
                         {[
                           { label: 'Compute Core', val: product.processor },
@@ -172,7 +172,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
             {/* PAGE 3: USE CASES & DEPLOYMENT */}
             <div className="a4-page">
               <PageHeader model={product.model} />
-              <div className="a4-content">
+              <div className="flex-1 flex flex-col">
                 <div className="mb-6">
                   <h2 className="text-[16pt] font-black text-gray-900 mb-6 tracking-tighter uppercase">
                     Sector Deployment
@@ -184,7 +184,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                       { id: 'corporate', title: 'Enterprise & MNC', text: marketing.sectors.corporate },
                       { id: 'specialized', title: 'Specialized Workloads', text: marketing.sectors.specialized }
                     ].map((sector, i) => (
-                      <div key={i} className="flex gap-5 p-4 bg-gray-50 rounded-xl border border-gray-100 items-center no-break">
+                      <div key={i} className="flex gap-5 p-4 bg-gray-50 rounded-xl border border-gray-100 items-center">
                          <div className="h-10 w-10 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0 text-primary">
                             <SectorIcon sector={sector.id} />
                          </div>
@@ -198,7 +198,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                 </div>
 
                 <div className="grid grid-cols-2 gap-5 mb-6">
-                   <div className="p-5 bg-blue-50/40 rounded-2xl border border-blue-100 no-break">
+                   <div className="p-5 bg-blue-50/40 rounded-2xl border border-blue-100">
                       <div className="flex items-center gap-2 text-blue-600 mb-2">
                         <Award size={16} />
                         <h4 className="text-[7.5pt] font-black uppercase tracking-widest">Enterprise</h4>
@@ -207,7 +207,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                         {marketing.professionalVsConsumer}
                       </p>
                    </div>
-                   <div className="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100 no-break">
+                   <div className="p-5 bg-emerald-50/40 rounded-2xl border border-emerald-100">
                       <div className="flex items-center gap-2 text-emerald-600 mb-2">
                         <History size={16} />
                         <h4 className="text-[7.5pt] font-black uppercase tracking-widest">Lifecycle</h4>
@@ -218,7 +218,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
                    </div>
                 </div>
 
-                <div className="mt-auto no-break">
+                <div className="mt-auto">
                    <div className="bg-gray-900 text-white p-6 rounded-[24px] relative overflow-hidden flex items-center justify-between">
                       <div className="absolute top-0 right-0 w-40 h-40 bg-primary/20 blur-[60px] -mr-20 -mt-20"></div>
                       <div className="relative z-10 max-w-[75%]">

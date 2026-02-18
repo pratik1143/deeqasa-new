@@ -71,32 +71,33 @@
 
 /* 
    ==========================================================================
-   STRICT A4 PRINT ARCHITECTURE (PDF RELIABILITY)
+   STRICT A4 PRINT ARCHITECTURE (FIXED BLANK PAGES)
    ==========================================================================
 */
 
 .document-canvas {
   background-color: transparent;
-  padding: 0;
+  padding: 0 !important;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .a4-container {
   width: 794px; /* Exact A4 width at 96 DPI */
   background: white;
-  margin: 0 auto;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none;
 }
 
 .a4-page {
   width: 794px !important;
-  height: 1123px !important; /* Exact A4 height at 96 DPI */
-  min-height: 1123px !important;
-  max-height: 1123px !important;
+  height: 1122px !important; /* Slightly under 1123 to prevent rounding overflows */
+  min-height: 1122px !important;
+  max-height: 1122px !important;
   margin: 0 auto !important;
   background: white !important;
   color: #1a1a1a !important;
@@ -106,15 +107,11 @@
   flex-direction: column !important;
   font-family: 'Inter', sans-serif !important;
   position: relative !important;
-  overflow: hidden !important;
-  border-bottom: 1px dashed #eee;
+  overflow: hidden !important; /* Critical: prevent any content from leaking */
 }
 
-.a4-page:last-child {
-  border-bottom: none;
-}
-
-.page-break {
+/* Automatic Page Breaks: Apply to all except the very last page to prevent blank pages at end */
+.a4-page:not(:last-child) {
   page-break-after: always !important;
   break-after: always !important;
 }
@@ -185,7 +182,6 @@
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
-    page-break-after: always !important;
   }
   
   * {

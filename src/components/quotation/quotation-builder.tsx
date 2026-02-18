@@ -235,7 +235,7 @@ export function QuotationBuilder() {
           useCORS: true, 
           logging: false, 
           letterRendering: true,
-          windowWidth: 794 // Strict A4 width
+          windowWidth: 794 // Strict A4 width capture
         }, 
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
@@ -556,7 +556,7 @@ export function QuotationBuilder() {
               <div id="quotation-export-root" className="document-canvas">
                 <div className="a4-container holographic-edge">
                   {/* PAGE 1: COVER LETTER */}
-                  <div className="a4-page page-break">
+                  <div className="a4-page">
                     <LetterheadHeader />
                     
                     <div className="flex-1 flex flex-col">
