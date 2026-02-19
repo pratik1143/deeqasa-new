@@ -1,45 +1,121 @@
 {
   "entities": {
-    "Quotation": {
-      "title": "Quotation",
-      "description": "Enterprise HP solution records. Managed exclusively by deeqasa@admin.in.",
+    "SiteVisitExpense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SiteVisitExpense",
       "type": "object",
+      "description": "Represents an employee's expense record for a site visit.",
       "properties": {
-        "quotationId": { "type": "string" },
-        "clientDetails": { "type": "string" },
-        "products": { "type": "string" },
-        "pricing": { "type": "string" },
-        "totals": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "createdBy": { "type": "string" },
-        "status": { "type": "string", "enum": ["ACTIVE", "ARCHIVED"] },
-        "subject": { "type": "string" }
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SiteVisitExpense entity."
+        },
+        "employeeName": {
+          "type": "string",
+          "description": "The full name of the employee who incurred the expense for the site visit."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "The name of the company associated with the site visit expense."
+        },
+        "fromLocation": {
+          "type": "string",
+          "description": "The starting location of the site visit route."
+        },
+        "toLocation": {
+          "type": "string",
+          "description": "The destination location of the site visit route."
+        },
+        "goingAmount": {
+          "type": "number",
+          "description": "The monetary amount spent on travel for the outgoing leg of the site visit."
+        },
+        "returnAmount": {
+          "type": "number",
+          "description": "The monetary amount spent on travel for the return leg of the site visit."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The auto-calculated total travel expense, which is the sum of 'Going Amount' and 'Return Amount'."
+        },
+        "quotationStatus": {
+          "type": "string",
+          "description": "The current status of the quotation associated with the expense. Possible values are 'Sent', 'Pending', or 'Approved'."
+        },
+        "quotationReferenceNumber": {
+          "type": "string",
+          "description": "A unique reference number provided for the associated quotation."
+        },
+        "remarks": {
+          "type": "string",
+          "description": "Any additional notes or comments pertinent to the site visit expense."
+        },
+        "visitDate": {
+          "type": "string",
+          "description": "The specific date when the site visit took place.",
+          "format": "date"
+        },
+        "expenseApprovalStatus": {
+          "type": "string",
+          "description": "The overall approval status of the expense record itself. Possible values are 'Pending', 'Approved', or 'Rejected'."
+        }
       },
-      "required": ["quotationId", "clientDetails", "products", "pricing", "totals", "createdAt", "createdBy", "status"]
-    },
-    "UserProfile": {
-      "title": "UserProfile",
-      "description": "Administrator identity profile.",
-      "type": "object",
-      "properties": {
-        "email": { "type": "string" },
-        "role": { "type": "string", "enum": ["admin"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["email", "role", "createdAt"]
+      "required": [
+        "id",
+        "employeeName",
+        "companyName",
+        "fromLocation",
+        "toLocation",
+        "goingAmount",
+        "returnAmount",
+        "totalAmount",
+        "quotationStatus",
+        "visitDate",
+        "expenseApprovalStatus"
+      ]
     }
   },
   "auth": {
-    "providers": ["password"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
-    "/quotations/{quotationId}": {
-      "schema": { "$ref": "#/backend/entities/Quotation" },
-      "description": "Master quotation repository. Restricted to deeqasa@admin.in."
-    },
-    "/users/{userId}": {
-      "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "Administrator profiles."
-    }
+    "structure": [
+      {
+        "path": "/roles_admin/{adminId}",
+        "definition": {
+          "entityName": "admin",
+          "schema": {
+            "$ref": "#/backend/entities/admin"
+          },
+          "description": "A collection used for Database Access Control (DBAC). The existence of a document at `/roles_admin/{uid}` signifies that the user with that 'uid' has administrative privileges. Used to authorize access to admin-only resources. This enables Authorization Independence for admin-scoped data.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier (UID) of the administrative user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/site_visit_expenses/{expenseId}",
+        "definition": {
+          "entityName": "SiteVisitExpense",
+          "schema": {
+            "$ref": "#/backend/entities/SiteVisitExpense"
+          },
+          "description": "Stores all site visit expense records submitted and managed by administrators. This collection has a homogeneous security posture, meaning all documents within it are exclusively accessible by authenticated admin users. This segregation supports QAPs by ensuring secure list operations directly from the database.",
+          "params": [
+            {
+              "name": "expenseId",
+              "description": "The unique identifier for a specific site visit expense record."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for managing employee site visit expenses leverages structural segregation and DBAC (Database Access Control) for robust, debuggable, and scalable security. All expense records are stored in a top-level collection, `/site_visit_expenses/{expenseId}`, ensuring a homogeneous security posture where every document in this collection has the exact same access requirements.\n\nAuthorization Independence is achieved by denormalizing the administrative role into a separate collection, `/roles_admin/{adminId}`. Instead of embedding 'admin' flags or roles within the expense documents themselves, or relying on complex hierarchical `get()` calls, authorization for any operation on `/site_visit_expenses` is determined solely by checking the *existence* of `request.auth.uid` within the `/roles_admin` collection. This allows for atomic operations (create, update, delete) on expense documents without requiring additional document reads for authorization, significantly simplifying security rules and enhancing performance.\n\nThis structure directly supports QAPs (Queries as Policy/Rules are not Filters) by design. Since the entire `/site_visit_expenses` collection is gated to be exclusively accessible by users whose UIDs exist in `/roles_admin`, any `list` operation performed on this collection by an authorized admin will return only authorized data. Non-admin users will be blocked from performing *any* read operation (including `list`) on this collection at the rule level, preventing the need for client-side filtering or inefficient security rule-based filtering after data retrieval. This ensures that only data the user is explicitly allowed to see is ever returned, making the security intent crystal clear and highly efficient."
   }
 }
