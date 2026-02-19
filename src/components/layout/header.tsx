@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search, LogIn, LogOut, Menu, Sun, Moon, X, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, Menu, Sun, Moon, User as UserIcon } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -157,10 +157,6 @@ export function Header() {
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
-
-            <Button size="icon" className="bg-primary hover:bg-primary/90 text-white rounded-full h-10 w-10 transition-shadow hover:shadow-lg hover:shadow-primary/20">
-                <Search className="h-4 w-4" />
             </Button>
             
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
