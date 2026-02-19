@@ -27,7 +27,7 @@ export default function ExpensesPage() {
     if (isUserLoading) {
         return (
             <div className="flex flex-col min-h-screen bg-background items-center justify-center">
-                <CenteredLoader text="Verifying Admin Uplink..." />
+                <CenteredLoader text="Authenticating..." />
             </div>
         );
     }
@@ -35,13 +35,13 @@ export default function ExpensesPage() {
     if (!user || !isAdmin) {
          return (
             <div className="flex flex-col min-h-screen bg-background items-center justify-center">
-                <CenteredLoader text="Redirecting to secure node..." />
+                <CenteredLoader text="Redirecting..." />
             </div>
         );
     }
     
     return (
-        <AdminLayout>
+        <AdminLayout className="pt-24 px-6 lg:px-10">
             <ExpenseManager />
         </AdminLayout>
     );
