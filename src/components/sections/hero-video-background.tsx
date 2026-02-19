@@ -10,13 +10,22 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 const posterImage = PlaceHolderImages.find(img => img.id === 'hero-poster');
 const posterImageUrl = posterImage?.imageUrl || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=1080";
 
-// Reliable high-tech abstract video for HP Enterprise branding
-const HERO_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-futuristic-abstract-network-background-34404-large.mp4";
+// HIGH-TECH DIGITAL CIRCUITRY FOR HP BRANDING
+const HERO_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-digital-circuit-board-background-4401-large.mp4";
 
-const VideoBackground = () => {
+const VideoElement = () => {
+    const videoRef = useRef<HTMLVideoElement>(null);
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 500], [0, 100], { clamp: false });
-    const scale = useTransform(scrollY, [0, 500], [1, 1.15]);
+    const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.play().catch(error => {
+                console.warn("Autoplay was prevented:", error);
+            });
+        }
+    }, []);
 
     return (
         <motion.div 
@@ -24,6 +33,7 @@ const VideoBackground = () => {
             style={{ y, scale }}
         >
             <video
+                ref={videoRef}
                 autoPlay
                 muted
                 loop
@@ -31,7 +41,7 @@ const VideoBackground = () => {
                 preload="auto"
                 className="absolute w-full h-full object-cover"
                 style={{
-                    filter: `brightness(0.7) contrast(1.2) saturate(0.8)`
+                    filter: `brightness(0.6) contrast(1.1) saturate(0.7)`
                 }}
                 poster={posterImageUrl}
             >
@@ -42,11 +52,7 @@ const VideoBackground = () => {
 };
 
 const FallbackImage = () => {
-    if (!posterImage) {
-        return (
-             <div className="absolute inset-0 bg-black -z-10" />
-        );
-    }
+    if (!posterImage) return <div className="absolute inset-0 bg-black -z-10" />;
     
     return (
         <div className="absolute inset-0 -z-10">
@@ -74,7 +80,7 @@ export const HeroVideoBackground = () => {
 
     return (
         <div className="absolute inset-0 w-full h-full">
-            {!isMobile ? <VideoBackground /> : <FallbackImage />}
+            {!isMobile ? <VideoElement /> : <FallbackImage />}
             
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-background/20" />

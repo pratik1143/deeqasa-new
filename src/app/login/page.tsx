@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -18,17 +19,26 @@ export default function LoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     if (!isUserLoading && user) {
       router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
+
+  useEffect(() => {
+    if (mounted && videoRef.current) {
+        videoRef.current.play().catch(() => {});
+    }
+  }, [mounted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,15 +72,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-background font-body">
       {/* Immersive Background Video */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
-      >
-        <source src="/bg-video.mp4" type="video/mp4" />
-      </video>
+      {mounted && (
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
+        >
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-abstract-network-background-34404-large.mp4" type="video/mp4" />
+        </video>
+      )}
 
       {/* Layered Overlays */}
       <div className="absolute inset-0 bg-black/60 z-10" />

@@ -12,6 +12,7 @@ const PRINTER_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-close-
 
 export function Printers() {
   const ref = useRef(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
   const posterImage = PlaceHolderImages.find(img => img.id === 'case-study-2')?.imageUrl;
   const [mounted, setMounted] = useState(false);
@@ -19,6 +20,12 @@ export function Printers() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted && videoRef.current) {
+        videoRef.current.play().catch(() => {});
+    }
+  }, [mounted]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,6 +54,7 @@ export function Printers() {
     <section ref={ref} className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden bg-black">
       {mounted && (
         <video
+          ref={videoRef}
           autoPlay
           loop
           muted
