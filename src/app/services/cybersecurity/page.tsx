@@ -10,7 +10,7 @@ export default function CybersecurityPage() {
       title="Cybersecurity Suite"
       tagline="Resilience Built on Zero Trust. Proactive Threat Hunting."
       heroImage="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1920&q=80"
-      overviewImage="https://images.unsplash.com/photo-1563986768494-0bc2cd66172b?w=1200&q=80"
+      overviewImage="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80"
       archImage="https://images.unsplash.com/photo-1510511459019-5dee997ddfef?w=1200&q=80"
       overview="Deliver an iron-clad security posture through our Zero Trust architecture. We protect your enterprise assets from emerging threats using AI-driven telemetry and proactive monitoring."
       capabilities={[
