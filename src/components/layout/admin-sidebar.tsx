@@ -38,14 +38,46 @@ const adminLinks = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const auth = useAuth();
-  const { state } = useSidebar();
+  const { state, setOpen, isMobile } = useSidebar();
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const handleSignOut = () => {
     auth.signOut();
   };
 
+  // Logic to auto-collapse the sidebar after 3 seconds of inactivity
+  const startAutoHideTimer = React.useCallback(() => {
+    if (isMobile) return; // Don't auto-hide on mobile
+    
+    if (state === "expanded") {
+      // Clear any existing timer
+      if (timerRef.current) clearTimeout(timerRef.current);
+      
+      timerRef.current = setTimeout(() => {
+        setOpen(false);
+      }, 3000); // 3 seconds
+    }
+  }, [state, setOpen, isMobile]);
+
+  const cancelAutoHideTimer = React.useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => cancelAutoHideTimer();
+  }, [cancelAutoHideTimer]);
+
   return (
-    <Sidebar collapsible="icon" className="border-r border-white/10 bg-black/95 backdrop-blur-xl">
+    <Sidebar 
+      collapsible="icon" 
+      className="border-r border-white/10 bg-black/95 backdrop-blur-xl"
+      onMouseEnter={cancelAutoHideTimer}
+      onMouseLeave={startAutoHideTimer}
+    >
       <SidebarHeader className="p-4 border-b border-white/5">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-black shrink-0">
