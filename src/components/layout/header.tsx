@@ -124,10 +124,10 @@ export function Header() {
               <div className="flex items-center gap-2">
                 <Button 
                   variant="outline" 
-                  className="hidden sm:flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold h-10 px-4" 
+                  className="hidden sm:flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold h-10 px-4 text-xs" 
                   onClick={() => router.push('/dashboard')}
                 >
-                  <UserIcon className="h-4 w-4" />
+                  <UserIcon className="h-3.5 w-3.5" />
                   <span>Admin Terminal</span>
                 </Button>
                 <Button 
@@ -142,10 +142,10 @@ export function Header() {
             ) : (
               <Button 
                 variant="outline" 
-                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold h-10 px-4" 
+                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold h-10 px-4 text-xs" 
                 onClick={handleSignIn}
               >
-                <LogIn className="h-4 w-4" />
+                <LogIn className="h-3.5 w-3.5" />
                 <span>Admin Access</span>
               </Button>
             )}
@@ -210,7 +210,7 @@ export function Header() {
                           className="w-full h-12 flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold justify-start px-4" 
                           onClick={() => { setIsMenuOpen(false); router.push('/dashboard'); }}
                         >
-                          <UserIcon className="h-4 w-4" />
+                          <UserIcon className="h-3.5 w-3.5" />
                           <span>Admin Terminal</span>
                         </Button>
                         <Button 
@@ -228,7 +228,7 @@ export function Header() {
                         className="w-full h-12 flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold justify-start px-4" 
                         onClick={handleSignIn}
                       >
-                        <LogIn className="h-4 w-4" />
+                        <LogIn className="h-3.5 w-3.5" />
                         <span>Admin Access</span>
                       </Button>
                     )}
