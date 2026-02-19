@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { getProductData } from '@/ai/flows/get-product-data';
 import { generateLetterBody } from '@/ai/flows/ai-quotation-letter-generation';
@@ -39,7 +40,8 @@ import {
   BrainCircuit,
   Eye,
   Landmark,
-  PencilLine
+  PencilLine,
+  UserCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +53,7 @@ const FormSchema = z.object({
   address: z.string().min(1, 'Address is required'),
   subject: z.string().min(1, 'Subject is required.'),
   letterBody: z.string().min(1, 'Letter body is required.'),
+  authorizedSignatory: z.string().min(1, 'Authorized signatory is required.'),
   lineItems: z.array(z.object({
       product: ProductSchema,
       quantity: z.coerce.number().min(1),
@@ -90,7 +93,13 @@ const STEPS = [
   { id: 'customer', title: 'Customer', icon: User },
   { id: 'letter', title: 'Cover Letter', icon: Layout },
   { id: 'items', title: 'Line Items', icon: Package },
+  { id: 'signatory', title: 'Signatory', icon: UserCheck },
   { id: 'summary', title: 'Export', icon: CheckCircle2 },
+];
+
+const SIGNATORIES = [
+  { name: "Pratik Chaudhary", phone: "+91 8595270950" },
+  { name: "Prabhjot kaur", phone: "+91 8950163119" }
 ];
 
 const HP_LOGO_URL = "/hp-logo.png";
@@ -131,6 +140,7 @@ export function QuotationBuilder() {
       address: 'Sector 14, Chandigarh',
       subject: 'Submission of Quotation for HP Enterprise Servers and Storage Solution',
       letterBody: 'With reference to your requirement for high-performance computing infrastructure, we are pleased to submit our formal technical and commercial proposal. Our solution is engineered to deliver maximum reliability, scalability, and security, tailored specifically for mission-critical academic and research workloads. We ensure that all proposed components are fully backed by HP OEM onsite warranty and professional technical support services.',
+      authorizedSignatory: `${SIGNATORIES[0].name} (${SIGNATORIES[0].phone})`,
       lineItems: [],
     },
   });
@@ -142,6 +152,7 @@ export function QuotationBuilder() {
   const watchedCompany = useWatch({ control: form.control, name: 'companyName' });
   const watchedAddress = useWatch({ control: form.control, name: 'address' });
   const watchedLetterBody = useWatch({ control: form.control, name: 'letterBody' });
+  const watchedSignatory = useWatch({ control: form.control, name: 'authorizedSignatory' });
 
   useEffect(() => {
     async function fetchProducts() {
@@ -512,6 +523,37 @@ export function QuotationBuilder() {
                 </motion.div>
               )}
 
+              {currentStep === 'signatory' && (
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
+                  <FormField control={form.control} name="authorizedSignatory" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Choose Authorized Signatory</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-background border-border h-12">
+                            <SelectValue placeholder="Select representative" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover border-border">
+                          {SIGNATORIES.map((sig) => (
+                            <SelectItem key={sig.name} value={`${sig.name} (${sig.phone})`} className="text-xs">
+                              {sig.name} <span className="text-muted-foreground ml-2">{sig.phone}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                    <p className="text-[10px] text-primary font-bold uppercase mb-2">Signature Policy</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed italic">
+                      "The selected representative's name and contact information will be locked into the final document's legal validation block."
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
               {currentStep === 'summary' && (
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
                   <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-2">
@@ -669,7 +711,8 @@ export function QuotationBuilder() {
                       <div className="mt-auto flex justify-between items-end border-t border-gray-100 pt-10">
                         <div className="text-[8pt] text-gray-400 font-bold uppercase tracking-widest">
                           <p>Authorized Signature</p>
-                          <p className="mt-10 text-gray-900">For DEEQASA TECH</p>
+                          <p className="mt-8 text-gray-900">For DEEQASA TECH</p>
+                          <p className="mt-1 text-gray-900 font-black text-[9pt] uppercase tracking-tighter">{watchedSignatory}</p>
                         </div>
                         <div className="text-right text-[7pt] text-gray-300 font-black uppercase">
                           <p>Document Ref: {savedId || 'DQT-PENDING'}</p>
