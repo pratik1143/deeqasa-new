@@ -12,7 +12,7 @@ import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Lock, ArrowRight, LogIn } from 'lucide-react';
+import { ShieldCheck, Lock, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -35,7 +35,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (mounted && videoRef.current) {
-        videoRef.current.play().catch(() => {});
+        // Force play on mount to bypass autoplay policies
+        const playVideo = async () => {
+            try {
+                await videoRef.current?.play();
+            } catch (err) {
+                console.warn("Autoplay was prevented. User interaction may be required.", err);
+            }
+        };
+        playVideo();
     }
   }, [mounted]);
 
@@ -70,7 +78,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-background font-body">
-      {/* Immersive Background Video */}
+      {/* Immersive Background Video - Local Asset */}
       {mounted && (
         <video
           ref={videoRef}
@@ -80,7 +88,7 @@ export default function LoginPage() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
         >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-abstract-network-background-34404-large.mp4" type="video/mp4" />
+          <source src="/bg-video.mp4" type="video/mp4" />
         </video>
       )}
 
@@ -110,7 +118,7 @@ export default function LoginPage() {
             <span className="text-4xl font-black text-white uppercase tracking-tight block whitespace-nowrap leading-none">
               DEEQASA TECH
             </span>
-            <div className="mt-3 text-[11px] font-black text-primary uppercase tracking-[0.4em]">
+            <div className="mt-2 text-[10px] font-black text-primary uppercase tracking-[0.4em]">
               HP CONNECT
             </div>
           </Link>
