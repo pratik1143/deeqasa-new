@@ -229,19 +229,19 @@ export function QuotationBuilder() {
       const opt = { 
         margin: 0, 
         filename: `${filename}_${savedId || 'DRAFT'}.pdf`, 
-        image: { type: 'jpeg', quality: 0.98 }, 
+        image: { type: 'jpeg', quality: 1.0 }, 
         html2canvas: { 
-          scale: 2, 
+          scale: 3, // High scale for HD quality
           useCORS: true, 
           logging: false, 
           letterRendering: true,
           windowWidth: 794 // Strict A4 width capture
         }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
       };
 
       await html2pdf().from(element).set(opt).save();
-      toast({ title: "Export Complete", description: "Technical proposal generated successfully." });
+      toast({ title: "Export Complete", description: "Technical proposal generated in HD." });
     } catch (error: any) {
       console.error("PDF Export failed:", error);
       toast({ variant: "destructive", title: "Export Error", description: error.message || "Failed to render document." });
@@ -545,7 +545,7 @@ export function QuotationBuilder() {
               disabled={isDownloading || !watchedLineItems?.length}
             >
               {isDownloading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download size={14} className="mr-2"/>}
-              {isDownloading ? "Synthesizing PDF..." : "Export Tender PDF"}
+              {isDownloading ? "Synthesizing HD PDF..." : "Export Tender PDF"}
             </Button>
           </div>
         </div>
