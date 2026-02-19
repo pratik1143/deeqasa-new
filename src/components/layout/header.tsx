@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { LogIn, LogOut, Menu, Sun, Moon, User as UserIcon } from "lucide-react";
+import { LogOut, Menu, Sun, Moon, User as UserIcon } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -32,6 +32,10 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Hidden Access States
+  const logoClickCount = useRef(0);
+  const logoClickTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "dark" | "light" | null;
@@ -46,9 +50,22 @@ export function Header() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
+
+    // Keyboard Shortcut Trigger: Ctrl + Shift + A
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        router.push('/login');
+      }
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [router]);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
@@ -63,9 +80,21 @@ export function Header() {
     router.push('/');
   };
 
-  const handleSignIn = () => {
-    setIsMenuOpen(false);
-    router.push('/login');
+  // Hidden Logo Click Logic (Triple Click)
+  const handleLogoClick = () => {
+    logoClickCount.current += 1;
+    
+    if (logoClickTimer.current) clearTimeout(logoClickTimer.current);
+    
+    if (logoClickCount.current === 3) {
+      logoClickCount.current = 0;
+      router.push('/login');
+      return;
+    }
+
+    logoClickTimer.current = setTimeout(() => {
+      logoClickCount.current = 0;
+    }, 1000); // Reset after 1 second of inactivity
   };
 
   return (
@@ -75,14 +104,19 @@ export function Header() {
     )}>
       <div className="container-enterprise flex justify-between items-center h-full">
         <div className="flex items-center">
-          <Link href="/" className="flex flex-col justify-center">
-            <span className="text-2xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none">
-              DEEQASA TECH
-            </span>
-            <span className="text-[9px] font-black tracking-[0.4em] text-primary uppercase mt-1.5 ml-0.5">
+          <div 
+            onClick={handleLogoClick}
+            className="flex flex-col justify-center cursor-default select-none active:scale-[0.98] transition-transform"
+          >
+            <Link href="/" className="pointer-events-none">
+              <span className="text-2xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none">
+                DEEQASA TECH
+              </span>
+            </Link>
+            <span className="text-[9px] font-black tracking-[0.4em] text-primary uppercase mt-1.5 ml-0.5 pointer-events-none">
               HP CONNECT
             </span>
-          </Link>
+          </div>
         </div>
 
         <nav className="hidden lg:flex items-center gap-6 h-full">
@@ -120,7 +154,7 @@ export function Header() {
               <div className="w-10 h-10 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               </div>
-            ) : user ? (
+            ) : user && (
               <div className="flex items-center gap-2">
                 <Button 
                   variant="outline" 
@@ -139,15 +173,6 @@ export function Header() {
                   <LogOut className="h-4 w-4" />
                 </Button>
               </div>
-            ) : (
-              <Button 
-                variant="outline" 
-                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold h-10 px-4 text-xs" 
-                onClick={handleSignIn}
-              >
-                <LogIn className="h-3.5 w-3.5" />
-                <span>Admin Access</span>
-              </Button>
             )}
 
             <Button 
@@ -199,7 +224,7 @@ export function Header() {
                       Contact Sales
                     </Button>
                     
-                    {user ? (
+                    {user && (
                       <>
                         <Button 
                           variant="outline" 
@@ -218,15 +243,6 @@ export function Header() {
                           <span>Sign Out</span>
                         </Button>
                       </>
-                    ) : (
-                      <Button 
-                        variant="outline" 
-                        className="w-full h-12 flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold justify-start px-4" 
-                        onClick={handleSignIn}
-                      >
-                        <LogIn className="h-3.5 w-3.5" />
-                        <span>Admin Access</span>
-                      </Button>
                     )}
                   </div>
                 </div>
