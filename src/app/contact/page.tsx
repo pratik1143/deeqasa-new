@@ -109,8 +109,8 @@ export default function ContactPage() {
                                 <InfoBlock 
                                     icon={MapPin} 
                                     label="Operational Coordinates" 
-                                    value="Sector 14, Chandigarh" 
-                                    subValue="Regional Command Center"
+                                    value="Sector 70, Sahibzada Ajit Singh Nagar" 
+                                    subValue="1st Floor, SCO 105 & 106, Punjab 160071"
                                 />
                             </div>
 
