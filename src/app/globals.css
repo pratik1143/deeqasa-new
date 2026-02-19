@@ -71,50 +71,53 @@
 
 /* 
    ==========================================================================
-   STRICT A4 PRINT ARCHITECTURE (ZERO BLANK PAGES & HD)
+   PRECISION A4 PRINT ARCHITECTURE (ZERO BLANK PAGES & HD)
    ==========================================================================
 */
 
 .document-canvas {
-  background-color: transparent;
+  background-color: transparent !important;
   padding: 0 !important;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-  margin: 0 !important;
+  width: 794px !important; /* Lock to A4 width */
+  margin: 0 auto !important;
+  display: block !important;
+  overflow: visible !important;
 }
 
 .a4-container {
-  width: 794px; /* Exact A4 width at 96 DPI */
-  background: white;
+  width: 794px !important;
+  background: white !important;
   margin: 0 !important;
   padding: 0 !important;
-  box-shadow: none;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .a4-page {
   width: 794px !important;
-  height: 1122px !important; /* Precision height to prevent rounding overflows */
+  height: 1122px !important; /* Precision A4 height (297mm @ 96dpi) */
   min-height: 1122px !important;
   max-height: 1122px !important;
-  margin: 0 auto !important;
+  margin: 0 !important;
+  padding: 20mm !important;
+  box-sizing: border-box !important;
   background: white !important;
   color: #1a1a1a !important;
-  padding: 20mm 20mm 20mm 20mm !important;
-  box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
-  font-family: 'Inter', sans-serif !important;
   position: relative !important;
-  overflow: hidden !important; /* Crucial: contain content within bounds */
-}
-
-/* Automatic Page Breaks: Prevent extra trailing blank page */
-.a4-page:not(:last-child) {
+  overflow: hidden !important; /* Contain all content strictly */
   page-break-after: always !important;
   break-after: always !important;
+}
+
+/* Eliminate extra blank page at the end */
+.a4-page:last-child,
+.document-canvas > *:last-child,
+.a4-container > *:last-child {
+  page-break-after: auto !important;
+  break-after: auto !important;
+  margin-bottom: 0 !important;
 }
 
 .justified-text {
@@ -175,17 +178,15 @@
   .no-print { display: none !important; }
   
   .document-canvas {
+    width: 794px !important;
+    margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
   }
 
   .a4-page {
     margin: 0 !important;
-    box-shadow: none !important;
     border: none !important;
-  }
-  
-  * {
+    box-shadow: none !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }

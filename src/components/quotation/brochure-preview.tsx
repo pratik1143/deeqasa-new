@@ -40,7 +40,7 @@ const HP_LOGO_URL = "/hp-logo.png";
 export function BrochurePreview({ products, marketingData }: BrochurePreviewProps) {
   
   const PageHeader = ({ model }: { model: string }) => (
-    <div className="flex justify-between items-center mb-10 border-b border-gray-100 pb-4 shrink-0 w-full">
+    <div className="flex justify-between items-center mb-10 border-b border-gray-100 pb-4 shrink-0 w-full bg-white">
       <div className="flex items-center gap-3">
         <img src={HP_LOGO_URL} alt="HP" className="h-[8mm] w-auto" />
         <div className="h-5 w-px bg-gray-200"></div>
@@ -54,7 +54,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
   );
 
   const PageFooter = ({ page }: { page: number }) => (
-    <div className="mt-auto pt-6 border-t border-gray-100 flex justify-between items-center text-[7pt] font-bold text-gray-400 uppercase tracking-widest">
+    <div className="mt-auto pt-6 border-t border-gray-100 flex justify-between items-center text-[7pt] font-bold text-gray-400 uppercase tracking-widest bg-white">
       <p>Innovation that powers business. HP Enterprise.</p>
       <p>Page {page.toString().padStart(2, '0')} of 03</p>
     </div>

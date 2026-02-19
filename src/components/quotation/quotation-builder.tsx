@@ -231,13 +231,14 @@ export function QuotationBuilder() {
         filename: `${filename}_${savedId || 'DRAFT'}.pdf`, 
         image: { type: 'jpeg', quality: 1.0 }, 
         html2canvas: { 
-          scale: 3, // High scale for HD quality
+          scale: 3, // HD Resolution (300+ DPI equivalent)
           useCORS: true, 
           logging: false, 
           letterRendering: true,
-          windowWidth: 794 // Strict A4 width capture
+          windowWidth: 794 // Strict A4 Width capture
         }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+        pagebreak: { mode: ['css', 'legacy'] }
       };
 
       await html2pdf().from(element).set(opt).save();
@@ -283,7 +284,7 @@ export function QuotationBuilder() {
   };
 
   const LetterheadHeader = () => (
-    <div className="flex justify-between items-start mb-10 border-b border-gray-100 pb-6 shrink-0 w-full">
+    <div className="flex justify-between items-start mb-10 border-b border-gray-100 pb-6 shrink-0 w-full bg-white">
       <div className="flex flex-col gap-2">
         <img src={HP_LOGO_URL} alt="HP CONNECT" className="h-[12mm] w-auto mb-2" crossOrigin="anonymous" />
         <span className="text-[10pt] font-black text-gray-900 tracking-widest uppercase">HP CONNECT PARTNER</span>
@@ -554,7 +555,7 @@ export function QuotationBuilder() {
           <div className="py-12 md:py-20 flex flex-col items-center">
             {activeTab === 'quotation' ? (
               <div id="quotation-export-root" className="document-canvas">
-                <div className="a4-container holographic-edge">
+                <div className="a4-container">
                   {/* PAGE 1: COVER LETTER */}
                   <div className="a4-page">
                     <LetterheadHeader />
