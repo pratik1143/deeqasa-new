@@ -1,16 +1,19 @@
+
 "use client";
 
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useInView, useScroll, useTransform, motion } from 'framer-motion';
+import { useScroll, useTransform, motion } from 'framer-motion';
 import Image from 'next/image';
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const posterImage = PlaceHolderImages.find(img => img.id === 'hero-poster');
 const posterImageUrl = posterImage?.imageUrl || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=1080";
 
+// Reliable high-tech abstract video for HP Enterprise branding
+const HERO_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-futuristic-abstract-network-background-34404-large.mp4";
+
 const VideoBackground = () => {
-    const videoRef = useRef<HTMLVideoElement>(null);
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 500], [0, 100], { clamp: false });
     const scale = useTransform(scrollY, [0, 500], [1, 1.15]);
@@ -21,19 +24,18 @@ const VideoBackground = () => {
             style={{ y, scale }}
         >
             <video
-                ref={videoRef}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload="metadata"
+                preload="auto"
                 className="absolute w-full h-full object-cover"
                 style={{
-                    filter: `brightness(0.9) contrast(1.1) saturate(1)`
+                    filter: `brightness(0.7) contrast(1.2) saturate(0.8)`
                 }}
                 poster={posterImageUrl}
             >
-                <source src="/HP_ZBook_Fury_G1i_1080P.mp4" type="video/mp4" />
+                <source src={HERO_VIDEO_URL} type="video/mp4" />
             </video>
         </motion.div>
     );
@@ -42,7 +44,7 @@ const VideoBackground = () => {
 const FallbackImage = () => {
     if (!posterImage) {
         return (
-             <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-blue-50 to-purple-50 -z-10" />
+             <div className="absolute inset-0 bg-black -z-10" />
         );
     }
     
@@ -52,7 +54,7 @@ const FallbackImage = () => {
                 src={posterImage.imageUrl}
                 alt={posterImage.description}
                 fill
-                className="object-cover opacity-80"
+                className="object-cover opacity-40"
                 data-ai-hint={posterImage.imageHint}
                 priority
             />
@@ -62,14 +64,17 @@ const FallbackImage = () => {
 
 export const HeroVideoBackground = () => {
     const isMobile = useIsMobile();
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, amount: 0.2 });
+    const [mounted, setMounted] = useState(false);
 
-    const showVideo = !isMobile && isInView;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return <div className="absolute inset-0 bg-black -z-10" />;
 
     return (
-        <div ref={ref} className="absolute inset-0 w-full h-full">
-            {showVideo ? <VideoBackground /> : <FallbackImage />}
+        <div className="absolute inset-0 w-full h-full">
+            {!isMobile ? <VideoBackground /> : <FallbackImage />}
             
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-background/20" />

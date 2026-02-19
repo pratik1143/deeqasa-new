@@ -1,16 +1,24 @@
+
 "use client";
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, MicOff, Camera } from 'lucide-react';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+
+const POLY_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-modern-office-business-meeting-room-4444-large.mp4";
 
 export function Proof() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
   const posterImage = PlaceHolderImages.find(img => img.id === 'case-study-1')?.imageUrl;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -37,17 +45,19 @@ export function Proof() {
 
   return (
     <section ref={ref} className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden bg-black">
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute top-0 left-0 w-full h-full object-cover -z-20 opacity-100"
-        poster={posterImage}
-      >
-        <source src="/poly.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      {mounted && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute top-0 left-0 w-full h-full object-cover -z-20 opacity-60"
+          poster={posterImage}
+        >
+          <source src={POLY_VIDEO_URL} type="video/mp4" />
+        </video>
+      )}
       
       <div className="absolute inset-0 bg-black/40 z-0" />
 
