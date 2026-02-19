@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "SiteVisitExpense": {
@@ -73,6 +74,25 @@
         "visitDate",
         "expenseApprovalStatus"
       ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile and assigned role within the system.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The email address associated with the user profile."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"],
+          "description": "The access level assigned to the user."
+        }
+      },
+      "required": ["email", "role"]
     }
   },
   "auth": {
@@ -84,13 +104,30 @@
   "firestore": {
     "structure": [
       {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores individual user profiles. Each user can read and write their own profile to manage their personal data and view their assigned role.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier (UID) of the user."
+            }
+          ]
+        }
+      },
+      {
         "path": "/roles_admin/{adminId}",
         "definition": {
           "entityName": "admin",
           "schema": {
-            "$ref": "#/backend/entities/admin"
+            "type": "object",
+            "properties": {}
           },
-          "description": "A collection used for Database Access Control (DBAC). The existence of a document at `/roles_admin/{uid}` signifies that the user with that 'uid' has administrative privileges. Used to authorize access to admin-only resources. This enables Authorization Independence for admin-scoped data.",
+          "description": "A collection used for Database Access Control (DBAC). The existence of a document at `/roles_admin/{uid}` signifies that the user with that 'uid' has administrative privileges. Used to authorize access to admin-only resources.",
           "params": [
             {
               "name": "adminId",
@@ -106,7 +143,7 @@
           "schema": {
             "$ref": "#/backend/entities/SiteVisitExpense"
           },
-          "description": "Stores all site visit expense records submitted and managed by administrators. This collection has a homogeneous security posture, meaning all documents within it are exclusively accessible by authenticated admin users. This segregation supports QAPs by ensuring secure list operations directly from the database.",
+          "description": "Stores all site visit expense records submitted and managed by administrators.",
           "params": [
             {
               "name": "expenseId",
@@ -116,6 +153,6 @@
         }
       }
     ],
-    "reasoning": "The recommended Firestore structure for managing employee site visit expenses leverages structural segregation and DBAC (Database Access Control) for robust, debuggable, and scalable security. All expense records are stored in a top-level collection, `/site_visit_expenses/{expenseId}`, ensuring a homogeneous security posture where every document in this collection has the exact same access requirements.\n\nAuthorization Independence is achieved by denormalizing the administrative role into a separate collection, `/roles_admin/{adminId}`. Instead of embedding 'admin' flags or roles within the expense documents themselves, or relying on complex hierarchical `get()` calls, authorization for any operation on `/site_visit_expenses` is determined solely by checking the *existence* of `request.auth.uid` within the `/roles_admin` collection. This allows for atomic operations (create, update, delete) on expense documents without requiring additional document reads for authorization, significantly simplifying security rules and enhancing performance.\n\nThis structure directly supports QAPs (Queries as Policy/Rules are not Filters) by design. Since the entire `/site_visit_expenses` collection is gated to be exclusively accessible by users whose UIDs exist in `/roles_admin`, any `list` operation performed on this collection by an authorized admin will return only authorized data. Non-admin users will be blocked from performing *any* read operation (including `list`) on this collection at the rule level, preventing the need for client-side filtering or inefficient security rule-based filtering after data retrieval. This ensures that only data the user is explicitly allowed to see is ever returned, making the security intent crystal clear and highly efficient."
+    "reasoning": "The Firestore structure utilizes structural segregation and DBAC for secure, enterprise-grade access control. User profiles are stored at '/users/{userId}' for personal data management, while sensitive admin operations are gated by existence checks in the '/roles_admin' collection."
   }
 }

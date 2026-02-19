@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 /**
@@ -7,23 +8,6 @@ rules_version = '2';
  * This ruleset implements a robust Role-Based Access Control (RBAC) model using the 
  * "Database Access Control" (DBAC) pattern. Administrative privileges are determined 
  * by the existence of a user's UID within a dedicated '/roles_admin' collection.
- * 
- * Data Structure:
- * - /roles_admin/{adminId}: A registry of administrative users.
- * - /site_visit_expenses/{expenseId}: A flat, top-level collection containing all 
- *   employee site visit expense records.
- * 
- * Key Security Decisions:
- * 1. Authorization Independence: Expense records do not store user roles internally. 
- *    Instead, the rules perform a lookup (exists()) against the '/roles_admin' 
- *    collection to verify administrative status.
- * 2. Homogeneous Admin Scoping: The entire '/site_visit_expenses' collection is 
- *    restricted to admin-only access for all operations (read and write).
- * 3. Structural Segregation: Administrative markers are kept in a separate 
- *    collection from business data to prevent accidental privilege escalation.
- * 4. Relational Integrity: On creation and update of expenses, the rules enforce 
- *    that the document's internal 'id' field remains consistent with the document 
- *    path and is immutable once set.
  */
 
 service cloud.firestore {
@@ -48,47 +32,44 @@ service cloud.firestore {
     // --- COLLECTION RULES ---
 
     /**
+     * @description Access control for individual user profiles.
+     * Users can manage their own profile data.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
      * @description Access control for the administrative roles registry.
      * @path /roles_admin/{adminId}
      * @allow (get) Any authenticated user can check their own admin status.
      * @deny (list) Standard users cannot list all administrative accounts.
-     * @principle Prevents unauthorized users from discovering or modifying administrative roles.
      */
     match /roles_admin/{adminId} {
       allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
       allow list: if isAdmin();
-      allow create, update, delete: if false; // Admin roles should be managed via Admin SDK or a super-admin process.
+      allow create, update, delete: if false; // Managed via Admin SDK
     }
 
     /**
      * @description Security rules for employee site visit expense records.
-     * @path /site_visit_expenses/{expenseId}
-     * @allow (create) An authenticated admin user submitting a new expense record.
-     * @deny (list) Any user who is not explicitly registered in the /roles_admin collection.
-     * @principle Enforces strict admin-only access for sensitive financial and operational data.
+     * Restricted to authenticated admin users.
      */
     match /site_visit_expenses/{expenseId} {
-      
-      // READ OPERATIONS
       allow get, list: if isAdmin();
-
-      // WRITE OPERATIONS
-      
-      /**
-       * On creation, we ensure the user is an admin and that the internal 'id'
-       * field matches the document ID for relational consistency.
-       */
       allow create: if isAdmin() && request.resource.data.id == expenseId;
-
-      /**
-       * Updates require admin status and enforce the immutability of the 'id' field.
-       */
       allow update: if isAdmin() && resource != null && request.resource.data.id == resource.data.id;
-
-      /**
-       * Deletions are restricted to admins and require the document to exist.
-       */
       allow delete: if isAdmin() && resource != null;
+    }
+    
+    /**
+     * @description Generic rules for quotations.
+     * Accessible by admins for management.
+     */
+    match /quotations/{quotationId} {
+      allow read, write: if isAdmin();
     }
   }
 }
