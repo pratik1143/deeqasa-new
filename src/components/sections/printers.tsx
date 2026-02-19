@@ -23,7 +23,12 @@ export function Printers() {
 
   useEffect(() => {
     if (mounted && videoRef.current) {
-        videoRef.current.play().catch(() => {});
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                // Autoplay blocked, handled by browsers' native interaction policies
+            });
+        }
     }
   }, [mounted]);
 

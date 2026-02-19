@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useScroll, useTransform, motion } from 'framer-motion';
 import Image from 'next/image';
 import React, { useRef, useState, useEffect } from 'react';
@@ -10,7 +9,6 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 const posterImage = PlaceHolderImages.find(img => img.id === 'hero-poster');
 const posterImageUrl = posterImage?.imageUrl || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=1080";
 
-// Updated to the specific requested HP Enterprise video
 const HERO_VIDEO_URL = "/HP_ZBook_Fury_G1i_1080P.mp4";
 
 const VideoElement = () => {
@@ -22,28 +20,31 @@ const VideoElement = () => {
     useEffect(() => {
         const attemptPlay = () => {
             if (videoRef.current) {
-                videoRef.current.play().catch(error => {
-                    console.warn("Autoplay was prevented by browser security policy. Interaction may be required.", error);
-                });
+                const playPromise = videoRef.current.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.warn("Autoplay blocked on mobile. Waiting for interaction.", error);
+                    });
+                }
             }
         };
 
         // Attempt immediate play
         attemptPlay();
 
-        // Backup: attempt play on first user interaction if blocked
+        // Mobile browsers often require an interaction to start video even if muted
         const handleInteraction = () => {
             attemptPlay();
+            document.removeEventListener('touchstart', handleInteraction);
             document.removeEventListener('click', handleInteraction);
-            document.removeEventListener('keydown', handleInteraction);
         };
 
+        document.addEventListener('touchstart', handleInteraction);
         document.addEventListener('click', handleInteraction);
-        document.addEventListener('keydown', handleInteraction);
 
         return () => {
+            document.removeEventListener('touchstart', handleInteraction);
             document.removeEventListener('click', handleInteraction);
-            document.removeEventListener('keydown', handleInteraction);
         };
     }, []);
 
@@ -71,25 +72,7 @@ const VideoElement = () => {
     );
 };
 
-const FallbackImage = () => {
-    if (!posterImage) return <div className="absolute inset-0 bg-black -z-10" />;
-    
-    return (
-        <div className="absolute inset-0 -z-10">
-            <Image
-                src={posterImage.imageUrl}
-                alt={posterImage.description}
-                fill
-                className="object-cover opacity-40"
-                data-ai-hint={posterImage.imageHint}
-                priority
-            />
-        </div>
-    );
-};
-
 export const HeroVideoBackground = () => {
-    const isMobile = useIsMobile();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -100,7 +83,8 @@ export const HeroVideoBackground = () => {
 
     return (
         <div className="absolute inset-0 w-full h-full z-0">
-            {!isMobile ? <VideoElement /> : <FallbackImage />}
+            {/* Render video regardless of platform, mobile-specific restrictions handled in VideoElement */}
+            <VideoElement />
             
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
             <div className="absolute inset-0 bg-gradient-to-r from-background/10 via-transparent to-background/10" />

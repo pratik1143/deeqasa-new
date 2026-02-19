@@ -23,7 +23,12 @@ export function Proof() {
 
   useEffect(() => {
     if (mounted && videoRef.current) {
-        videoRef.current.play().catch(() => {});
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                // Autoplay blocked, will wait for interaction
+            });
+        }
     }
   }, [mounted]);
 
