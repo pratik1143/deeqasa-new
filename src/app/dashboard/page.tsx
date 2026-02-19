@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserWithRole } from "@/firebase";
 import { FunnelAnalyzerDashboard } from "@/components/dashboard/funnel-analyzer-dashboard";
-import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
+import { AdminLayout } from "@/components/layout/admin-layout";
 
 export default function DashboardPage() {
     const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
@@ -22,22 +22,16 @@ export default function DashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col min-h-screen bg-background">
-                <Header />
-                <main className="flex-1 pt-20 flex items-center justify-center">
-                    <CenteredLoader text="Verifying permissions..." />
-                </main>
+            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+                <CenteredLoader text="Verifying permissions..." />
             </div>
         );
     }
     
     if (!user) {
          return (
-            <div className="flex flex-col min-h-screen bg-background">
-                <Header />
-                <main className="flex-1 pt-20 flex items-center justify-center">
-                    <CenteredLoader text="Redirecting to login..." />
-                </main>
+            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+                <CenteredLoader text="Redirecting to login..." />
             </div>
         );
     }
@@ -47,11 +41,8 @@ export default function DashboardPage() {
     }
     
     return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <Header />
-            <main className="flex-1 pt-20">
-                <FunnelAnalyzerDashboard />
-            </main>
-        </div>
+        <AdminLayout>
+            <FunnelAnalyzerDashboard />
+        </AdminLayout>
     );
 }

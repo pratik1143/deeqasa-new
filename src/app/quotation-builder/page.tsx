@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserWithRole } from "@/firebase";
-import { Header } from "@/components/layout/header";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
 import { QuotationBuilder } from "@/components/quotation/quotation-builder";
+import { AdminLayout } from "@/components/layout/admin-layout";
 
 export default function QuotationBuilderPage() {
     const { user, profile, isUserLoading, isProfileLoading } = useUserWithRole();
@@ -22,22 +22,16 @@ export default function QuotationBuilderPage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col min-h-screen bg-background">
-                <Header />
-                <main className="flex-1 pt-20 flex items-center justify-center">
-                    <CenteredLoader text="Verifying permissions..." />
-                </main>
+            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+                <CenteredLoader text="Verifying permissions..." />
             </div>
         );
     }
     
     if (!user) {
          return (
-            <div className="flex flex-col min-h-screen bg-background">
-                <Header />
-                <main className="flex-1 pt-20 flex items-center justify-center">
-                    <CenteredLoader text="Redirecting to login..." />
-                </main>
+            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+                <CenteredLoader text="Redirecting to login..." />
             </div>
         );
     }
@@ -47,11 +41,8 @@ export default function QuotationBuilderPage() {
     }
     
     return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <Header />
-            <main className="flex-1 pt-20">
-                <QuotationBuilder />
-            </main>
-        </div>
+        <AdminLayout className="px-0 py-0 pt-20 lg:pt-20">
+            <QuotationBuilder />
+        </AdminLayout>
     );
 }

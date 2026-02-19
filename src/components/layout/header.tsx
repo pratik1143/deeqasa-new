@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search, LogIn, LogOut, Menu, Sun, Moon, X } from "lucide-react";
+import { Search, LogIn, LogOut, Menu, Sun, Moon, X, User as UserIcon } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -15,19 +15,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const baseNavLinks = [
+const navLinks = [
   { name: "Home", href: "/" },
   { name: "Solutions", href: "/solutions" },
   { name: "Industries", href: "/industries" },
   { name: "Case Studies", href: "/case-studies" },
   { name: "Resources", href: "/resources" },
   { name: "Support", href: "/support" },
-];
-
-const protectedLinks = [
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "Quotation Builder", href: "/quotation-builder" },
-  { name: "AI Intelligence", href: "/deal-intelligence" },
 ];
 
 export function Header() {
@@ -40,7 +34,6 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Initialize theme from localStorage or system preference
     const savedTheme = localStorage.getItem("theme") as "dark" | "light" | null;
     if (savedTheme) {
       setTheme(savedTheme);
@@ -74,10 +67,6 @@ export function Header() {
     setIsMenuOpen(false);
     router.push('/login');
   };
-
-  const navLinks = user 
-    ? [...baseNavLinks, ...protectedLinks]
-    : baseNavLinks;
 
   return (
     <header className={cn(
@@ -132,18 +121,28 @@ export function Header() {
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
               </div>
             ) : user ? (
-              <Button 
-                variant="outline" 
-                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
-                onClick={handleSignOut}
-              >
-                <span>Sign Out</span>
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="hidden sm:flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold h-10 px-4" 
+                  onClick={() => router.push('/dashboard')}
+                >
+                  <UserIcon className="h-4 w-4" />
+                  <span>Admin Terminal</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-muted-foreground hover:text-destructive"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             ) : (
               <Button 
                 variant="outline" 
-                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
+                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold h-10 px-4" 
                 onClick={handleSignIn}
               >
                 <LogIn className="h-4 w-4" />
@@ -205,14 +204,24 @@ export function Header() {
                     </Button>
                     
                     {user ? (
-                      <Button 
-                        variant="outline" 
-                        className="w-full h-12 flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold justify-start px-4" 
-                        onClick={handleSignOut}
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span>Sign Out</span>
-                      </Button>
+                      <>
+                        <Button 
+                          variant="outline" 
+                          className="w-full h-12 flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold justify-start px-4" 
+                          onClick={() => { setIsMenuOpen(false); router.push('/dashboard'); }}
+                        >
+                          <UserIcon className="h-4 w-4" />
+                          <span>Admin Terminal</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          className="w-full h-12 flex items-center gap-2 text-muted-foreground font-bold justify-start px-4" 
+                          onClick={handleSignOut}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          <span>Sign Out</span>
+                        </Button>
+                      </>
                     ) : (
                       <Button 
                         variant="outline" 
