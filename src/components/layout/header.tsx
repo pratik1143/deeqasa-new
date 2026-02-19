@@ -85,15 +85,15 @@ export function Header() {
       isScrolled && "shadow-primary/5 border-primary/10"
     )}>
       <div className="container-enterprise flex justify-between items-center h-full">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-black tracking-tight text-foreground uppercase whitespace-nowrap">
+        <div className="flex items-center">
+          <Link href="/" className="flex flex-col justify-center">
+            <span className="text-2xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none">
               DEEQASA TECH
             </span>
+            <span className="text-[9px] font-black tracking-[0.4em] text-primary uppercase mt-1.5 ml-0.5">
+              HP CONNECT
+            </span>
           </Link>
-          <div className="hidden lg:flex items-center gap-1 border-l border-white/10 pl-8 h-8">
-              <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground uppercase">HP CONNECT</span>
-          </div>
         </div>
 
         <nav className="hidden lg:flex items-center gap-6 h-full">
@@ -173,10 +173,10 @@ export function Header() {
               <SheetContent side="right" className="bg-background border-white/10 w-[300px] p-0 font-body">
                 <SheetHeader className="p-6 border-b border-white/5 bg-white/5">
                   <SheetTitle className="text-left">
-                    <span className="text-xl font-black tracking-tight text-foreground uppercase whitespace-nowrap">
+                    <span className="text-xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none block">
                       DEEQASA TECH
                     </span>
-                    <p className="text-[8px] font-black text-primary uppercase tracking-[0.4em] mt-1">Mission Portal</p>
+                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mt-2">HP CONNECT</p>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col p-6 space-y-6">
