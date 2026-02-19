@@ -77,7 +77,7 @@ export function Header() {
       <div className="container-enterprise flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-black tracking-tight text-foreground uppercase">
+            <span className="text-2xl font-black tracking-tight text-foreground uppercase whitespace-nowrap">
               DEEQASA TECH
             </span>
           </Link>

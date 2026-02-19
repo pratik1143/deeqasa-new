@@ -107,7 +107,7 @@ export default function LoginPage() {
           className="text-center"
         >
           <Link href="/" className="group block">
-            <span className="text-4xl font-black text-white uppercase tracking-tight block">
+            <span className="text-4xl font-black text-white uppercase tracking-tight block whitespace-nowrap">
               DEEQASA TECH
             </span>
             <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">

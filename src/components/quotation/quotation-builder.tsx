@@ -292,7 +292,7 @@ export function QuotationBuilder() {
         <span className="text-[10pt] font-black text-gray-900 tracking-widest uppercase">HP CONNECT PARTNER</span>
       </div>
       <div className="text-right flex flex-col">
-        <h2 className="text-[14pt] font-black uppercase tracking-tighter text-gray-900 leading-tight">M/S DEEQASA-TECH</h2>
+        <h2 className="text-[14pt] font-black uppercase tracking-tighter text-gray-900 leading-tight whitespace-nowrap">M/S DEEQASA TECH</h2>
         <p className="text-[8pt] font-medium text-gray-500 italic">Smart. Secure. Sustainable. IT Solutions.</p>
         <p className="text-[8pt] font-bold text-gray-400 mt-1 uppercase tracking-widest">GSTIN: 03EPIPK0093E1Z7</p>
       </div>
@@ -669,7 +669,7 @@ export function QuotationBuilder() {
                       <div className="mt-auto flex justify-between items-end border-t border-gray-100 pt-10">
                         <div className="text-[8pt] text-gray-400 font-bold uppercase tracking-widest">
                           <p>Authorized Signature</p>
-                          <p className="mt-10 text-gray-900">For Deeqasa-Tech</p>
+                          <p className="mt-10 text-gray-900">For DEEQASA TECH</p>
                         </div>
                         <div className="text-right text-[7pt] text-gray-300 font-black uppercase">
                           <p>Document Ref: {savedId || 'DQT-PENDING'}</p>

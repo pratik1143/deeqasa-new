@@ -34,7 +34,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-12">
           <div className="col-span-2">
             <Link href="/" className="block mb-6">
-              <span className="text-2xl font-black tracking-[0.25em] text-white uppercase">
+              <span className="text-2xl font-black tracking-[0.25em] text-white uppercase whitespace-nowrap">
                 DEEQASA TECH
               </span>
             </Link>
