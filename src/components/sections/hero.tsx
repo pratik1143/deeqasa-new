@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -39,50 +38,53 @@ export function Hero() {
   };
   
   return (
-    <section className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden font-code">
+    <section className="relative min-h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center py-20 px-4 md:px-8 overflow-hidden font-code">
       <HeroVideoBackground />
       
       {/* Dark Overlay for Hero - calibrated for visibility */}
       <div className="absolute inset-0 bg-black/40 z-10" />
       
-      <div className="relative z-20 flex flex-col items-center justify-center text-center p-4 w-full">
-        <div className="w-full">
-          <AnimatePresence>
+      <div className="relative z-20 flex flex-col items-center justify-center text-center w-full max-w-6xl mx-auto">
+        <AnimatePresence>
           {show && (
-              <motion.div 
-                  className="flex flex-col items-center"
-                  initial="hidden"
-                  animate="visible"
-                  exit={{ opacity: 0 }}
-                  variants={containerVariants}
-              >
-                  <motion.div variants={itemVariants} className="inline-block px-6 py-2 bg-black/50 rounded-lg mb-8 border border-white/10">
-                      <span className="text-sm text-primary tracking-widest font-black">
-                      STATUS: OPERATIONAL
-                      </span>
-                  </motion.div>
-              
-                  <motion.h1 variants={itemVariants} className="text-4xl md:text-7xl font-black tracking-tight text-white uppercase leading-none">
-                      <span className="text-white/40">smart</span>
-                      <span className="mx-4 text-white/10">/</span>
-                      <span className="text-primary drop-shadow-[0_0_15px_rgba(0,224,255,0.4)]">secure</span>
-                      <span className="mx-4 text-white/10">/</span>
-                      <span className="text-white/40">sustainable</span>
-                  </motion.h1>
-                  
-                  <motion.p variants={itemVariants} className="mt-8 text-lg md:text-xl text-white/60 font-medium">
-                      {'> enterprise_it_solutions.init()'}
-                  </motion.p>
-
-                  <motion.div variants={itemVariants} className="mt-12">
-                      <Button asChild size="lg" className="h-16 px-10 bg-primary text-black font-black uppercase tracking-widest hover:shadow-[0_0_30px_rgba(0,224,255,0.5)] transition-all rounded-full">
-                        <Link href="/contact">Initiate Transformation</Link>
-                      </Button>
-                  </motion.div>
+            <motion.div 
+              className="flex flex-col items-center space-y-10"
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0 }}
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants} className="inline-block px-6 py-2 bg-black/50 rounded-lg border border-white/10">
+                <span className="text-sm text-primary tracking-[0.3em] font-black uppercase">
+                  STATUS: OPERATIONAL
+                </span>
               </motion.div>
+          
+              <motion.h1 
+                variants={itemVariants} 
+                className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-white uppercase leading-[1.1]"
+              >
+                <span className="text-white/40">smart</span>
+                <span className="mx-4 text-white/10">/</span>
+                <span className="text-primary drop-shadow-[0_0_20px_rgba(0,224,255,0.5)]">secure</span>
+                <span className="mx-4 text-white/10">/</span>
+                <span className="text-white/40">sustainable</span>
+              </motion.h1>
+              
+              <motion.p variants={itemVariants} className="text-lg md:text-xl text-white/60 font-medium max-w-2xl">
+                {'> enterprise_it_solutions.init()'}
+              </motion.p>
+
+              <motion.div variants={itemVariants} className="pt-4">
+                <Button asChild size="lg" className="h-16 px-12 bg-primary text-black font-black uppercase tracking-widest hover:shadow-[0_0_40px_rgba(0,224,255,0.6)] transition-all rounded-full group">
+                  <Link href="/contact" className="flex items-center gap-3">
+                    Initiate Transformation
+                  </Link>
+                </Button>
+              </motion.div>
+            </motion.div>
           )}
-          </AnimatePresence>
-        </div>
+        </AnimatePresence>
       </div>
     </section>
   );
