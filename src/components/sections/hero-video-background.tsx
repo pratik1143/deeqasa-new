@@ -10,8 +10,8 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 const posterImage = PlaceHolderImages.find(img => img.id === 'hero-poster');
 const posterImageUrl = posterImage?.imageUrl || "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=1080";
 
-// HIGH-TECH DIGITAL CIRCUITRY FOR HP BRANDING
-const HERO_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-digital-circuit-board-background-4401-large.mp4";
+// Updated to the specific requested HP Enterprise video
+const HERO_VIDEO_URL = "/HP_ZBook_Fury_G1i_1080P.mp4";
 
 const VideoElement = () => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -20,11 +20,31 @@ const VideoElement = () => {
     const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
 
     useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.play().catch(error => {
-                console.warn("Autoplay was prevented:", error);
-            });
-        }
+        const attemptPlay = () => {
+            if (videoRef.current) {
+                videoRef.current.play().catch(error => {
+                    console.warn("Autoplay was prevented by browser security policy. Interaction may be required.", error);
+                });
+            }
+        };
+
+        // Attempt immediate play
+        attemptPlay();
+
+        // Backup: attempt play on first user interaction if blocked
+        const handleInteraction = () => {
+            attemptPlay();
+            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('keydown', handleInteraction);
+        };
+
+        document.addEventListener('click', handleInteraction);
+        document.addEventListener('keydown', handleInteraction);
+
+        return () => {
+            document.removeEventListener('click', handleInteraction);
+            document.removeEventListener('keydown', handleInteraction);
+        };
     }, []);
 
     return (
@@ -41,7 +61,7 @@ const VideoElement = () => {
                 preload="auto"
                 className="absolute w-full h-full object-cover"
                 style={{
-                    filter: `brightness(0.6) contrast(1.1) saturate(0.7)`
+                    filter: `brightness(0.5) contrast(1.1) saturate(0.8)`
                 }}
                 poster={posterImageUrl}
             >
