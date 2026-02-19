@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ServiceDetailView } from "@/components/services/service-detail-view";
@@ -10,7 +9,7 @@ export default function AiAutomationPage() {
       title="AI & Automation"
       tagline="Intelligent Systems. Accelerated Outcomes. Predictive Insights."
       heroImage="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1920&q=80"
-      overviewImage="https://images.unsplash.com/photo-1551288049-bbbda5366fd9?w=1200&q=80"
+      overviewImage="https://images.unsplash.com/photo-1509228468518-180dd4864904?w=1200&q=80"
       archImage="https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=1200&q=80"
       overview="Harness machine learning and process automation to drive exponential efficiency. We integrate enterprise-ready GenAI into your existing workflows to turn raw data into strategic assets."
       capabilities={[
