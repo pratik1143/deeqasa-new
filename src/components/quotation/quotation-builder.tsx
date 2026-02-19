@@ -231,13 +231,15 @@ export function QuotationBuilder() {
         filename: `${filename}_${savedId || 'DRAFT'}.pdf`, 
         image: { type: 'jpeg', quality: 1.0 }, 
         html2canvas: { 
-          scale: 3, // HD Resolution (300+ DPI equivalent)
+          scale: 3, 
           useCORS: true, 
           logging: false, 
           letterRendering: true,
-          windowWidth: 794 // Strict A4 Width capture
+          windowWidth: 794,
+          scrollX: 0,
+          scrollY: 0
         }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['css', 'legacy'] }
       };
 
@@ -675,14 +677,19 @@ export function QuotationBuilder() {
                         </div>
                       </div>
                     </div>
+                    {/* Sentinel to ensure no trailing blank page */}
+                    <div style={{ height: 0, overflow: 'hidden' }}></div>
                   </div>
                 </div>
               </div>
             ) : (
-              <BrochurePreview 
-                products={Array.from(new Set(watchedLineItems.map(i => i.product.id))).map(id => watchedLineItems.find(i => i.product.id === id)!.product)} 
-                marketingData={marketingData!} 
-              />
+              <div id="brochure-export-root" className="document-canvas">
+                <BrochurePreview 
+                  products={Array.from(new Set(watchedLineItems.map(i => i.product.id))).map(id => watchedLineItems.find(i => i.product.id === id)!.product)} 
+                  marketingData={marketingData!} 
+                />
+                <div style={{ height: 0, overflow: 'hidden' }}></div>
+              </div>
             )}
           </div>
         </ScrollArea>

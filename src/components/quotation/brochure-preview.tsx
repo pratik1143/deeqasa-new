@@ -61,7 +61,7 @@ export function BrochurePreview({ products, marketingData }: BrochurePreviewProp
   );
 
   return (
-    <div id="brochure-export-root" className="document-canvas">
+    <div className="a4-container">
       {products.map((product) => {
         const marketing = marketingData.brochureItems.find(m => m.sku === product.id);
         if (!marketing) return null;
