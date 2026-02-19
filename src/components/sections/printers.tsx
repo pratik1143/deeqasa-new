@@ -31,6 +31,14 @@ export function Printers() {
             }
         };
         playVideo();
+
+        // Mobile-specific interaction trigger
+        const handleInteraction = () => {
+            videoRef.current?.play();
+            document.removeEventListener('touchstart', handleInteraction);
+        };
+        document.addEventListener('touchstart', handleInteraction);
+        return () => document.removeEventListener('touchstart', handleInteraction);
     }
   }, [mounted]);
 

@@ -31,6 +31,14 @@ export function Proof() {
             }
         };
         playVideo();
+        
+        // Mobile-specific interaction trigger to force playback if blocked
+        const handleInteraction = () => {
+            videoRef.current?.play();
+            document.removeEventListener('touchstart', handleInteraction);
+        };
+        document.addEventListener('touchstart', handleInteraction);
+        return () => document.removeEventListener('touchstart', handleInteraction);
     }
   }, [mounted]);
 
