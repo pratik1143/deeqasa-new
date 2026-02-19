@@ -8,7 +8,7 @@ import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const PRINTER_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-close-up-of-a-keyboard-and-a-mouse-4446-large.mp4";
+const PRINTER_VIDEO_URL = "/printer.mp4";
 
 export function Printers() {
   const ref = useRef(null);
@@ -23,12 +23,14 @@ export function Printers() {
 
   useEffect(() => {
     if (mounted && videoRef.current) {
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(() => {
-                // Autoplay blocked, handled by browsers' native interaction policies
-            });
-        }
+        const playVideo = async () => {
+            try {
+                await videoRef.current?.play();
+            } catch (err) {
+                console.warn("Autoplay blocked. User interaction may be required.", err);
+            }
+        };
+        playVideo();
     }
   }, [mounted]);
 

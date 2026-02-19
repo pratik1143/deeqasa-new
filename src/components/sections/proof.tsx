@@ -8,7 +8,7 @@ import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
-const POLY_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-modern-office-business-meeting-room-4444-large.mp4";
+const POLY_VIDEO_URL = "/poly.mp4";
 
 export function Proof() {
   const ref = useRef(null);
@@ -23,12 +23,14 @@ export function Proof() {
 
   useEffect(() => {
     if (mounted && videoRef.current) {
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(() => {
-                // Autoplay blocked, will wait for interaction
-            });
-        }
+        const playVideo = async () => {
+            try {
+                await videoRef.current?.play();
+            } catch (err) {
+                console.warn("Autoplay blocked. User interaction may be required.", err);
+            }
+        };
+        playVideo();
     }
   }, [mounted]);
 
