@@ -3,19 +3,46 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/firebase";
 import { CenteredLoader } from "@/components/ui/centered-loader";
+import { AdminLayout } from "@/components/layout/admin-layout";
+import { ExpenseManager } from "@/components/expenses/expense-manager";
 
-/**
- * Decommissioned Expense Management Page
- * Redirects users back to the Dashboard.
- */
+const ADMIN_EMAILS = ['deeqasa@admin.in'];
+
 export default function ExpensesPage() {
+    const { user, isUserLoading } = useUser();
     const router = useRouter();
 
-    useEffect(() => {
-        // Immediate redirect to Dashboard
-        router.push('/dashboard');
-    }, [router]);
+    const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
 
-    return <CenteredLoader text="Redirecting to Dashboard..." />;
+    useEffect(() => {
+        if (!isUserLoading && !user) {
+            router.push('/login');
+        } else if (!isUserLoading && user && !isAdmin) {
+            router.push('/dashboard');
+        }
+    }, [user, isUserLoading, isAdmin, router]);
+
+    if (isUserLoading) {
+        return (
+            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+                <CenteredLoader text="Verifying Admin Uplink..." />
+            </div>
+        );
+    }
+    
+    if (!user || !isAdmin) {
+         return (
+            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+                <CenteredLoader text="Redirecting to secure node..." />
+            </div>
+        );
+    }
+    
+    return (
+        <AdminLayout>
+            <ExpenseManager />
+        </AdminLayout>
+    );
 }

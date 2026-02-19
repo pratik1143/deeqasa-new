@@ -66,6 +66,26 @@
         }
       },
       "required": ["quotationId", "clientDetails", "products", "totals", "status"]
+    },
+    "SiteVisitExpense": {
+      "title": "SiteVisitExpense",
+      "type": "object",
+      "properties": {
+        "employeeName": { "type": "string" },
+        "companyName": { "type": "string" },
+        "fromLocation": { "type": "string" },
+        "toLocation": { "type": "string" },
+        "goingAmount": { "type": "number" },
+        "returnAmount": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "quotationStatus": { "type": "string", "enum": ["Sent", "Pending", "Approved"] },
+        "quotationReference": { "type": "string" },
+        "remarks": { "type": "string" },
+        "visitDate": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["employeeName", "companyName", "totalAmount", "visitDate"]
     }
   },
   "auth": {
@@ -121,6 +141,22 @@
             {
               "name": "quotationId",
               "description": "The unique identifier for the quotation record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/expenses/{expenseId}",
+        "definition": {
+          "entityName": "SiteVisitExpense",
+          "schema": {
+            "$ref": "#/backend/entities/SiteVisitExpense"
+          },
+          "description": "Stores employee site visit expense records.",
+          "params": [
+            {
+              "name": "expenseId",
+              "description": "Unique identifier for the expense record."
             }
           ]
         }

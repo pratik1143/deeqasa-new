@@ -1,80 +1,48 @@
 
 rules_version = '2';
 
-/**
- * DEEQASA TECH - Firestore Security Rules
- * 
- * Core Philosophy:
- * This ruleset implements a robust Role-Based Access Control (RBAC) model.
- * Administrative privileges are determined by:
- * 1. The existence of a user's UID within the '/roles_admin' collection (DBAC).
- * 2. A 'role' field set to 'admin' in the user's profile document.
- */
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // --- GLOBAL HELPER FUNCTIONS ---
 
-    /**
-     * @description Checks if the request is from an authenticated user.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * @description Checks if the authenticated user has administrative privileges.
-     * Checks both the DBAC collection and the user profile field.
+     * @description Checks if user has admin privileges.
+     * Includes an explicit email whitelist for high-security modules.
      */
     function isAdmin() {
       return isSignedIn() && (
+        request.auth.token.email == 'deeqasa@admin.in' ||
         exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
       );
     }
 
-    // --- COLLECTION RULES ---
-
-    /**
-     * @description Access control for individual user profiles.
-     * Users can manage their own profile data.
-     */
     match /users/{userId} {
       allow get: if isSignedIn() && request.auth.uid == userId;
       allow create: if isSignedIn() && request.auth.uid == userId;
       allow update: if isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Access control for the administrative roles registry.
-     */
     match /roles_admin/{adminId} {
       allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
       allow list: if isAdmin();
-      allow create, update, delete: if false; // Managed via Admin SDK/Console
-    }
-
-    /**
-     * @description Security rules for employee site visit expense records.
-     * Restricted to authenticated admin users.
-     */
-    match /site_visit_expenses/{expenseId} {
-      allow get, list: if isAdmin();
-      allow create: if isAdmin() && request.resource.data.id == expenseId;
-      allow update: if isAdmin() && resource != null && request.resource.data.id == resource.data.id;
-      allow delete: if isAdmin() && resource != null;
+      allow create, update, delete: if false;
     }
     
-    /**
-     * @description Rules for technical quotations and proposals.
-     * Accessible only by administrators for deal lifecycle management.
-     */
     match /quotations/{quotationId} {
       allow get, list: if isAdmin();
       allow create: if isAdmin() && request.resource.data.quotationId == quotationId;
       allow update: if isAdmin() && resource != null && request.resource.data.quotationId == resource.data.quotationId;
       allow delete: if isAdmin() && resource != null;
+    }
+
+    match /expenses/{expenseId} {
+      allow get, list, create, update, delete: if isAdmin();
     }
   }
 }

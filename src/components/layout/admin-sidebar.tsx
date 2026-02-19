@@ -12,7 +12,8 @@ import {
   Settings,
   LogOut,
   ChevronRight,
-  Zap
+  Zap,
+  Wallet
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,9 +28,11 @@ import {
   SidebarGroupContent,
   useSidebar
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/firebase";
+import { useAuth, useUser } from "@/firebase";
 
-const adminLinks = [
+const ADMIN_EMAILS = ['deeqasa@admin.in'];
+
+const baseAdminLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Quotation Builder", href: "/quotation-builder", icon: FileText },
   { name: "AI Intelligence", href: "/deal-intelligence", icon: BrainCircuit },
@@ -38,24 +41,32 @@ const adminLinks = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const auth = useAuth();
+  const { user } = useUser();
   const { state, setOpen, isMobile } = useSidebar();
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const isAdminEmail = user && ADMIN_EMAILS.includes(user.email || '');
+
+  const adminLinks = React.useMemo(() => {
+    if (isAdminEmail) {
+      return [...baseAdminLinks, { name: "Expense Management", href: "/expenses", icon: Wallet }];
+    }
+    return baseAdminLinks;
+  }, [isAdminEmail]);
 
   const handleSignOut = () => {
     auth.signOut();
   };
 
-  // Logic to auto-collapse the sidebar after 3 seconds of inactivity
   const startAutoHideTimer = React.useCallback(() => {
-    if (isMobile) return; // Don't auto-hide on mobile
+    if (isMobile) return;
     
     if (state === "expanded") {
-      // Clear any existing timer
       if (timerRef.current) clearTimeout(timerRef.current);
       
       timerRef.current = setTimeout(() => {
         setOpen(false);
-      }, 3000); // 3 seconds
+      }, 3000);
     }
   }, [state, setOpen, isMobile]);
 
@@ -66,7 +77,6 @@ export function AdminSidebar() {
     }
   }, []);
 
-  // Cleanup on unmount
   React.useEffect(() => {
     return () => cancelAutoHideTimer();
   }, [cancelAutoHideTimer]);
