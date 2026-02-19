@@ -4,9 +4,16 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Search, LogIn, LogOut, Menu, Sun, Moon } from "lucide-react";
+import { Search, LogIn, LogOut, Menu, Sun, Moon, X } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const baseNavLinks = [
   { name: "Home", href: "/" },
@@ -30,6 +37,7 @@ export function Header() {
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     // Initialize theme from localStorage or system preference
@@ -58,10 +66,12 @@ export function Header() {
 
   const handleSignOut = async () => {
     await auth.signOut();
+    setIsMenuOpen(false);
     router.push('/');
   };
 
   const handleSignIn = () => {
+    setIsMenuOpen(false);
     router.push('/login');
   };
 
@@ -124,20 +134,20 @@ export function Header() {
             ) : user ? (
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
+                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
                 onClick={handleSignOut}
               >
-                <span className="hidden sm:inline">Sign Out</span>
+                <span>Sign Out</span>
                 <LogOut className="h-4 w-4" />
               </Button>
             ) : (
               <Button 
                 variant="outline" 
-                className="flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
+                className="hidden sm:flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold" 
                 onClick={handleSignIn}
               >
                 <LogIn className="h-4 w-4" />
-                <span className="hidden sm:inline">Admin Access</span>
+                <span>Admin Access</span>
               </Button>
             )}
 
@@ -154,9 +164,74 @@ export function Header() {
                 <Search className="h-4 w-4" />
             </Button>
             
-            <Button variant="ghost" size="icon" className="lg:hidden">
-              <Menu className="h-6 w-6" />
-            </Button>
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-background border-white/10 w-[300px] p-0 font-body">
+                <SheetHeader className="p-6 border-b border-white/5 bg-white/5">
+                  <SheetTitle className="text-left">
+                    <span className="text-xl font-black tracking-tight text-foreground uppercase whitespace-nowrap">
+                      DEEQASA TECH
+                    </span>
+                    <p className="text-[8px] font-black text-primary uppercase tracking-[0.4em] mt-1">Mission Portal</p>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col p-6 space-y-6">
+                  <nav className="flex flex-col space-y-4">
+                    {navLinks.map((link) => (
+                      <Link 
+                        key={link.name} 
+                        href={link.href}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={cn(
+                          "text-sm font-bold uppercase tracking-[0.2em] py-2 transition-colors",
+                          pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </nav>
+                  
+                  <div className="pt-6 border-t border-white/5 space-y-4">
+                    <Button 
+                      className="w-full h-12 bg-white/5 border border-white/10 text-muted-foreground font-bold hover:bg-white/10 hover:text-foreground justify-start px-4"
+                      onClick={() => { setIsMenuOpen(false); router.push('/contact'); }}
+                    >
+                      Contact Sales
+                    </Button>
+                    
+                    {user ? (
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-12 flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold justify-start px-4" 
+                        onClick={handleSignOut}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Sign Out</span>
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        className="w-full h-12 flex items-center gap-2 border-white/10 hover:bg-white/5 font-bold justify-start px-4" 
+                        onClick={handleSignIn}
+                      >
+                        <LogIn className="h-4 w-4" />
+                        <span>Admin Access</span>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div className="absolute bottom-8 left-6 right-6">
+                  <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em] text-center">
+                    Secure Terminal v4.0.1
+                  </p>
+                </div>
+              </SheetContent>
+            </Sheet>
         </div>
       </div>
     </header>
