@@ -1,80 +1,6 @@
 
 {
   "entities": {
-    "SiteVisitExpense": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "SiteVisitExpense",
-      "type": "object",
-      "description": "Represents an employee's expense record for a site visit.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the SiteVisitExpense entity."
-        },
-        "employeeName": {
-          "type": "string",
-          "description": "The full name of the employee who incurred the expense."
-        },
-        "companyName": {
-          "type": "string",
-          "description": "The name of the company associated with the site visit."
-        },
-        "fromLocation": {
-          "type": "string",
-          "description": "The starting location of the site visit route."
-        },
-        "toLocation": {
-          "type": "string",
-          "description": "The destination location of the site visit route."
-        },
-        "goingAmount": {
-          "type": "number",
-          "description": "Monetary amount spent on travel for the outgoing leg."
-        },
-        "returnAmount": {
-          "type": "number",
-          "description": "Monetary amount spent on travel for the return leg."
-        },
-        "totalAmount": {
-          "type": "number",
-          "description": "Auto-calculated total travel expense."
-        },
-        "quotationStatus": {
-          "type": "string",
-          "description": "The status of the quotation ('Sent', 'Pending', 'Approved')."
-        },
-        "quotationReferenceNumber": {
-          "type": "string",
-          "description": "Reference number for the associated quotation."
-        },
-        "remarks": {
-          "type": "string",
-          "description": "Additional notes for the site visit expense."
-        },
-        "visitDate": {
-          "type": "string",
-          "description": "The date when the site visit took place.",
-          "format": "date"
-        },
-        "expenseApprovalStatus": {
-          "type": "string",
-          "description": "The approval status ('Pending', 'Approved', 'Rejected')."
-        }
-      },
-      "required": [
-        "id",
-        "employeeName",
-        "companyName",
-        "fromLocation",
-        "toLocation",
-        "goingAmount",
-        "returnAmount",
-        "totalAmount",
-        "quotationStatus",
-        "visitDate",
-        "expenseApprovalStatus"
-      ]
-    },
     "UserProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "UserProfile",
@@ -179,22 +105,6 @@
             {
               "name": "adminId",
               "description": "The unique identifier (UID) of the administrative user."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/site_visit_expenses/{expenseId}",
-        "definition": {
-          "entityName": "SiteVisitExpense",
-          "schema": {
-            "$ref": "#/backend/entities/SiteVisitExpense"
-          },
-          "description": "Stores employee site visit expense records.",
-          "params": [
-            {
-              "name": "expenseId",
-              "description": "Unique identifier for the expense record."
             }
           ]
         }

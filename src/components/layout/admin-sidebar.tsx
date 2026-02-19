@@ -12,9 +12,7 @@ import {
   Settings,
   LogOut,
   ChevronRight,
-  ShieldCheck,
-  Zap,
-  Wallet
+  Zap
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,7 +32,6 @@ import { useAuth } from "@/firebase";
 const adminLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Quotation Builder", href: "/quotation-builder", icon: FileText },
-  { name: "Expense Management", href: "/expenses", icon: Wallet },
   { name: "AI Intelligence", href: "/deal-intelligence", icon: BrainCircuit },
 ];
 
