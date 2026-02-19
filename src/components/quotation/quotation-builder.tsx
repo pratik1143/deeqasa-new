@@ -239,7 +239,7 @@ export function QuotationBuilder() {
           scrollX: 0,
           scrollY: 0
         }, 
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: false },
         pagebreak: { mode: ['css', 'legacy'] }
       };
 
@@ -300,9 +300,9 @@ export function QuotationBuilder() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-0 min-h-[calc(100vh-80px)] bg-background overflow-hidden font-body relative">
+    <div className="flex flex-col lg:flex-row gap-0 h-[calc(100vh-80px)] bg-background overflow-hidden font-body relative">
       {/* Sidebar Controls */}
-      <div className="w-full lg:w-[420px] bg-card border-r border-border flex flex-col no-print shrink-0 relative z-20 overflow-y-auto max-h-screen">
+      <div className="w-full lg:w-[420px] bg-card border-r border-border flex flex-col no-print shrink-0 relative z-20">
         <div className="p-6 pb-0">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,224,255,0.2)]">
@@ -677,10 +677,10 @@ export function QuotationBuilder() {
                         </div>
                       </div>
                     </div>
-                    {/* Sentinel to ensure no trailing blank page */}
-                    <div style={{ height: 0, overflow: 'hidden' }}></div>
                   </div>
                 </div>
+                {/* Sentinel to ensure no trailing blank page */}
+                <div style={{ height: 0, overflow: 'hidden' }}></div>
               </div>
             ) : (
               <div id="brochure-export-root" className="document-canvas">

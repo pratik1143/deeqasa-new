@@ -99,7 +99,7 @@
 
   .a4-page {
     width: 794px !important;
-    height: 1122px !important;
+    height: 1122px !important; /* Perfect A4 Height at 96dpi with safety buffer */
     min-height: 1122px !important;
     max-height: 1122px !important;
     margin: 0 !important;
@@ -136,6 +136,11 @@
     print-color-adjust: exact !important;
     image-rendering: crisp-edges !important;
     background-attachment: scroll !important;
+    page-break-inside: avoid;
+  }
+
+  .no-print {
+    display: none !important;
   }
 }
 
@@ -170,6 +175,10 @@
   position: relative !important;
   overflow: hidden !important;
   box-shadow: 0 0 40px rgba(0,0,0,0.1);
+}
+
+.a4-page:not(:last-child) {
+  margin-bottom: 40px;
 }
 
 .justified-text {

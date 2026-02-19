@@ -71,12 +71,10 @@ export function Header() {
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b",
-      isScrolled || pathname !== '/' 
-        ? "bg-background/80 backdrop-blur-xl border-white/10 shadow-2xl" 
-        : "bg-transparent border-transparent"
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b bg-background border-white/10 shadow-lg",
+      isScrolled && "shadow-primary/5 border-primary/10"
     )}>
-      <div className="container mx-auto px-4 flex justify-between items-center h-full">
+      <div className="container-enterprise flex justify-between items-center h-full">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center">
             <span className="text-2xl font-black tracking-tight text-foreground uppercase">

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { HeroVideoBackground } from './hero-video-background';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 
 export function Hero() {
   const [show, setShow] = useState(false);
@@ -37,7 +38,7 @@ export function Hero() {
   };
   
   return (
-    <section className="relative h-screen min-h-[700px] w-full flex flex-col items-center justify-center overflow-hidden font-code">
+    <section className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden font-code bg-black">
       <HeroVideoBackground />
       
       {/* Dark Overlay for Hero */}
@@ -54,27 +55,27 @@ export function Hero() {
                   exit={{ opacity: 0 }}
                   variants={containerVariants}
               >
-                  <motion.div variants={itemVariants} className="inline-block px-6 py-2 bg-black/50 rounded-lg mb-8 border border-border">
-                      <span className="text-sm text-primary tracking-widest">
+                  <motion.div variants={itemVariants} className="inline-block px-6 py-2 bg-black/50 rounded-lg mb-8 border border-white/10">
+                      <span className="text-sm text-primary tracking-widest font-black">
                       STATUS: OPERATIONAL
                       </span>
                   </motion.div>
               
-                  <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-medium tracking-tight text-foreground">
-                      <span className="text-muted-foreground">smart</span>
-                      <span className="mx-4 text-border">/</span>
-                      <span className="text-primary">secure</span>
-                      <span className="mx-4 text-border">/</span>
-                      <span className="text-muted-foreground">sustainable</span>
+                  <motion.h1 variants={itemVariants} className="text-4xl md:text-7xl font-black tracking-tight text-white uppercase leading-none">
+                      <span className="text-white/40">smart</span>
+                      <span className="mx-4 text-white/10">/</span>
+                      <span className="text-primary drop-shadow-[0_0_15px_rgba(0,224,255,0.4)]">secure</span>
+                      <span className="mx-4 text-white/10">/</span>
+                      <span className="text-white/40">sustainable</span>
                   </motion.h1>
                   
-                  <motion.p variants={itemVariants} className="mt-8 text-lg md:text-xl text-muted-foreground">
+                  <motion.p variants={itemVariants} className="mt-8 text-lg md:text-xl text-white/60 font-medium">
                       {'> enterprise_it_solutions.init()'}
                   </motion.p>
 
                   <motion.div variants={itemVariants} className="mt-12">
-                      <Button size="lg" className="font-headline font-bold text-lg bg-gradient-to-r from-primary via-emerald to-accent text-primary-foreground hover:shadow-[0_0_20px_5px_hsl(var(--primary)/0.5)] transition-shadow duration-300 rounded-full px-8 py-6">
-                      Initiate Transformation
+                      <Button asChild size="lg" className="h-16 px-10 bg-primary text-black font-black uppercase tracking-widest hover:shadow-[0_0_30px_rgba(0,224,255,0.5)] transition-all rounded-full">
+                        <Link href="/contact">Initiate Transformation</Link>
                       </Button>
                   </motion.div>
               </motion.div>

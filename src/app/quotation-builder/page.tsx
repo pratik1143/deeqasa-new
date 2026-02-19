@@ -24,7 +24,7 @@ export default function QuotationBuilderPage() {
         return (
             <div className="flex flex-col min-h-screen bg-background">
                 <Header />
-                <main className="flex-1 pt-16 flex items-center justify-center">
+                <main className="flex-1 pt-20 flex items-center justify-center">
                     <CenteredLoader text="Verifying permissions..." />
                 </main>
             </div>
@@ -35,7 +35,7 @@ export default function QuotationBuilderPage() {
          return (
             <div className="flex flex-col min-h-screen bg-background">
                 <Header />
-                <main className="flex-1 pt-16 flex items-center justify-center">
+                <main className="flex-1 pt-20 flex items-center justify-center">
                     <CenteredLoader text="Redirecting to login..." />
                 </main>
             </div>
@@ -49,7 +49,7 @@ export default function QuotationBuilderPage() {
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <Header />
-            <main className="flex-1 pt-16">
+            <main className="flex-1 pt-20">
                 <QuotationBuilder />
             </main>
         </div>
