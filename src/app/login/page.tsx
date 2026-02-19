@@ -12,7 +12,7 @@ import { CenteredLoader } from '@/components/ui/centered-loader';
 import { Label } from '@/components/ui/label';
 import { LineLoader } from '@/components/ui/line-loader';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Lock, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -35,7 +35,6 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (mounted && videoRef.current) {
-        // Force play on mount to bypass autoplay policies
         const playVideo = async () => {
             try {
                 await videoRef.current?.play();
@@ -47,7 +46,7 @@ export default function LoginPage() {
     }
   }, [mounted]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!email || !password) {
@@ -57,28 +56,31 @@ export default function LoginPage() {
     
     setIsLoading(true);
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
-    } catch (err: any) {
-      console.error(err);
-      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-        setError('Authentication failed. Invalid identity credentials.');
-      } else {
-        setError('System error during authentication. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    // Non-blocking sign-in as per Firebase SDK best practices for UI responsiveness
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        // Success is handled by the useUser() hook and the redirect effect above
+      })
+      .catch((err: any) => {
+        setIsLoading(false);
+        // Map common Firebase Auth errors to user-friendly messages
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+          setError('Invalid credentials. Please verify your corporate identity and security key.');
+        } else if (err.code === 'auth/too-many-requests') {
+          setError('Too many failed attempts. Access temporarily restricted for security.');
+        } else {
+          setError('System authorization failed. Please check your network connection.');
+        }
+      });
   };
   
-  if (isUserLoading || user) {
+  if (isUserLoading || (user && mounted)) {
     return <CenteredLoader text="Verifying Identity..." />;
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-background font-body">
-      {/* Immersive Background Video - Local Asset */}
+      {/* Immersive Background Video */}
       {mounted && (
         <video
           ref={videoRef}
@@ -206,9 +208,10 @@ export default function LoginPage() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="mt-6 p-3 bg-destructive/10 border border-destructive/20 rounded-md"
+                    className="mt-6 p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-center gap-2"
                   >
-                    <p className="text-destructive text-center text-[10px] font-bold uppercase tracking-tight">{error}</p>
+                    <AlertCircle className="w-3 h-3 text-destructive shrink-0" />
+                    <p className="text-destructive text-[10px] font-bold uppercase tracking-tight leading-tight">{error}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
