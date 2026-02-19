@@ -13,11 +13,11 @@
         },
         "employeeName": {
           "type": "string",
-          "description": "The full name of the employee who incurred the expense for the site visit."
+          "description": "The full name of the employee who incurred the expense."
         },
         "companyName": {
           "type": "string",
-          "description": "The name of the company associated with the site visit expense."
+          "description": "The name of the company associated with the site visit."
         },
         "fromLocation": {
           "type": "string",
@@ -29,36 +29,36 @@
         },
         "goingAmount": {
           "type": "number",
-          "description": "The monetary amount spent on travel for the outgoing leg of the site visit."
+          "description": "Monetary amount spent on travel for the outgoing leg."
         },
         "returnAmount": {
           "type": "number",
-          "description": "The monetary amount spent on travel for the return leg of the site visit."
+          "description": "Monetary amount spent on travel for the return leg."
         },
         "totalAmount": {
           "type": "number",
-          "description": "The auto-calculated total travel expense, which is the sum of 'Going Amount' and 'Return Amount'."
+          "description": "Auto-calculated total travel expense."
         },
         "quotationStatus": {
           "type": "string",
-          "description": "The current status of the quotation associated with the expense. Possible values are 'Sent', 'Pending', or 'Approved'."
+          "description": "The status of the quotation ('Sent', 'Pending', 'Approved')."
         },
         "quotationReferenceNumber": {
           "type": "string",
-          "description": "A unique reference number provided for the associated quotation."
+          "description": "Reference number for the associated quotation."
         },
         "remarks": {
           "type": "string",
-          "description": "Any additional notes or comments pertinent to the site visit expense."
+          "description": "Additional notes for the site visit expense."
         },
         "visitDate": {
           "type": "string",
-          "description": "The specific date when the site visit took place.",
+          "description": "The date when the site visit took place.",
           "format": "date"
         },
         "expenseApprovalStatus": {
           "type": "string",
-          "description": "The overall approval status of the expense record itself. Possible values are 'Pending', 'Approved', or 'Rejected'."
+          "description": "The approval status ('Pending', 'Approved', 'Rejected')."
         }
       },
       "required": [
@@ -93,6 +93,53 @@
         }
       },
       "required": ["email", "role"]
+    },
+    "Quotation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Quotation",
+      "type": "object",
+      "description": "Represents a technical proposal or quotation generated for a client.",
+      "properties": {
+        "quotationId": {
+          "type": "string",
+          "description": "Unique identifier for the quotation record."
+        },
+        "clientDetails": {
+          "type": "string",
+          "description": "JSON string containing name, companyName, and address."
+        },
+        "products": {
+          "type": "string",
+          "description": "JSON string representing the array of selected product line items."
+        },
+        "pricing": {
+          "type": "string",
+          "description": "JSON string representing the unit pricing for each line item."
+        },
+        "totals": {
+          "type": "string",
+          "description": "JSON string containing subTotal, totalGst, and grandTotal."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the quotation was generated."
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "The UID of the administrator who generated the quotation."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ACTIVE", "ARCHIVED"],
+          "description": "The lifecycle status of the quotation."
+        },
+        "subject": {
+          "type": "string",
+          "description": "The primary subject line of the technical proposal."
+        }
+      },
+      "required": ["quotationId", "clientDetails", "products", "totals", "status"]
     }
   },
   "auth": {
@@ -110,7 +157,7 @@
           "schema": {
             "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "Stores individual user profiles. Each user can read and write their own profile to manage their personal data and view their assigned role.",
+          "description": "Stores individual user profiles including role designations.",
           "params": [
             {
               "name": "userId",
@@ -127,7 +174,7 @@
             "type": "object",
             "properties": {}
           },
-          "description": "A collection used for Database Access Control (DBAC). The existence of a document at `/roles_admin/{uid}` signifies that the user with that 'uid' has administrative privileges. Used to authorize access to admin-only resources.",
+          "description": "A collection used for primary Database Access Control (DBAC).",
           "params": [
             {
               "name": "adminId",
@@ -143,16 +190,31 @@
           "schema": {
             "$ref": "#/backend/entities/SiteVisitExpense"
           },
-          "description": "Stores all site visit expense records submitted and managed by administrators.",
+          "description": "Stores employee site visit expense records.",
           "params": [
             {
               "name": "expenseId",
-              "description": "The unique identifier for a specific site visit expense record."
+              "description": "Unique identifier for the expense record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/quotations/{quotationId}",
+        "definition": {
+          "entityName": "Quotation",
+          "schema": {
+            "$ref": "#/backend/entities/Quotation"
+          },
+          "description": "Stores technical proposals and commercial quotations.",
+          "params": [
+            {
+              "name": "quotationId",
+              "description": "The unique identifier for the quotation record."
             }
           ]
         }
       }
-    ],
-    "reasoning": "The Firestore structure utilizes structural segregation and DBAC for secure, enterprise-grade access control. User profiles are stored at '/users/{userId}' for personal data management, while sensitive admin operations are gated by existence checks in the '/roles_admin' collection."
+    ]
   }
 }

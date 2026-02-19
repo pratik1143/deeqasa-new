@@ -5,9 +5,10 @@ rules_version = '2';
  * DEEQASA TECH - Firestore Security Rules
  * 
  * Core Philosophy:
- * This ruleset implements a robust Role-Based Access Control (RBAC) model using the 
- * "Database Access Control" (DBAC) pattern. Administrative privileges are determined 
- * by the existence of a user's UID within a dedicated '/roles_admin' collection.
+ * This ruleset implements a robust Role-Based Access Control (RBAC) model.
+ * Administrative privileges are determined by:
+ * 1. The existence of a user's UID within the '/roles_admin' collection (DBAC).
+ * 2. A 'role' field set to 'admin' in the user's profile document.
  */
 
 service cloud.firestore {
@@ -23,10 +24,14 @@ service cloud.firestore {
     }
 
     /**
-     * @description Checks if the authenticated user has an entry in the roles_admin collection.
+     * @description Checks if the authenticated user has administrative privileges.
+     * Checks both the DBAC collection and the user profile field.
      */
     function isAdmin() {
-      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)) ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
     }
 
     // --- COLLECTION RULES ---
@@ -43,14 +48,11 @@ service cloud.firestore {
 
     /**
      * @description Access control for the administrative roles registry.
-     * @path /roles_admin/{adminId}
-     * @allow (get) Any authenticated user can check their own admin status.
-     * @deny (list) Standard users cannot list all administrative accounts.
      */
     match /roles_admin/{adminId} {
       allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
       allow list: if isAdmin();
-      allow create, update, delete: if false; // Managed via Admin SDK
+      allow create, update, delete: if false; // Managed via Admin SDK/Console
     }
 
     /**
@@ -65,11 +67,14 @@ service cloud.firestore {
     }
     
     /**
-     * @description Generic rules for quotations.
-     * Accessible by admins for management.
+     * @description Rules for technical quotations and proposals.
+     * Accessible only by administrators for deal lifecycle management.
      */
     match /quotations/{quotationId} {
-      allow read, write: if isAdmin();
+      allow get, list: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.quotationId == quotationId;
+      allow update: if isAdmin() && resource != null && request.resource.data.quotationId == resource.data.quotationId;
+      allow delete: if isAdmin() && resource != null;
     }
   }
 }
