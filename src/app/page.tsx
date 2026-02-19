@@ -40,7 +40,7 @@ const FeatureSection = () => (
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px w-8 bg-primary/30" />
-            <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Why DeeQasa</span>
+            <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Why DeeQasa Tech</span>
           </div>
           <h2 className="text-4xl md:text-6xl font-black text-foreground mb-8 tracking-tighter uppercase leading-none">
             Infrastructure <br /> <span className="text-primary">Redefined</span>

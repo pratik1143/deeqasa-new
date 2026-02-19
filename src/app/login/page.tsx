@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -109,7 +108,7 @@ export default function LoginPage() {
         >
           <Link href="/" className="group block">
             <span className="text-4xl font-black text-white uppercase tracking-tight block">
-              DEEQASA
+              DEEQASA TECH
             </span>
             <div className="mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">
               HP CONNECT
