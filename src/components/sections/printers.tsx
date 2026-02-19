@@ -66,7 +66,7 @@ export function Printers() {
   };
 
   return (
-    <section ref={ref} className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden bg-black">
+    <section ref={ref} className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden bg-background">
       {mounted && (
         <video
           ref={videoRef}
@@ -75,17 +75,17 @@ export function Printers() {
           muted
           playsInline
           preload="auto"
-          className="absolute top-0 left-0 w-full h-full object-cover -z-20 opacity-60"
+          className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-60"
           poster={posterImage}
         >
           <source src={PRINTER_VIDEO_URL} type="video/mp4" />
         </video>
       )}
 
-      <div className="absolute inset-0 bg-black/40 z-0" />
+      <div className="absolute inset-0 bg-black/40 z-10" />
 
       <motion.div
-        className="relative z-10 flex flex-col items-center text-center p-8 container-enterprise rounded-3xl"
+        className="relative z-20 flex flex-col items-center text-center p-8 container-enterprise rounded-3xl"
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
         variants={containerVariants}
