@@ -49,7 +49,7 @@ const VideoElement = () => {
 
     return (
         <motion.div 
-            className="absolute inset-0 overflow-hidden -z-10"
+            className="absolute inset-0 overflow-hidden z-0"
             style={{ y, scale }}
         >
             <video
@@ -61,7 +61,7 @@ const VideoElement = () => {
                 preload="auto"
                 className="absolute w-full h-full object-cover"
                 style={{
-                    filter: `brightness(0.5) contrast(1.1) saturate(0.8)`
+                    filter: `brightness(0.8) contrast(1.05) saturate(0.9)`
                 }}
                 poster={posterImageUrl}
             >
@@ -96,14 +96,14 @@ export const HeroVideoBackground = () => {
         setMounted(true);
     }, []);
 
-    if (!mounted) return <div className="absolute inset-0 bg-black -z-10" />;
+    if (!mounted) return <div className="absolute inset-0 bg-black z-0" />;
 
     return (
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 w-full h-full z-0">
             {!isMobile ? <VideoElement /> : <FallbackImage />}
             
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-background/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background/10 via-transparent to-background/10" />
             
             <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <div className="absolute top-0 h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent animate-scanline" />

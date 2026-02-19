@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -38,11 +39,11 @@ export function Hero() {
   };
   
   return (
-    <section className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden font-code bg-black">
+    <section className="relative h-[calc(100vh-80px)] w-full flex flex-col items-center justify-center overflow-hidden font-code">
       <HeroVideoBackground />
       
-      {/* Dark Overlay for Hero */}
-      <div className="absolute inset-0 bg-black/60 z-10" />
+      {/* Dark Overlay for Hero - calibrated for visibility */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
       
       <div className="relative z-20 flex flex-col items-center justify-center text-center p-4 w-full">
         <div className="w-full">
