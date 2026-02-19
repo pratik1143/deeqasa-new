@@ -91,8 +91,9 @@ export default function SupportPage() {
               <p className="text-muted-foreground italic mb-8">For critical system failures requiring <span className="text-primary font-bold">Priority-1</span> onsite intervention.</p>
               <div className="flex items-center gap-6">
                 <div className="flex-1 p-6 bg-white/5 rounded-2xl border border-white/10 text-center">
-                  <p className="text-[8px] font-black text-white/30 uppercase mb-1">Direct Line</p>
-                  <p className="text-xl font-black text-primary">+91 172 272 0000</p>
+                  <p className="text-[8px] font-black text-white/30 uppercase mb-1">Direct Lines</p>
+                  <p className="text-xl font-black text-primary">+91 85952 70950</p>
+                  <p className="text-xl font-black text-primary mt-1">+91 89755 06300</p>
                 </div>
                 <div className="flex-1 p-6 bg-white/5 rounded-2xl border border-white/10 text-center">
                   <p className="text-[8px] font-black text-white/30 uppercase mb-1">Response Target</p>

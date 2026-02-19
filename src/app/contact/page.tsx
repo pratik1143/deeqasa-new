@@ -16,7 +16,8 @@ import {
   ArrowRight,
   Loader2,
   Zap,
-  Lock
+  Lock,
+  UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,22 +89,28 @@ export default function ContactPage() {
 
                             <div className="grid grid-cols-1 gap-4">
                                 <InfoBlock 
+                                    icon={UserCheck} 
+                                    label="Point of Contact" 
+                                    value="Pratik Chaudhary" 
+                                    subValue="Store Manager"
+                                />
+                                <InfoBlock 
+                                    icon={Mail} 
+                                    label="Direct Exchange" 
+                                    value="sales@deeqasa.com" 
+                                    subValue="Encrypted SMTP Protocol"
+                                />
+                                <InfoBlock 
+                                    icon={Phone} 
+                                    label="Signal Frequencies" 
+                                    value="+91 85952 70950" 
+                                    subValue="+91 89755 06300"
+                                />
+                                <InfoBlock 
                                     icon={MapPin} 
                                     label="Operational Coordinates" 
                                     value="Sector 14, Chandigarh" 
                                     subValue="Regional Command Center"
-                                />
-                                <InfoBlock 
-                                    icon={Phone} 
-                                    label="Signal Frequency" 
-                                    value="+91 172 272 0000" 
-                                    subValue="Available 0900 - 1800 IST"
-                                />
-                                <InfoBlock 
-                                    icon={Mail} 
-                                    label="Data Exchange" 
-                                    value="hq@deeqasa.tech" 
-                                    subValue="Encrypted SMTP Protocol"
                                 />
                             </div>
 
