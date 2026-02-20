@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -62,16 +63,18 @@ export function Hero() {
           
               <motion.h1 
                 variants={itemVariants} 
-                className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-white uppercase leading-[1.1]"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-white uppercase leading-[1.1]"
               >
-                <span className="text-white/40">smart</span>
-                <span className="mx-4 text-white/10">/</span>
-                <span className="text-primary drop-shadow-[0_0_20px_rgba(0,224,255,0.5)]">secure</span>
-                <span className="mx-4 text-white/10">/</span>
-                <span className="text-white/40">sustainable</span>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-0">
+                  <span className="text-white/40">smart</span>
+                  <span className="hidden sm:block mx-4 text-white/10">/</span>
+                  <span className="text-primary drop-shadow-[0_0_20px_rgba(0,224,255,0.5)]">secure</span>
+                  <span className="hidden sm:block mx-4 text-white/10">/</span>
+                  <span className="text-white/40">sustainable</span>
+                </div>
               </motion.h1>
               
-              <motion.p variants={itemVariants} className="text-lg md:text-xl text-white/60 font-medium max-w-2xl">
+              <motion.p variants={itemVariants} className="text-lg md:text-xl text-white/60 font-medium max-w-2xl px-4">
                 {'> enterprise_it_solutions.init()'}
               </motion.p>
 
