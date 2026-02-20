@@ -316,7 +316,7 @@ export function QuotationBuilder() {
       <div className="w-full lg:w-[420px] bg-card border-r border-border flex flex-col no-print shrink-0 relative z-20">
         <div className="p-6 pb-0">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-[0_0_15px_rgba(0,224,255,0.2)]">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg shadow-primary/10">
                <Sparkles size={20} />
             </div>
             <div>
@@ -342,7 +342,7 @@ export function QuotationBuilder() {
                   >
                     <div className={cn(
                       "w-4 h-4 rounded-full border-2 z-10 bg-card transition-all duration-300",
-                      isActive ? "border-primary scale-125 shadow-[0_0_10px_rgba(0,224,255,0.5)]" : "border-border group-hover:border-primary/40"
+                      isActive ? "border-primary scale-125 shadow-sm" : "border-border group-hover:border-primary/40"
                     )} />
                     <div className="flex items-center gap-2">
                       <Icon size={14} className={cn("transition-colors", isActive ? "text-primary" : "text-muted-foreground")} />
@@ -418,7 +418,7 @@ export function QuotationBuilder() {
 
               {currentStep === 'items' && (
                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} className="space-y-6">
-                  <div className="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-xl border border-border">
                     <div className="flex items-center gap-2">
                       <PencilLine size={14} className="text-primary"/>
                       <span className="text-[10px] font-black uppercase tracking-widest text-primary">Manual Entry Mode</span>
@@ -468,7 +468,7 @@ export function QuotationBuilder() {
                       )}
                     </>
                   ) : (
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-4">
+                    <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-4">
                       <div className="space-y-2">
                         <Label className="text-[10px] font-bold uppercase text-muted-foreground">Item Model/Description</Label>
                         <Input 
@@ -545,7 +545,7 @@ export function QuotationBuilder() {
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                  <div className="p-4 bg-muted rounded-xl border border-border">
                     <p className="text-[10px] text-primary font-bold uppercase mb-2">Signature Policy</p>
                     <p className="text-[11px] text-muted-foreground leading-relaxed italic">
                       "The selected representative's name and contact information will be locked into the final document's legal validation block."
@@ -586,7 +586,7 @@ export function QuotationBuilder() {
             <Button 
               onClick={() => handleDownloadPdf(activeTab === 'quotation' ? 'quotation-export-root' : 'brochure-export-root', 'Enterprise_Proposal')} 
               size="sm" 
-              className="rounded-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-6 shadow-lg shadow-primary/20" 
+              className="rounded-full h-9 bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-6 shadow-lg" 
               disabled={isDownloading || !watchedLineItems?.length}
             >
               {isDownloading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Download size={14} className="mr-2"/>}

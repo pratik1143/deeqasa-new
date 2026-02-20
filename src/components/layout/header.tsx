@@ -41,10 +41,11 @@ export function Header() {
     const savedTheme = localStorage.getItem("theme") as "dark" | "light" | null;
     if (savedTheme) {
       setTheme(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
       document.documentElement.classList.toggle("light", savedTheme === "light");
-    } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
-      setTheme("light");
-      document.documentElement.classList.add("light");
+    } else {
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
     }
 
     const handleScroll = () => {
@@ -71,6 +72,7 @@ export function Header() {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
     document.documentElement.classList.toggle("light", newTheme === "light");
   };
 
@@ -99,8 +101,8 @@ export function Header() {
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b bg-background border-white/10 shadow-lg",
-      isScrolled && "shadow-primary/5 border-primary/10"
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b bg-background/80 backdrop-blur-md border-border",
+      isScrolled && "shadow-sm border-primary/10"
     )}>
       <div className="container-enterprise flex justify-between items-center h-full">
         <div className="flex items-center">
@@ -144,7 +146,7 @@ export function Header() {
         <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
-              className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-white/5 hover:text-foreground"
+              className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-accent hover:text-foreground"
               onClick={() => router.push('/contact')}
             >
               Contact Sales
@@ -190,8 +192,8 @@ export function Header() {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-background border-white/10 w-[300px] p-0 font-body">
-                <SheetHeader className="p-6 border-b border-white/5 bg-white/5">
+              <SheetContent side="right" className="bg-background border-border w-[300px] p-0 font-body">
+                <SheetHeader className="p-6 border-b border-border bg-muted/50">
                   <SheetTitle className="text-left">
                     <span className="text-xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none block">
                       DEEQASA TECH
@@ -216,9 +218,9 @@ export function Header() {
                     ))}
                   </nav>
                   
-                  <div className="pt-6 border-t border-white/5 space-y-4">
+                  <div className="pt-6 border-t border-border space-y-4">
                     <Button 
-                      className="w-full h-12 bg-white/5 border border-white/10 text-muted-foreground font-bold hover:bg-white/10 hover:text-foreground justify-start px-4"
+                      className="w-full h-12 bg-muted border border-border text-muted-foreground font-bold hover:bg-accent hover:text-foreground justify-start px-4"
                       onClick={() => { setIsMenuOpen(false); router.push('/contact'); }}
                     >
                       Contact Sales

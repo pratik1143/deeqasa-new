@@ -4,7 +4,49 @@
 
 @layer base {
   :root {
-    /* DEFAULT: DARK MODE */
+    /* LIGHT MODE - CLEAN ENTERPRISE */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 188 100% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 188 100% 42%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 188 100% 42%;
+    --radius: 0.75rem;
+    --emerald-hsl: 165 100% 42%;
+    
+    /* Sidebar Specifics - Light */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 188 100% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 188 100% 42%;
+
+    /* Chart Colors */
+    --chart-1: 188 100% 42%;
+    --chart-2: 165 100% 42%;
+    --chart-3: 0 84% 60%;
+    --chart-4: 210 100% 50%;
+    --chart-5: 280 100% 50%;
+  }
+
+  .dark {
+    /* DARK MODE - IMMERSIVE ENTERPRISE */
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
@@ -15,46 +57,25 @@
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
+    --muted: 0 0% 10%;
     --muted-foreground: 0 0% 63.9%;
     --accent: 188 100% 42%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 188 100% 42%;
-    --radius: 0.5rem;
-    --emerald-hsl: 165 100% 42%;
     
-    /* Chart Colors */
-    --chart-1: 188 100% 42%;
-    --chart-2: 165 100% 42%;
-    --chart-3: 0 84% 60%;
-    --chart-4: 210 100% 50%;
-    --chart-5: 280 100% 50%;
-  }
-
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 188 100% 42%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 188 100% 42%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 188 100% 42%;
+    /* Sidebar Specifics - Dark */
+    --sidebar-background: 0 0% 2%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 188 100% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-ring: 188 100% 42%;
   }
 }
 
@@ -71,7 +92,7 @@
 
 /* 
    ==========================================================================
-   PRECISION A4 PRINT ARCHITECTURE (ZERO BLANK PAGES & HD)
+   PRECISION A4 PRINT ARCHITECTURE
    ==========================================================================
 */
 
@@ -99,7 +120,7 @@
 
   .a4-page {
     width: 794px !important;
-    height: 1122px !important; /* Perfect A4 Height at 96dpi with safety buffer */
+    height: 1122px !important;
     min-height: 1122px !important;
     max-height: 1122px !important;
     margin: 0 !important;
@@ -121,22 +142,6 @@
     page-break-after: avoid !important;
     break-after: avoid !important;
     margin-bottom: 0 !important;
-  }
-
-  /* Kill 100vh and min-height issues in print */
-  *[style*="100vh"],
-  *[style*="min-height"] {
-    min-height: auto !important;
-    height: auto !important;
-  }
-
-  * {
-    box-sizing: border-box !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    image-rendering: crisp-edges !important;
-    background-attachment: scroll !important;
-    page-break-inside: avoid;
   }
 
   .no-print {
@@ -224,18 +229,19 @@
   border-left: 4px solid #111827 !important;
 }
 
-/* DEEQASA FUTURISTIC UI ELEMENTS */
+/* DEEQASA THEME UI ELEMENTS */
 .command-grid {
   background-size: 40px 40px;
   background-image: 
-    linear-gradient(to right, rgba(0, 224, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 224, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  @apply text-primary/5;
 }
 
 .scanline {
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 224, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent);
   position: absolute;
   top: 0;
   left: 0;
@@ -253,7 +259,7 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(0, 224, 255, 0.2), transparent 40%, transparent 60%, rgba(0, 224, 255, 0.1));
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.2), transparent 40%, transparent 60%, hsl(var(--primary) / 0.1));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
