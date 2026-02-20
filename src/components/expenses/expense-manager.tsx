@@ -24,7 +24,9 @@ import {
   Building2,
   ExternalLink,
   Image as ImageIcon,
-  Receipt
+  Receipt,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -47,6 +49,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -138,6 +141,23 @@ export function ExpenseManager() {
     }
   };
 
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    if (!isAdmin || !firestore) return;
+    const newStatus = currentStatus === 'Approved' ? 'Pending' : 'Approved';
+    try {
+      await updateDoc(doc(firestore, 'expenses', id), {
+        quotationStatus: newStatus,
+        updatedAt: serverTimestamp(),
+      });
+      toast({ 
+        title: "Status Synchronized", 
+        description: `Expense status migrated to ${newStatus}.`,
+      });
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Update Refused", description: e.message });
+    }
+  };
+
   const handleEdit = (expense: any) => {
     setSavedEditingId(expense.id);
     form.reset({
@@ -181,7 +201,7 @@ export function ExpenseManager() {
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-secondary/50 border border-border text-xs font-medium text-muted-foreground">
           <ShieldCheck size={14} className="text-primary"/>
-          Admin: {user?.email}
+          Admin Authorized: {user?.email}
         </div>
       </header>
 
@@ -340,17 +360,17 @@ export function ExpenseManager() {
           <Card className="shadow-sm border-border">
             <CardHeader className="pb-0">
               <CardTitle className="text-lg font-semibold">Expense Records</CardTitle>
-              <CardDescription>History of documented site visit expenses.</CardDescription>
+              <CardDescription>Registry of documented site visit expenses and approval statuses.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <ScrollArea className="h-[750px] w-full">
                 {isDataLoading ? (
                   <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
                     <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="text-sm">Loading records...</span>
+                    <span className="text-sm">Loading database records...</span>
                   </div>
                 ) : (
-                  <div className="min-w-[1000px]">
+                  <div className="min-w-[1050px]">
                     <Table>
                       <TableHeader className="bg-secondary/20">
                         <TableRow>
@@ -358,7 +378,8 @@ export function ExpenseManager() {
                           <TableHead>Employee & Company</TableHead>
                           <TableHead>Travel Route</TableHead>
                           <TableHead className="text-right">Total (₹)</TableHead>
-                          <TableHead className="text-center">Documents</TableHead>
+                          <TableHead className="text-center">Approval</TableHead>
+                          <TableHead className="text-center">Docs</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -386,11 +407,23 @@ export function ExpenseManager() {
                                 <span>{item.totalAmount?.toLocaleString('en-IN')}</span>
                                 <Badge variant={item.quotationStatus === 'Approved' ? 'default' : 'outline'} className={cn(
                                   "text-[10px] h-5 px-2",
+                                  item.quotationStatus === 'Approved' && "bg-emerald-500 hover:bg-emerald-600 border-none",
                                   item.quotationStatus === 'Sent' && "border-blue-500/30 text-blue-500",
                                   item.quotationStatus === 'Pending' && "border-yellow-500/30 text-yellow-500"
                                 )}>
+                                  {item.quotationStatus === 'Approved' ? <CheckCircle2 size={10} className="mr-1"/> : <Clock size={10} className="mr-1"/>}
                                   {item.quotationStatus}
                                 </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-3">
+                                <span className="text-[10px] font-bold uppercase text-muted-foreground/40">{item.quotationStatus === 'Approved' ? 'ON' : 'OFF'}</span>
+                                <Switch 
+                                  checked={item.quotationStatus === 'Approved'} 
+                                  onCheckedChange={() => handleToggleStatus(item.id, item.quotationStatus)}
+                                  className="data-[state=checked]:bg-emerald-500"
+                                />
                               </div>
                             </TableCell>
                             <TableCell className="text-center">
@@ -425,7 +458,7 @@ export function ExpenseManager() {
                           </TableRow>
                         )) : (
                           <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground italic">
+                            <TableCell colSpan={7} className="h-24 text-center text-muted-foreground italic">
                               No records found in the database.
                             </TableCell>
                           </TableRow>
