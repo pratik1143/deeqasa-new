@@ -1,6 +1,7 @@
 'use server';
 /**
  * @fileoverview This file defines a Genkit flow for fetching product data from a Google Sheet.
+ * It includes a deterministic de-duplication engine to ensure product models are unique.
  */
 
 import { ai } from '@/ai/genkit';
@@ -127,10 +128,18 @@ const getProductDataFlow = ai.defineFlow(
         };
       }).filter((p): p is NonNullable<typeof p> => p !== null);
 
-      // De-duplicate products based on the 'id' (SKU)
+      // De-duplicate products based on the 'model' name (Prefer model name as unique key)
+      // If multiple configurations share the same model name, keep only the first occurrence.
       const uniqueData = Array.from(
         parsedData.reduce((map, product) => {
-          if (!map.has(product.id)) map.set(product.id, product);
+          // Normalize model name for comparison, fallback to SKU if model is missing or generic
+          const key = (product.model && product.model !== '-') 
+            ? product.model.trim().toLowerCase() 
+            : product.id.trim().toLowerCase();
+            
+          if (!map.has(key)) {
+            map.set(key, product);
+          }
           return map;
         }, new Map<string, (typeof parsedData)[0]>()).values()
       );
