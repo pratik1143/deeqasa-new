@@ -82,6 +82,8 @@
         "quotationReference": { "type": "string" },
         "remarks": { "type": "string" },
         "visitDate": { "type": "string", "format": "date-time" },
+        "paymentLink": { "type": "string", "format": "uri", "description": "Link to payment screenshot or receipt." },
+        "invoiceLink": { "type": "string", "format": "uri", "description": "Link to the official invoice document." },
         "createdBy": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },

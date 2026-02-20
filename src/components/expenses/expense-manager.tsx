@@ -21,7 +21,10 @@ import {
   Loader2,
   Edit,
   Save,
-  Building2
+  Building2,
+  ExternalLink,
+  Image as ImageIcon,
+  Receipt
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { 
@@ -60,6 +63,8 @@ const ExpenseSchema = z.object({
   quotationReference: z.string().optional(),
   remarks: z.string().optional(),
   visitDate: z.string().min(1, "Visit date is required"),
+  paymentLink: z.string().optional(),
+  invoiceLink: z.string().optional(),
 });
 
 type ExpenseFormValues = z.infer<typeof ExpenseSchema>;
@@ -93,6 +98,8 @@ export function ExpenseManager() {
       quotationReference: '',
       remarks: '',
       visitDate: format(new Date(), 'yyyy-MM-dd'),
+      paymentLink: '',
+      invoiceLink: '',
     },
   });
 
@@ -144,6 +151,8 @@ export function ExpenseManager() {
       quotationReference: expense.quotationReference || '',
       remarks: expense.remarks || '',
       visitDate: expense.visitDate ? format(expense.visitDate.toDate(), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+      paymentLink: expense.paymentLink || '',
+      invoiceLink: expense.invoiceLink || '',
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -277,6 +286,24 @@ export function ExpenseManager() {
                       </FormItem>
                     )} />
 
+                    <div className="space-y-4 pt-2 border-t border-border">
+                      <FormField control={form.control} name="paymentLink" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2"><ImageIcon size={14} className="text-primary"/> Payment Screenshot Link</FormLabel>
+                          <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      
+                      <FormField control={form.control} name="invoiceLink" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2"><Receipt size={14} className="text-primary"/> Invoice Link</FormLabel>
+                          <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
                     <FormField control={form.control} name="remarks" render={({ field }) => (
                       <FormItem>
                         <FormLabel>Remarks</FormLabel>
@@ -323,7 +350,7 @@ export function ExpenseManager() {
                     <span className="text-sm">Loading records...</span>
                   </div>
                 ) : (
-                  <div className="min-w-[800px]">
+                  <div className="min-w-[1000px]">
                     <Table>
                       <TableHeader className="bg-secondary/20">
                         <TableRow>
@@ -331,6 +358,7 @@ export function ExpenseManager() {
                           <TableHead>Employee & Company</TableHead>
                           <TableHead>Travel Route</TableHead>
                           <TableHead className="text-right">Total (₹)</TableHead>
+                          <TableHead className="text-center">Documents</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -365,6 +393,25 @@ export function ExpenseManager() {
                                 </Badge>
                               </div>
                             </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                {item.paymentLink && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary" asChild>
+                                    <a href={item.paymentLink} target="_blank" rel="noopener noreferrer" title="View Payment Screenshot">
+                                      <ImageIcon size={14} />
+                                    </a>
+                                  </Button>
+                                )}
+                                {item.invoiceLink && (
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600" asChild>
+                                    <a href={item.invoiceLink} target="_blank" rel="noopener noreferrer" title="View Invoice">
+                                      <Receipt size={14} />
+                                    </a>
+                                  </Button>
+                                )}
+                                {!item.paymentLink && !item.invoiceLink && <span className="text-xs text-muted-foreground/40 italic">None</span>}
+                              </div>
+                            </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(item)}>
@@ -378,7 +425,7 @@ export function ExpenseManager() {
                           </TableRow>
                         )) : (
                           <TableRow>
-                            <TableCell colSpan={5} className="h-24 text-center text-muted-foreground italic">
+                            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground italic">
                               No records found in the database.
                             </TableCell>
                           </TableRow>
