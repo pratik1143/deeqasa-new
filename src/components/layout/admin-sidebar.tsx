@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  FileText,
+  Users,
   BrainCircuit,
+  FileText,
   Settings,
   LogOut,
   ChevronRight,
-  Zap,
-  Wallet
+  ShieldCheck,
+  TrendingUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,84 +29,64 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { useAuth, useUser } from "@/firebase";
+import { motion } from "framer-motion";
 
 const ADMIN_EMAILS = ['deeqasa@admin.in'];
 
 const baseAdminLinks = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Quotation Builder", href: "/quotation-builder", icon: FileText },
-  { name: "AI Intelligence", href: "/deal-intelligence", icon: BrainCircuit },
+  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Lead Management", href: "/dashboard/leads", icon: Users },
+  { name: "Sales Funnel", href: "/dashboard/funnel", icon: TrendingUp },
+  { name: "Intelligence", href: "/deal-intelligence", icon: BrainCircuit },
+  { name: "Quotations", href: "/quotation-builder", icon: FileText },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const auth = useAuth();
   const { user } = useUser();
-  const { state, setOpen, isMobile } = useSidebar();
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const { state } = useSidebar();
 
   const isAdminEmail = user && ADMIN_EMAILS.includes(user.email || '');
 
   const adminLinks = React.useMemo(() => {
-    if (isAdminEmail) {
-      return [...baseAdminLinks, { name: "Expense Management", href: "/expenses", icon: Wallet }];
-    }
-    return baseAdminLinks;
+    const links = [...baseAdminLinks];
+    // Additional admin-only links can be added here
+    return links;
   }, [isAdminEmail]);
 
   const handleSignOut = () => {
     auth.signOut();
   };
 
-  const startAutoHideTimer = React.useCallback(() => {
-    if (isMobile) return;
-    
-    if (state === "expanded") {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      
-      timerRef.current = setTimeout(() => {
-        setOpen(false);
-      }, 3000);
-    }
-  }, [state, setOpen, isMobile]);
-
-  const cancelAutoHideTimer = React.useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  React.useEffect(() => {
-    return () => cancelAutoHideTimer();
-  }, [cancelAutoHideTimer]);
-
   return (
     <Sidebar 
       collapsible="icon" 
-      className="border-r border-border bg-sidebar"
-      onMouseEnter={cancelAutoHideTimer}
-      onMouseLeave={startAutoHideTimer}
+      className="border-r border-slate-100 bg-white group-data-[collapsible=icon]:w-[80px]"
     >
-      <SidebarHeader className="p-4 border-b border-border bg-muted/30">
+      <SidebarHeader className="h-20 flex items-center px-6 border-b border-slate-50">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shrink-0 shadow-lg shadow-primary/20">
-            <Zap size={18} fill="currentColor" />
+          <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center text-white shrink-0 shadow-sm">
+            <ShieldCheck size={20} />
           </div>
           {state === "expanded" && (
-            <div className="flex flex-col">
-              <span className="text-sm font-black text-foreground uppercase tracking-tighter leading-none">ADMIN CORE</span>
-              <span className="text-[8px] font-bold text-primary uppercase tracking-[0.3em] mt-1">Terminal Active</span>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex flex-col"
+            >
+              <span className="text-sm font-black text-slate-900 tracking-tight leading-none uppercase">Deeqasa Core</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Admin Terminal</span>
+            </motion.div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-2 space-y-6">
+      <SidebarContent className="px-3 py-6">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground px-2 py-4">Main Modules</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 px-4 mb-4">Operations</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {adminLinks.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -115,14 +96,16 @@ export function AdminSidebar() {
                       isActive={isActive}
                       tooltip={item.name}
                       className={cn(
-                        "h-12 px-3 transition-all group",
-                        isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        "h-11 px-4 transition-all duration-200 rounded-lg",
+                        isActive 
+                          ? "bg-slate-900 text-white shadow-md font-bold" 
+                          : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                       )}
                     >
                       <Link href={item.href} className="flex items-center gap-3">
-                        <item.icon className={cn("shrink-0", isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary transition-colors")} />
-                        <span className="font-bold uppercase tracking-widest text-[11px]">{item.name}</span>
-                        {isActive && state === "expanded" && <ChevronRight className="ml-auto h-3 w-3" />}
+                        <item.icon className={cn("h-4.5 w-4.5 shrink-0", isActive ? "text-primary" : "text-slate-400")} />
+                        <span className="text-[13px] font-medium tracking-tight">{item.name}</span>
+                        {isActive && state === "expanded" && <ChevronRight className="ml-auto h-3.5 w-3.5 opacity-50" />}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -132,14 +115,22 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground px-2 py-4">System Utilities</SidebarGroupLabel>
+        <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 px-4 mb-4">Preferences</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className="h-12 px-3 text-muted-foreground hover:text-foreground hover:bg-muted group">
-                  <Settings className="shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="font-bold uppercase tracking-widest text-[11px]">System Config</span>
+                <SidebarMenuButton 
+                  asChild
+                  className={cn(
+                    "h-11 px-4 transition-all rounded-lg",
+                    pathname === "/dashboard/settings" ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                  )}
+                >
+                  <Link href="/dashboard/settings" className="flex items-center gap-3">
+                    <Settings className="h-4.5 w-4.5 shrink-0 text-slate-400" />
+                    <span className="text-[13px] font-medium tracking-tight">Setings & Security</span>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -147,22 +138,14 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border bg-muted/30">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3 px-2">
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            {state === "expanded" && (
-              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.4em]">Uplink Verified</span>
-            )}
-          </div>
-          <SidebarMenuButton 
-            onClick={handleSignOut}
-            className="h-12 px-3 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors group"
-          >
-            <LogOut className="shrink-0" />
-            <span className="font-bold uppercase tracking-widest text-[11px]">Terminate Session</span>
-          </SidebarMenuButton>
-        </div>
+      <SidebarFooter className="p-4 border-t border-slate-50 bg-slate-50/50">
+        <SidebarMenuButton 
+          onClick={handleSignOut}
+          className="h-11 px-4 text-slate-500 hover:text-destructive hover:bg-destructive/5 transition-all rounded-lg group"
+        >
+          <LogOut className="h-4.5 w-4.5 shrink-0" />
+          <span className="text-[13px] font-medium tracking-tight italic">Sign Out Protocol</span>
+        </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
   );

@@ -7,6 +7,9 @@ import { doc } from 'firebase/firestore';
 export interface UserProfile {
   email: string;
   role: 'admin' | 'user';
+  displayName?: string;
+  photoURL?: string;
+  designation?: string;
 }
 
 export interface UseUserWithRoleResult {

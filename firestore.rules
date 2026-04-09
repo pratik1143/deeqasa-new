@@ -44,5 +44,9 @@ service cloud.firestore {
     match /expenses/{expenseId} {
       allow get, list, create, update, delete: if isAdmin();
     }
+
+    match /leads/{leadId} {
+      allow read, write: if request.auth.token.email == 'deeqasa@admin.in';
+    }
   }
 }

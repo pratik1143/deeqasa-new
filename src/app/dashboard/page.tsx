@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserWithRole } from "@/firebase";
-import { FunnelAnalyzerDashboard } from "@/components/dashboard/funnel-analyzer-dashboard";
+import { DashboardHome } from "@/components/dashboard/dashboard-home";
 import { CenteredLoader } from "@/components/ui/centered-loader";
 import AccessDenied from "@/components/auth/access-denied";
 import { AdminLayout } from "@/components/layout/admin-layout";
@@ -22,16 +22,16 @@ export default function DashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
-                <CenteredLoader text="Verifying permissions..." />
+            <div className="flex flex-col min-h-screen bg-[#f8fafc] items-center justify-center">
+                <CenteredLoader text="Verifying mission protocols..." />
             </div>
         );
     }
     
     if (!user) {
          return (
-            <div className="flex flex-col min-h-screen bg-background items-center justify-center">
-                <CenteredLoader text="Redirecting to login..." />
+            <div className="flex flex-col min-h-screen bg-[#f8fafc] items-center justify-center">
+                <CenteredLoader text="Redirecting to terminal login..." />
             </div>
         );
     }
@@ -42,7 +42,7 @@ export default function DashboardPage() {
     
     return (
         <AdminLayout>
-            <FunnelAnalyzerDashboard />
+            <DashboardHome />
         </AdminLayout>
     );
 }

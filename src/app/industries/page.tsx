@@ -1,12 +1,10 @@
 'use client';
 
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { motion } from "framer-motion";
-import { Building2, GraduationCap, Hospital, Factory, Landmark, Cpu, ArrowRight } from "lucide-react";
+import { Building2, GraduationCap, Hospital, Factory, Cpu, ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { CorporatePageLayout } from "@/components/layout/corporate-page-layout";
 
 const industries = [
   {
@@ -48,67 +46,63 @@ const industries = [
 
 export default function IndustriesPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background font-body">
-      <Header />
-      <main className="flex-1 pt-32 pb-24">
-        <div className="container mx-auto px-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-24"
-          >
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground uppercase mb-6">
-              Sector <span className="text-primary">Expertise</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto font-medium">
-              Specialized infrastructure frameworks tailored for mission-critical industry requirements.
-            </p>
-          </motion.div>
-
-          <div className="space-y-32">
-            {industries.map((industry, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className={cn(
-                  "flex flex-col lg:flex-row gap-16 items-center",
-                  i % 2 !== 0 && "lg:flex-row-reverse"
-                )}
-              >
-                <div className="flex-1 space-y-8">
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                      <industry.icon size={32} />
+    <CorporatePageLayout 
+      title="Sector Expertise" 
+      subtitle="Specialized infrastructure frameworks tailored for mission-critical industry requirements."
+    >
+      <div className="container-enterprise pb-40">
+        <div className="space-y-64">
+          {industries.map((industry, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              viewport={{ once: true, margin: "-100px" }}
+              className={cn(
+                "flex flex-col lg:flex-row gap-32 items-center",
+                i % 2 !== 0 && "lg:flex-row-reverse"
+              )}
+            >
+              <div className="flex-1 space-y-12 text-center lg:text-left">
+                <div className="space-y-6">
+                  <div className="h-20 w-20 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-primary mb-10 mx-auto lg:ml-0 shadow-sm">
+                    <industry.icon size={36} />
+                  </div>
+                  <h2 className="text-6xl md:text-9xl font-black uppercase tracking-tighter leading-[0.85] text-slate-900">{industry.title}</h2>
+                </div>
+                
+                <p className="text-3xl text-slate-400 leading-relaxed font-bold italic max-w-2xl">
+                  {industry.useCase}
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10">
+                  {industry.benefits.map((benefit, j) => (
+                    <div key={j} className="flex items-center gap-6 px-10 py-6 bg-white rounded-[2rem] border border-slate-100 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:border-primary/30 hover:translate-x-2 transition-all duration-500 group">
+                      <ArrowRight size={20} className="text-primary group-hover:translate-x-1 transition-transform" />
+                      <span className="text-[12px] font-black uppercase tracking-widest text-slate-900">{benefit}</span>
                     </div>
-                    <h2 className="text-4xl font-black uppercase tracking-tight">{industry.title}</h2>
-                  </div>
-                  <p className="text-xl text-muted-foreground leading-relaxed italic">"{industry.useCase}"</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {industry.benefits.map((benefit, j) => (
-                      <div key={j} className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-xl border border-white/5">
-                        <ArrowRight size={14} className="text-primary" />
-                        <span className="text-xs font-bold uppercase tracking-widest">{benefit}</span>
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
-                <div className="flex-1 w-full h-[400px] relative rounded-[40px] overflow-hidden holographic-edge group">
-                  <Image 
-                    src={industry.image} 
-                    alt={industry.title} 
-                    fill 
-                    className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-primary/10 mix-blend-overlay" />
+              </div>
+              
+              <div className="flex-1 w-full h-[650px] relative rounded-[4rem] overflow-hidden group shadow-[0_50px_100px_-20px_rgba(0,0,0,0.1)]">
+                <Image 
+                  src={industry.image} 
+                  alt={industry.title} 
+                  fill 
+                  className="object-cover transition-transform duration-[3s] group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-colors duration-[1.5s]" />
+                <div className="absolute inset-0 border-[20px] border-white/5 group-hover:border-primary/5 transition-colors duration-1000 rounded-[4rem]" />
+                <div className="absolute inset-0 p-1 pointer-events-none">
+                   <div className="w-full h-full rounded-[3.8rem] border border-white/20" />
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </CorporatePageLayout>
   );
 }

@@ -43,7 +43,7 @@ export function Preloader({ onLoaded }: { onLoaded: () => void }) {
     <motion.div
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
-      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background"
+      className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white"
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,hsl(var(--primary)/0.1),transparent)]" />
       
@@ -73,7 +73,7 @@ export function Preloader({ onLoaded }: { onLoaded: () => void }) {
             </div>
             {/* Percentage */}
             <motion.div
-                className="font-code text-sm text-primary"
+                className="font-code text-sm text-primary font-bold"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1, transition: { delay: 0.5, duration: 1 } }}
             >

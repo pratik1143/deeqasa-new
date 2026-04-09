@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { LogOut, Menu, Sun, Moon, User as UserIcon } from "lucide-react";
+import { LogOut, Menu, User as UserIcon } from "lucide-react";
 import { useAuth, useUser } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -26,7 +26,6 @@ const navLinks = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -38,15 +37,7 @@ export function Header() {
   const logoClickTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "dark" | "light" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-      document.documentElement.classList.toggle("light", savedTheme === "light");
-    } else {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
+    // Removed forced dark mode to support system-wide light theme
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -68,13 +59,7 @@ export function Header() {
     };
   }, [router]);
 
-  const toggleTheme = () => {
-    const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-    document.documentElement.classList.toggle("light", newTheme === "light");
-  };
+
 
   const handleSignOut = async () => {
     await auth.signOut();
@@ -101,8 +86,8 @@ export function Header() {
 
   return (
     <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b bg-background/80 backdrop-blur-md border-border",
-      isScrolled && "shadow-sm border-primary/10"
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b border-black/5 bg-white/60 backdrop-blur-xl",
+      isScrolled && "shadow-sm bg-white/90 border-slate-100"
     )}>
       <div className="container-enterprise flex justify-between items-center h-full">
         <div className="flex items-center">
@@ -111,7 +96,7 @@ export function Header() {
             className="flex flex-col justify-center cursor-default select-none active:scale-[0.98] transition-transform"
           >
             <Link href="/" className="pointer-events-none">
-              <span className="text-2xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none">
+              <span className="text-2xl font-black tracking-tight text-black uppercase whitespace-nowrap leading-none font-[Outfit]">
                 DEEQASA TECH
               </span>
             </Link>
@@ -121,7 +106,7 @@ export function Header() {
           </div>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-6 h-full">
+        <nav className="hidden lg:flex items-center gap-8 h-full">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -129,13 +114,13 @@ export function Header() {
                 key={link.name} 
                 href={link.href} 
                 className={cn(
-                  "relative h-full flex items-center text-xs font-bold uppercase tracking-widest transition-colors duration-200 py-2",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  "relative h-full flex items-center text-xs font-black uppercase tracking-widest transition-colors duration-200 py-2 font-[Outfit]",
+                  isActive ? "text-primary" : "text-primary/70 hover:text-primary"
                 )}
               >
                 {link.name}
                 <span className={cn(
-                  "absolute bottom-0 left-0 w-full h-0.5 bg-primary transition-transform duration-300 scale-x-0 group-hover:scale-x-100",
+                  "absolute bottom-0 left-0 w-full h-[2.5px] bg-primary transition-transform duration-300 scale-x-0 group-hover:scale-x-100",
                   isActive && "scale-x-100"
                 )} />
               </Link>
@@ -146,7 +131,7 @@ export function Header() {
         <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
-              className="hidden xl:inline-flex text-muted-foreground font-bold hover:bg-accent hover:text-foreground"
+              className="hidden xl:inline-flex text-foreground/60 font-bold hover:bg-primary/10 hover:text-primary uppercase tracking-widest text-xs font-[Outfit]"
               onClick={() => router.push('/contact')}
             >
               Contact Sales
@@ -160,7 +145,7 @@ export function Header() {
               <div className="flex items-center gap-2">
                 <Button 
                   variant="outline" 
-                  className="hidden sm:flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold h-10 px-4 text-xs" 
+                  className="hidden sm:flex items-center gap-2 border-primary/30 text-primary bg-primary/10 font-bold h-10 px-4 text-xs font-[Outfit] uppercase" 
                   onClick={() => router.push('/dashboard')}
                 >
                   <UserIcon className="h-3.5 w-3.5" />
@@ -169,7 +154,7 @@ export function Header() {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="text-muted-foreground hover:text-destructive"
+                  className="text-slate-400 hover:text-primary transition-colors"
                   onClick={handleSignOut}
                 >
                   <LogOut className="h-4 w-4" />
@@ -177,25 +162,16 @@ export function Header() {
               </div>
             )}
 
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={toggleTheme}
-              className="text-muted-foreground hover:text-primary transition-colors"
-            >
-              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-            </Button>
-            
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
+                <Button variant="ghost" size="icon" className="lg:hidden text-slate-600 hover:bg-slate-100 hover:text-primary">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-background border-border w-[300px] p-0 font-body">
-                <SheetHeader className="p-6 border-b border-border bg-muted/50">
+              <SheetContent side="right" className="bg-white/95 backdrop-blur-2xl border-l border-slate-100 w-[300px] p-0 font-[Outfit]">
+                <SheetHeader className="p-6 border-b border-slate-100 bg-slate-50">
                   <SheetTitle className="text-left">
-                    <span className="text-xl font-black tracking-tight text-foreground uppercase whitespace-nowrap leading-none block">
+                    <span className="text-xl font-black tracking-tight text-slate-900 uppercase whitespace-nowrap leading-none block">
                       DEEQASA TECH
                     </span>
                     <p className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mt-2">HP CONNECT</p>
@@ -210,7 +186,7 @@ export function Header() {
                         onClick={() => setIsMenuOpen(false)}
                         className={cn(
                           "text-sm font-bold uppercase tracking-[0.2em] py-2 transition-colors",
-                          pathname === link.href ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                          pathname === link.href ? "text-primary" : "text-slate-400 hover:text-slate-900"
                         )}
                       >
                         {link.name}
@@ -218,9 +194,9 @@ export function Header() {
                     ))}
                   </nav>
                   
-                  <div className="pt-6 border-t border-border space-y-4">
+                  <div className="pt-6 border-t border-slate-100 space-y-4">
                     <Button 
-                      className="w-full h-12 bg-muted border border-border text-muted-foreground font-bold hover:bg-accent hover:text-foreground justify-start px-4"
+                      className="w-full h-12 bg-slate-50 border border-slate-100 text-slate-600 font-bold hover:bg-primary hover:text-white hover:border-primary justify-start px-4 uppercase tracking-widest text-xs"
                       onClick={() => { setIsMenuOpen(false); router.push('/contact'); }}
                     >
                       Contact Sales
@@ -230,7 +206,7 @@ export function Header() {
                       <>
                         <Button 
                           variant="outline" 
-                          className="w-full h-12 flex items-center gap-2 border-primary/30 text-primary bg-primary/5 font-bold justify-start px-4" 
+                          className="w-full h-12 flex items-center gap-2 border-primary/30 text-primary bg-primary/10 font-bold justify-start px-4 uppercase tracking-widest text-xs" 
                           onClick={() => { setIsMenuOpen(false); router.push('/dashboard'); }}
                         >
                           <UserIcon className="h-3.5 w-3.5" />
@@ -238,7 +214,7 @@ export function Header() {
                         </Button>
                         <Button 
                           variant="ghost" 
-                          className="w-full h-12 flex items-center gap-2 text-muted-foreground font-bold justify-start px-4" 
+                          className="w-full h-12 flex items-center gap-2 text-slate-400 font-bold justify-start px-4 uppercase tracking-widest text-xs hover:text-red-500 hover:bg-red-50" 
                           onClick={handleSignOut}
                         >
                           <LogOut className="h-4 w-4" />
@@ -249,7 +225,7 @@ export function Header() {
                   </div>
                 </div>
                 <div className="absolute bottom-8 left-6 right-6">
-                  <p className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-[0.3em] text-center">
+                  <p className="text-[10px] font-bold text-slate-200 uppercase tracking-[0.3em] text-center">
                     Secure Terminal v4.0.1
                   </p>
                 </div>

@@ -1,7 +1,5 @@
 'use client';
 
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { motion } from "framer-motion";
 import { 
   Cloud, 
@@ -12,13 +10,11 @@ import {
   Bot, 
   ArrowRight,
   Monitor,
-  Layout,
-  Terminal,
-  Activity
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CorporatePageLayout } from "@/components/layout/corporate-page-layout";
 
 const solutions = [
   { 
@@ -61,61 +57,50 @@ const solutions = [
 
 export default function SolutionsPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background font-body selection:bg-primary/30">
-      <Header />
-      <main className="flex-1 pt-32 pb-24 relative overflow-hidden">
-        <div className="fixed inset-0 command-grid pointer-events-none opacity-20" />
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-20"
-          >
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
-              <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Core Capability Matrix</span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-foreground uppercase leading-none mb-6">
-              Enterprise <br /> <span className="text-primary">Solutions</span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium italic">
-              "Precision-engineered technology architectures designed for the modern business era."
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {solutions.map((solution, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="h-full bg-card/40 backdrop-blur-xl border-white/5 hover:border-primary/30 transition-all group overflow-hidden relative holographic-edge">
-                  <CardHeader className="relative z-10">
-                    <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-                      <solution.icon size={28} />
-                    </div>
-                    <CardTitle className="text-2xl font-bold uppercase tracking-tight">{solution.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="relative z-10">
-                    <p className="text-muted-foreground leading-relaxed mb-8">{solution.description}</p>
-                    <Button asChild variant="outline" className="w-full h-12 border-white/10 hover:bg-primary hover:text-black font-black uppercase tracking-widest text-[10px] transition-all">
-                      <Link href={solution.href}>View Solution Architecture <ArrowRight className="ml-2 h-3 w-3" /></Link>
-                    </Button>
-                  </CardContent>
-                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                    <solution.icon size={120} />
+    <CorporatePageLayout 
+      title="Industrial Solutions" 
+      subtitle="Precision-engineered technology architectures designed for the modern business era."
+    >
+      <div className="container-enterprise pb-32">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {solutions.map((solution, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1, duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full bg-white border border-slate-100 hover:border-primary/40 transition-all duration-700 group overflow-hidden relative rounded-[2.5rem] p-4 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] hover:shadow-2xl">
+                <CardHeader className="relative z-10 pb-6 pt-10 px-8">
+                  <div className="h-20 w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center text-primary mb-10 group-hover:bg-primary group-hover:text-white transition-all duration-500 group-hover:shadow-[0_20px_40px_-10px_rgba(26,140,255,0.4)]">
+                    <solution.icon size={36} />
                   </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                  <CardTitle className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-tight mb-4 group-hover:text-primary transition-colors">
+                     {solution.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="relative z-10 flex flex-col h-full px-8 pb-10">
+                  <p className="text-slate-400 leading-relaxed mb-12 text-lg flex-grow font-bold italic">
+                    {solution.description}
+                  </p>
+                  <Button asChild variant="ghost" className="w-full h-16 border border-slate-100 hover:bg-slate-900 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all rounded-2xl group/btn">
+                    <Link href={solution.href} className="flex items-center justify-center gap-4">
+                      Explore Architecture 
+                      <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform duration-500" />
+                    </Link>
+                  </Button>
+                </CardContent>
+                
+                {/* Background Icon Watermark */}
+                <div className="absolute -bottom-16 -right-16 opacity-[0.02] pointer-events-none group-hover:opacity-[0.05] group-hover:scale-110 transition-all duration-1000 text-primary">
+                  <solution.icon size={300} />
+                </div>
+              </Card>
+            </motion.div>
+          ))}
         </div>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </CorporatePageLayout>
   );
 }

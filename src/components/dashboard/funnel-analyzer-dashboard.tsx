@@ -49,49 +49,39 @@ import {
   BrainCircuit, 
   Edit, 
   RefreshCw, 
-  AlertTriangle, 
-  Lightbulb, 
-  TrendingUp, 
   Target, 
-  Award, 
-  UserX, 
+  Activity, 
+  Globe, 
+  Loader2, 
   DollarSign, 
-  Bot,
-  Terminal,
-  Activity,
-  ShieldCheck,
-  Cpu,
-  Globe,
-  Loader2,
-  Lock
+  Bot, 
+  Cpu, 
+  ShieldCheck, 
+  Activity as PulseIcon 
 } from "lucide-react";
 import { FunnelAnalysisOutput, analyzeFunnelData } from "@/ai/flows/ai-funnel-analyzer";
 import { getSheetData } from "@/ai/flows/get-sheet-data";
 import { updateSheetData } from "@/ai/flows/update-sheet-data";
-import { Skeleton } from "../ui/skeleton";
 import { ScrollArea } from "../ui/scroll-area";
 import { CenteredLoader } from "../ui/centered-loader";
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import { Label } from "@/components/ui/label";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
 const chartConfig = {
-  revenue: { label: "Revenue", color: "hsl(var(--primary))" },
-  funnels: { label: "Funnels", color: "hsl(var(--primary))" },
-  won: { label: "Won", color: "hsl(var(--chart-2))" },
-  lost: { label: "Lost", color: "hsl(var(--chart-3))" },
-  pipeline: { label: "Pipeline", color: "hsl(var(--chart-4))" },
+  revenue: { label: "Revenue", color: "#1A8CFF" },
+  funnels: { label: "Funnels", color: "#1A8CFF" },
+  won: { label: "Won", color: "#10B981" },
+  lost: { label: "Lost", color: "#EF4444" },
+  pipeline: { label: "Pipeline", color: "#1A8CFF" },
 } satisfies ChartConfig;
 
 const EXCHANGE_RATE_USD_TO_INR = 80;
@@ -211,7 +201,7 @@ export function FunnelAnalyzerDashboard() {
 
   const {
     months, owners, segments, filteredData, totalFunnels, wonCount, lostCount,
-    pipelineCount, totalRevenue, wonRevenue, pipelineRevenue, revenueByMonthData,
+    pipelineCount, wonRevenue, pipelineRevenue, totalRevenue, revenueByMonthData,
     funnelsByOwnerData, funnelsBySegment, winRatioBySegment
   } = useMemo(() => {
     const months = ["all", ...Array.from(new Set(data.map((d) => d.closureMonth)))];
@@ -254,8 +244,7 @@ export function FunnelAnalyzerDashboard() {
         return acc;
     }, {} as Record<string, number>);
     
-    const allSegments = segments.filter(s => s !== 'all');
-    const winRatioBySegment = allSegments.reduce((acc, segment) => {
+    const winRatioBySegment = segments.filter(s => s !== 'all').reduce((acc, segment) => {
         const totalInSegment = data.filter(d => d.segment === segment && (d.status === 'Won' || d.status === 'Lost')).length;
         const wonInSegment = data.filter(d => d.segment === segment && d.status === 'Won').length;
         acc[segment] = totalInSegment > 0 ? Math.round((wonInSegment / totalInSegment) * 100) : 0;
@@ -314,13 +303,10 @@ export function FunnelAnalyzerDashboard() {
   
   if (error) {
     return (
-        <div className="container mx-auto py-8 px-4 font-code">
-            <Alert variant="destructive" className="bg-destructive/10 border-destructive/20">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle className="font-bold uppercase">Critical System Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-            <Button onClick={handleRefresh} variant="outline" className="mt-4 border-primary/20 hover:bg-primary/5">
+        <div className="container mx-auto py-8 px-4 font-[Outfit] text-white">
+            <h2 className="text-xl font-black uppercase text-red-500 mb-4">Critical System Error</h2>
+            <p className="text-white/60 mb-8">{error}</p>
+            <Button onClick={handleRefresh} variant="outline" className="border-white/10 hover:bg-white/5">
                 {isRefreshing ? <Loader2 className="w-4 h-4 mr-2 animate-spin"/> : <RefreshCw className="mr-2 h-4 w-4" />}
                  Force Reconnect
             </Button>
@@ -329,697 +315,434 @@ export function FunnelAnalyzerDashboard() {
   }
 
   const statusData = [
-    { name: 'Won', value: wonCount, fill: 'hsl(var(--chart-2))' },
-    { name: 'Lost', value: lostCount, fill: 'hsl(var(--chart-3))' },
-    { name: 'Pipeline', value: pipelineCount, fill: 'hsl(var(--chart-4))' },
+    { name: 'Won', value: wonCount, fill: '#10B981' },
+    { name: 'Lost', value: lostCount, fill: '#EF4444' },
+    { name: 'Pipeline', value: pipelineCount, fill: '#1A8CFF' },
   ];
 
-  const HolographicCard = ({ title, value, subValue, icon: Icon, isPrimary = false }: any) => (
+  const MetricCard = ({ title, value, subValue, icon: Icon, isPrimary = false }: any) => (
     <motion.div whileHover={{ scale: 1.02, y: -2 }} className="group">
       <Card className={cn(
-        "relative overflow-hidden bg-card backdrop-blur-xl border-border h-full transition-all duration-500 holographic-edge",
-        isPrimary && "border-primary/20 bg-primary/5"
+        "relative overflow-hidden bg-white border border-slate-100 h-full transition-all duration-700 shadow-sm hover:shadow-2xl",
+        isPrimary && "border-primary/20 bg-primary/5 shadow-primary/10"
       )}>
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
-            <CardDescription className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{title}</CardDescription>
-            <Icon className={cn("h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity", isPrimary ? "text-primary" : "text-muted-foreground")} />
+            <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{title}</CardDescription>
+            <Icon className={cn("h-4 w-4 opacity-40 group-hover:opacity-100 transition-opacity", isPrimary ? "text-primary" : "text-slate-400")} />
           </div>
-          <CardTitle className={cn("text-2xl font-bold tracking-tighter mt-1", isPrimary ? "text-primary shadow-primary/20 drop-shadow-[0_0_8px_rgba(0,224,255,0.4)]" : "text-foreground")}>
+          <CardTitle className={cn("text-2xl font-black tracking-tighter mt-1", isPrimary ? "text-primary drop-shadow-[0_0_10px_rgba(26,140,255,0.2)]" : "text-slate-900")}>
             {value}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-code text-muted-foreground uppercase tracking-widest">{subValue}</p>
-            <div className="text-[8px] font-bold text-primary/0 group-hover:text-primary/60 transition-all uppercase tracking-tighter">Analysis Mode</div>
-          </div>
+          <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{subValue}</p>
         </CardContent>
       </Card>
     </motion.div>
   );
 
   return (
-    <div className="relative min-h-screen font-code bg-background selection:bg-primary/30">
-      <div className="fixed inset-0 command-grid pointer-events-none" />
-      <div className="scanline hidden dark:block" />
-
-      <div className="max-w-[1280px] mx-auto px-6 relative z-10">
-        
-        <header className="pt-12 pb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-            <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
-                  <span className="text-[10px] font-black tracking-[0.4em] text-primary uppercase">Mission Control Alpha</span>
-                </div>
-                <h1 className="text-4xl font-black tracking-tighter text-foreground uppercase flex items-center gap-4">
-                  Funnel Intelligence <span className="text-muted-foreground/20">|</span> <span className="text-muted-foreground font-light">v4.0.1</span>
-                </h1>
-                <div className="flex items-center gap-4 text-muted-foreground text-[10px] font-bold uppercase tracking-widest">
-                  <div className="flex items-center gap-1.5"><ShieldCheck size={12} className="text-emerald-500/50"/> Secure Terminal</div>
-                  <div className="flex items-center gap-1.5"><Activity size={12} className="text-primary/50"/> System Online</div>
-                  <div className="flex items-center gap-1.5"><Globe size={12} className="text-blue-500/50"/> Data Synced</div>
-                </div>
-            </div>
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              disabled={isRefreshing}
-              className="group relative h-14 px-8 border-border bg-card hover:bg-primary/5 hover:border-primary/30 transition-all overflow-hidden shrink-0"
-            >
-              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className={cn("mr-3 h-5 w-5 flex items-center justify-center", isRefreshing && "radar-spin")}>
-                <RefreshCw className="h-4 w-4 text-primary" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-[0.2em]">{isRefreshing ? "Calibrating..." : "Refresh Matrix"}</span>
-            </Button>
+    <div className="space-y-12 pb-20 font-[Outfit] text-slate-900">
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+      >
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-2 w-2 rounded-full bg-primary animate-ping" />
+            <span className="text-[10px] font-black text-primary uppercase tracking-[0.5em]">Central Intelligence Matrix</span>
           </div>
-        </header>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-12 p-6 bg-card border border-border rounded-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-2 opacity-5"><Terminal size={40} /></div>
-          <h3 className="text-[10px] font-black col-span-full uppercase tracking-[0.4em] text-primary/60 mb-2">Filter Parameters</h3>
-          
-          <Select value={monthFilter} onValueChange={(v) => triggerReprocess(setMonthFilter, v)}>
-            <SelectTrigger className="bg-background border-border h-12 focus:ring-primary/30">
-              <SelectValue placeholder="Closure Period" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {months.map((m) => (
-                <SelectItem key={m} value={m} className="text-xs">{m === 'all' ? 'All Temporal Cycles' : m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={ownerFilter} onValueChange={(v) => triggerReprocess(setOwnerFilter, v)}>
-            <SelectTrigger className="bg-background border-border h-12 focus:ring-primary/30">
-              <SelectValue placeholder="Asset Owner" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {owners.map((o) => (
-                <SelectItem key={o} value={o} className="text-xs">{o === 'all' ? 'All Network Assets' : o}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={segmentFilter} onValueChange={(v) => triggerReprocess(setSegmentFilter, v)}>
-            <SelectTrigger className="bg-background border-border h-12 focus:ring-primary/30">
-              <SelectValue placeholder="Market Segment" />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border-border">
-              {segments.map((s) => (
-                <SelectItem key={s} value={s} className="text-xs">{s === 'all' ? 'All Market Sectors' : s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center gap-3 px-4 bg-muted/50 rounded-md border border-border">
-            <Cpu size={16} className="text-primary/40" />
-            <div className="flex-1 overflow-hidden">
-              <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Processing Node</div>
-              <div className="text-[10px] font-bold text-primary truncate">DEEQASA-CORE-01</div>
-            </div>
-          </div>
+          <h1 className="text-6xl md:text-8xl font-black text-slate-900 uppercase tracking-tighter leading-none">
+            Funnel <span className="text-primary italic">Hub</span>
+          </h1>
+          <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-4 max-w-xl leading-relaxed">
+            Real-time synchronization with primary enterprise data pipelines. 
+            Calibrating success probabilities across global sectors.
+          </p>
         </div>
+        
+        <Button 
+          onClick={handleRefresh} 
+          variant="outline" 
+          disabled={isRefreshing}
+          className="h-14 px-8 border-slate-100 bg-white hover:bg-slate-50 hover:border-primary/30 transition-all font-black uppercase tracking-widest text-[10px] shadow-sm"
+        >
+          <RefreshCw className={cn("mr-3 h-4 w-4 text-primary", isRefreshing && "animate-spin")} />
+          {isRefreshing ? "Calibrating..." : "Refresh Matrix"}
+        </Button>
+      </motion.div>
 
-        <AnimatePresence>
-          {isReprocessing && (
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-background/20 backdrop-blur-[2px] flex items-center justify-center pointer-events-none"
-            >
-              <div className="flex flex-col items-center gap-4">
-                <Loader2 className="h-12 w-12 text-primary animate-spin opacity-40" />
-                <span className="text-[10px] font-black text-primary tracking-[0.5em] uppercase">Recalibrating Charts...</span>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
-          <HolographicCard 
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <MetricCard 
             title="Validated Revenue" 
             value={usdCurrencyFormatter.format(wonRevenue)} 
             subValue={inrCurrencyFormatter.format(wonRevenue * EXCHANGE_RATE_USD_TO_INR)} 
             icon={DollarSign}
             isPrimary
-          />
-          <HolographicCard 
+        />
+        <MetricCard 
             title="Pipeline Velocity" 
             value={usdCurrencyFormatter.format(pipelineRevenue)} 
             subValue={inrCurrencyFormatter.format(pipelineRevenue * EXCHANGE_RATE_USD_TO_INR)} 
-            icon={Activity}
-          />
-          <HolographicCard 
+            icon={PulseIcon}
+        />
+        <MetricCard 
             title="Conversion Logic" 
             value={(wonCount + lostCount) > 0 ? `${Math.round((wonCount / (wonCount + lostCount)) * 100)}%` : '0%'} 
             subValue="Historical Win Rate" 
             icon={Target}
-          />
-          <HolographicCard 
+        />
+        <MetricCard 
             title="Network Load" 
             value={totalFunnels} 
             subValue="Active Data Points" 
             icon={Cpu}
-          />
+        />
+      </div>
+
+      {/* Filters Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+        <div className="space-y-2">
+            <Label className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-300 ml-4">Temporal Cycle</Label>
+            <Select value={monthFilter} onValueChange={(v) => triggerReprocess(setMonthFilter, v)}>
+                <SelectTrigger className="bg-slate-50 border-slate-100 h-14 rounded-xl focus:ring-primary/40 text-slate-900 font-black uppercase tracking-widest text-[10px]">
+                    <SelectValue placeholder="All Cycles" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-100 text-slate-900">
+                    {months.map((m) => (
+                        <SelectItem key={m} value={m} className="uppercase font-black text-[10px] tracking-widest py-3">{m}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
 
-        {isMounted && (
-          <div className="space-y-12">
-            <div className="grid gap-12 md:grid-cols-2">
-                <Card className="bg-card border-border overflow-hidden holographic-edge group">
-                  <CardHeader className="border-b border-border py-4 bg-muted/30">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-xs font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                          <Activity size={14} className="text-primary"/> Live Status Ring
-                        </CardTitle>
-                        <span className="text-[8px] font-bold text-muted-foreground uppercase">Module: ORBIT-X</span>
-                      </div>
-                  </CardHeader>
-                  <CardContent className="h-[350px] relative flex items-center justify-center p-0">
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-48 h-48 rounded-full border border-primary/10 animate-spin-slow" style={{ animationDuration: '20s' }} />
-                        <div className="w-64 h-64 rounded-full border border-border animate-spin-slow" style={{ animationDuration: '30s', animationDirection: 'reverse' }} />
-                        <div className="text-center">
-                          <div className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Status</div>
-                          <div className="text-[10px] font-bold text-primary uppercase">Stable</div>
-                        </div>
-                      </div>
-                      <ChartContainer config={chartConfig} className="h-full w-full">
-                        <PieChart>
-                            <Tooltip content={<ChartTooltipContent hideLabel className="bg-popover border-border text-[10px]" />} />
-                            <Pie 
-                                data={statusData} 
-                                dataKey="value" 
-                                nameKey="name" 
-                                innerRadius={85} 
-                                outerRadius={105} 
-                                paddingAngle={8}
-                                stroke="none"
-                            >
-                              {statusData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} fillOpacity={0.8} />
-                              ))}
-                            </Pie>
-                            <Legend verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '20px', textTransform: 'uppercase', letterSpacing: '1px' }} />
-                        </PieChart>
-                      </ChartContainer>
-                  </CardContent>
+        <div className="space-y-2">
+            <Label className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-300 ml-4">Asset Controller</Label>
+            <Select value={ownerFilter} onValueChange={(v) => triggerReprocess(setOwnerFilter, v)}>
+                <SelectTrigger className="bg-slate-50 border-slate-100 h-14 rounded-xl focus:ring-primary/40 text-slate-900 font-black uppercase tracking-widest text-[10px]">
+                    <SelectValue placeholder="All Asset Controllers" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-100 text-slate-900">
+                    {owners.map((o) => (
+                        <SelectItem key={o} value={o} className="uppercase font-black text-[10px] tracking-widest py-3">{o}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+
+        <div className="space-y-2">
+            <Label className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-300 ml-4">Market Sector</Label>
+            <Select value={segmentFilter} onValueChange={(v) => triggerReprocess(setSegmentFilter, v)}>
+                <SelectTrigger className="bg-slate-50 border-slate-100 h-14 rounded-xl focus:ring-primary/40 text-slate-900 font-black uppercase tracking-widest text-[10px]">
+                    <SelectValue placeholder="All Market Sectors" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-100 text-slate-900">
+                    {segments.map((s) => (
+                        <SelectItem key={s} value={s} className="uppercase font-black text-[10px] tracking-widest py-3">{s}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
+      </div>
+
+      {/* Visualization Grid */}
+      {isMounted && (
+        <div className="space-y-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <Card className="bg-white border border-slate-100 overflow-hidden rounded-[2rem] shadow-sm">
+                    <CardHeader className="border-b border-slate-50 py-6 bg-slate-50/50">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Live Status Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[400px] p-4 text-slate-900">
+                        <ChartContainer config={chartConfig} className="h-full w-full">
+                            <PieChart>
+                                <Tooltip content={<ChartTooltipContent hideLabel className="bg-white border-slate-100 text-slate-900 rounded-xl font-bold shadow-xl" />} />
+                                <Pie 
+                                    data={statusData} 
+                                    dataKey="value" 
+                                    nameKey="name" 
+                                    innerRadius={90} 
+                                    outerRadius={120} 
+                                    paddingAngle={10}
+                                    stroke="none"
+                                >
+                                    {statusData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    ))}
+                                </Pie>
+                                <Legend verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: '900', paddingTop: '30px', textTransform: 'uppercase', letterSpacing: '2px', color: '#94a3b8' }} />
+                            </PieChart>
+                        </ChartContainer>
+                    </CardContent>
                 </Card>
 
-                <Card className="bg-card border-border overflow-hidden holographic-edge">
-                  <CardHeader className="border-b border-border py-4 bg-muted/30">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-xs font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                          <Target size={14} className="text-primary"/> Asset Performance Scanner
-                        </CardTitle>
-                        <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8px] font-black text-emerald-400 uppercase">Live Tracking</div>
-                      </div>
-                  </CardHeader>
-                  <CardContent className="h-[350px] p-6 pt-10">
-                      <ChartContainer config={chartConfig} className="h-full w-full">
-                        <BarChart data={funnelsByOwnerData} layout="vertical" margin={{ left: 20, right: 40 }}>
-                            <CartesianGrid horizontal={false} stroke="hsl(var(--border))" strokeDasharray="3 3" />
-                            <XAxis type="number" hide />
-                            <YAxis 
-                                type="category" 
-                                dataKey="name" 
-                                width={100} 
-                                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeights: 'bold' }} 
-                                axisLine={false}
-                                tickLine={false}
-                            />
-                            <Tooltip cursor={{ fill: 'hsl(var(--muted) / 0.5)' }} content={<ChartTooltipContent />} />
-                            <Bar 
-                              dataKey="funnels" 
-                              fill="hsl(var(--primary))" 
-                              radius={[0, 4, 4, 0]} 
-                              barSize={12}
-                            >
-                              {funnelsByOwnerData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fillOpacity={0.6} className="hover:fill-opacity-100 transition-all cursor-pointer" />
-                              ))}
-                            </Bar>
-                        </BarChart>
-                      </ChartContainer>
-                  </CardContent>
+                <Card className="bg-white border border-slate-100 overflow-hidden rounded-[2rem] shadow-sm">
+                    <CardHeader className="border-b border-slate-50 py-6 bg-slate-50/50">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Controller Performance Monitor</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-[400px] p-8">
+                        <ChartContainer config={chartConfig} className="h-full w-full">
+                            <BarChart data={funnelsByOwnerData} layout="vertical" margin={{ left: 20, right: 40 }}>
+                                <CartesianGrid horizontal={false} stroke="rgba(0,0,0,0.05)" />
+                                <XAxis type="number" hide />
+                                <YAxis 
+                                    type="category" 
+                                    dataKey="name" 
+                                    width={120} 
+                                    tick={{ fill: 'rgba(0,0,0,0.4)', fontSize: 10, fontWeight: '900' }} 
+                                    axisLine={false}
+                                    tickLine={false}
+                                />
+                                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} content={<ChartTooltipContent className="bg-white border-slate-100 text-slate-900 rounded-xl shadow-xl" />} />
+                                <Bar dataKey="funnels" fill="#1A8CFF" radius={[0, 8, 8, 0]} barSize={16} />
+                            </BarChart>
+                        </ChartContainer>
+                    </CardContent>
                 </Card>
             </div>
 
-            <Card className="bg-card border-border overflow-hidden holographic-edge">
-                <CardHeader className="border-b border-border py-4 bg-muted/30">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-xs font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                        <TrendingUp size={14} className="text-primary"/> Temporal Revenue Trajectory
-                      </CardTitle>
-                      <div className="flex items-center gap-4">
-                        <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Scanning cycle: 30D</div>
-                        <Lock size={12} className="text-muted-foreground/20"/>
-                      </div>
-                    </div>
+            <Card className="bg-white border border-slate-100 overflow-hidden rounded-[2rem] shadow-sm">
+                <CardHeader className="border-b border-slate-50 py-6 bg-slate-50/50">
+                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Temporal Revenue Projection</CardTitle>
                 </CardHeader>
-                <CardContent className="h-[400px] p-8">
+                <CardContent className="h-[450px] p-12">
                     <ChartContainer config={chartConfig} className="h-full w-full">
                         <LineChart data={revenueByMonthData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                            <CartesianGrid stroke="hsl(var(--border))" vertical={false} />
-                            <XAxis 
-                                dataKey="name" 
-                                tickLine={false} 
-                                axisLine={false} 
-                                tickMargin={15}
-                                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeights: 'bold' }}
-                            />
+                            <CartesianGrid stroke="rgba(0,0,0,0.05)" vertical={false} />
+                            <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fill: 'rgba(0,0,0,0.4)', fontSize: 10, fontWeight: '900' }} />
                             <YAxis 
                                 tickFormatter={(v) => `$${(v as number / 1000).toFixed(0)}k`}
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeights: 'bold' }}
+                                tick={{ fill: 'rgba(0,0,0,0.4)', fontSize: 10, fontWeight: '900' }}
                             />
-                            <Tooltip content={<ChartTooltipContent formatter={(v) => usdCurrencyFormatter.format(v as number)} />} />
+                            <Tooltip content={<ChartTooltipContent formatter={(v) => usdCurrencyFormatter.format(v as number)} className="bg-white border-slate-100 text-slate-900 rounded-xl shadow-xl" />} />
                             <Line 
                                 type="monotone" 
                                 dataKey="revenue" 
-                                stroke="hsl(var(--primary))" 
-                                strokeWidth={4} 
-                                dot={{ r: 5, fill: 'hsl(var(--primary))', strokeWidth: 2, stroke: 'hsl(var(--background))' }} 
-                                activeDot={{ r: 8, stroke: 'hsl(var(--primary))', strokeWidth: 2, fill: 'hsl(var(--background))' }}
-                                animationDuration={2000}
+                                stroke="#1A8CFF" 
+                                strokeWidth={6} 
+                                dot={{ r: 6, fill: '#1A8CFF', strokeWidth: 3, stroke: '#fff' }} 
+                                activeDot={{ r: 10, stroke: '#1A8CFF', strokeWidth: 4, fill: '#fff' }}
                             />
                         </LineChart>
                     </ChartContainer>
                 </CardContent>
             </Card>
 
-            <Card className="flex flex-col border-primary/20 bg-card/80 backdrop-blur-3xl overflow-hidden holographic-edge">
-                <CardHeader className="bg-primary/5 border-b border-border relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-5"><BrainCircuit size={80}/></div>
-                    <CardTitle className="flex items-center gap-3 text-lg font-black uppercase tracking-[0.2em] text-primary">
-                      <BrainCircuit size={24} className="text-primary animate-pulse"/> AI Funnel Command Logic
+            {/* AI Intelligence Hub */}
+            <Card className="bg-white border border-primary/20 backdrop-blur-3xl overflow-hidden rounded-[3rem] p-1 shadow-2xl">
+                <CardHeader className="bg-primary/5 p-12 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-12 opacity-10"><BrainCircuit size={120} className="text-primary"/></div>
+                    <CardTitle className="flex items-center gap-4 text-3xl font-black uppercase tracking-tighter text-primary">
+                      <PulseIcon className="animate-pulse" /> Neural Intelligence Matrix
                     </CardTitle>
-                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Automated Strategic Intelligence Synthesis</CardDescription>
+                    <CardDescription className="text-[10px] font-black uppercase tracking-[0.5em] text-primary/40 mt-4 leading-relaxed max-w-lg">
+                        Automated strategic synthesis utilizing multi-vector predictive analysis across global funnel pipelines.
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col min-h-[500px] p-8">
+                <CardContent className="min-h-[500px] p-12 flex flex-col">
                     {isAnalyzing ? (
-                        <div className="m-auto w-full max-w-lg space-y-8">
-                            <div className="flex flex-col items-center gap-4">
-                              <Bot size={48} className="text-primary animate-bounce" />
-                              <p className="text-[10px] font-black text-primary tracking-[0.5em] uppercase">Synthesizing Intelligence Matrix...</p>
-                            </div>
-                            <div className="space-y-4">
-                              <div className="h-[2px] bg-primary/20 overflow-hidden relative rounded-full">
-                                <div className="absolute inset-0 w-full h-full bg-primary animate-line-loader" style={{ background: 'linear-gradient(90deg, transparent, hsl(var(--primary)), transparent)', backgroundSize: '200% 100%' }} />
-                              </div>
-                              <div className="grid grid-cols-3 gap-2">
-                                <Skeleton className="h-1 w-full bg-muted" />
-                                <Skeleton className="h-1 w-full bg-primary/20" />
-                                <Skeleton className="h-1 w-full bg-muted" />
-                              </div>
-                            </div>
+                        <div className="m-auto flex flex-col items-center gap-8">
+                            <Bot size={64} className="text-primary animate-pulse" />
+                            <span className="text-[10px] font-black text-primary tracking-[0.8em] uppercase animate-pulse">Synchronizing Neural Net...</span>
                         </div>
                     ) : aiInsights ? (
-                        <ScrollArea className="h-[600px] pr-6">
-                            <div className="space-y-10">
-                              <div className="bg-muted/30 p-6 rounded-xl border border-border">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-4 flex items-center gap-2">
-                                      <Terminal size={14}/> Executive Intelligence Summary
-                                    </h4>
-                                    <p className="text-sm text-foreground/70 leading-relaxed font-medium">{aiInsights.executiveSummary}</p>
+                        <ScrollArea className="h-[600px] pr-8">
+                            <div className="space-y-12">
+                                <div className="p-8 bg-slate-50 rounded-3xl border border-slate-100">
+                                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-6">Executive Summary</h4>
+                                    <p className="text-lg text-slate-600 leading-relaxed font-medium italic">"{aiInsights.executiveSummary}"</p>
                                 </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <Card className="bg-card border-primary/30 holographic-edge">
-                                      <CardHeader className="p-5 border-b border-border">
-                                          <CardTitle className="text-xs flex items-center gap-2 text-primary font-black uppercase tracking-widest"><DollarSign size={16} /> Projected Trajectory</CardTitle>
-                                      </CardHeader>
-                                      <CardContent className="p-5">
-                                          <p className="text-sm text-muted-foreground leading-relaxed italic">"{aiInsights.revenueForecast.forecast}"</p>
-                                          <div className="mt-6 flex items-center justify-between">
-                                            <span className="text-[10px] font-black text-primary/40 uppercase tracking-widest">Confidence Index</span>
-                                            <span className="text-xl font-black text-primary font-mono">{aiInsights.revenueForecast.confidence}%</span>
-                                          </div>
-                                          <div className="w-full h-1 bg-muted rounded-full mt-2 overflow-hidden">
-                                            <motion.div initial={{ width: 0 }} animate={{ width: `${aiInsights.revenueForecast.confidence}%` }} className="h-full bg-primary shadow-[0_0_10px_rgba(0,224,255,0.5)]" />
-                                          </div>
-                                      </CardContent>
-                                  </Card>
-
-                                  <div className="space-y-4">
-                                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground px-2">Critical Alerts</h4>
-                                      {aiInsights.smartAlerts.map((alert, i) => (
-                                          <motion.div key={i} initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.1 }}>
-                                            <Alert variant={alert.priority === 'High' ? 'destructive' : 'default'} className={cn(
-                                              "border-border bg-card",
-                                              alert.priority === 'Medium' && 'border-amber-500/30 text-amber-600 [&>svg]:text-amber-600'
-                                            )}>
-                                                <AlertTriangle className="h-4 w-4" />
-                                                <AlertTitle className="text-[10px] font-black uppercase tracking-widest">{alert.title}</AlertTitle>
-                                                <AlertDescription className="text-xs text-muted-foreground">{alert.description}</AlertDescription>
-                                            </Alert>
-                                          </motion.div>
-                                      ))}
-                                  </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <Card className="bg-white border border-slate-100 rounded-3xl shadow-sm">
+                                        <CardHeader className="p-8 border-b border-slate-50">
+                                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-primary">Projected Revenue Trajectory</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-8">
+                                            <p className="text-sm text-slate-500 leading-relaxed mb-8">"{aiInsights.revenueForecast.forecast}"</p>
+                                            <div className="flex items-center justify-between border-t border-slate-50 pt-8">
+                                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Confidence Rating</span>
+                                                <span className="text-3xl font-black text-primary">{aiInsights.revenueForecast.confidence}%</span>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
-
-                                <div>
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600/60 mb-4 px-2">High-Probability Targets</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {aiInsights.topOpportunities.map((opp, i) => (
-                                            <Card key={i} className="bg-card border-emerald-500/20 group hover:border-emerald-500/50 transition-all">
-                                              <CardHeader className="p-4">
-                                                <CardTitle className="text-[11px] font-black uppercase tracking-tight text-emerald-600 flex items-center gap-2"><Lightbulb size={14}/>{opp.title}</CardTitle>
-                                                <CardDescription className="text-[10px] text-muted-foreground leading-tight mt-1">{opp.description}</CardDescription>
-                                              </CardHeader>
-                                              <CardFooter className="p-4 pt-0">
-                                                  <div className="w-full flex items-center gap-2 px-3 py-2 bg-emerald-500/5 rounded-md border border-emerald-500/10">
-                                                    <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter">CMD:</span>
-                                                    <span className="text-[9px] font-bold text-emerald-700 truncate">{opp.nextAction}</span>
-                                                  </div>
-                                              </CardFooter>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <Accordion type="single" collapsible className="w-full space-y-2">
-                                    <AccordionItem value="leakage" className="border-border bg-muted/20 rounded-xl px-4">
-                                        <AccordionTrigger className="text-xs font-black uppercase tracking-[0.2em] hover:text-primary no-underline py-4">
-                                          <div className="flex items-center gap-3"><Target size={14} className="text-primary"/> Segment Leakage Analysis</div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="pb-6">
-                                            <div className="p-4 border-l-2 border-destructive/40 bg-destructive/5 mb-4">
-                                              <h5 className="text-[10px] font-black text-destructive uppercase tracking-widest mb-1">Critical Sector: {aiInsights.funnelLeakageAnalysis.primaryLeakagePoint}</h5>
-                                              <p className="text-xs text-muted-foreground leading-relaxed italic">{aiInsights.funnelLeakageAnalysis.insight}</p>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                    <AccordionItem value="performance" className="border-border bg-muted/20 rounded-xl px-4">
-                                        <AccordionTrigger className="text-xs font-black uppercase tracking-[0.2em] hover:text-primary no-underline py-4">
-                                          <div className="flex items-center gap-3"><Award size={14} className="text-primary"/> Tactical Performance Readout</div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="pb-6 space-y-4">
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                                              <div className="flex items-center gap-2 mb-2">
-                                                <Award size={14} className="text-emerald-600"/>
-                                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Top Asset</span>
-                                              </div>
-                                              <h5 className="text-sm font-bold text-foreground mb-1">{aiInsights.ownerPerformance.topPerformer.name}</h5>
-                                              <p className="text-[10px] text-muted-foreground leading-relaxed italic">{aiInsights.ownerPerformance.topPerformer.reason}</p>
-                                            </div>
-                                            <div className="p-4 rounded-lg bg-amber-500/5 border border-amber-500/10">
-                                              <div className="flex items-center gap-2 mb-2">
-                                                <UserX size={14} className="text-amber-600"/>
-                                                <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Needs Calibration</span>
-                                              </div>
-                                              <h5 className="text-sm font-bold text-foreground mb-1">{aiInsights.ownerPerformance.needsAttention.name}</h5>
-                                              <p className="text-[10px] text-muted-foreground leading-relaxed italic">{aiInsights.ownerPerformance.needsAttention.reason}</p>
-                                            </div>
-                                          </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                </Accordion>
                             </div>
                         </ScrollArea>
                     ) : (
-                        <div className="m-auto text-center p-12 border-2 border-dashed border-border rounded-3xl group hover:border-primary/30 transition-all">
-                            <Bot className="mx-auto h-16 w-16 text-muted-foreground/20 group-hover:text-primary/40 transition-all mb-6" />
-                            <h3 className="text-xl font-black text-foreground uppercase tracking-[0.3em] mb-3">AI Engine Standby</h3>
-                            <p className="max-w-xs mx-auto text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] leading-relaxed">
-                              Uplink ready for funnel analysis. Requesting command authorization to synthesize live data points.
+                        <div className="m-auto text-center p-20 border-2 border-dashed border-slate-200 rounded-[3rem] group hover:border-primary/20 transition-all cursor-pointer bg-slate-50/30" onClick={handleAnalyze}>
+                            <Bot size={80} className="mx-auto text-slate-200 group-hover:text-primary/30 transition-all mb-8" />
+                            <h3 className="text-2xl font-black text-slate-900 uppercase tracking-[0.4em] mb-4">Awaiting Command</h3>
+                            <p className="max-w-xs mx-auto text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] leading-relaxed">
+                                Executive uplink ready for neural synthesis. Execute protocol to generate intelligence readout.
                             </p>
                         </div>
                     )}
+                    <div className="mt-12">
+                        <Button 
+                            onClick={handleAnalyze} 
+                            disabled={isAnalyzing || isRefreshing} 
+                            className="w-full h-20 text-xs font-black uppercase tracking-[0.5em] bg-slate-900 hover:bg-primary text-white shadow-2xl rounded-2xl transition-all"
+                        >
+                            {isAnalyzing ? "Processing Neural Matrix..." : "Execute Strategic Synthesis"}
+                        </Button>
+                    </div>
                 </CardContent>
-                <div className="p-8 pt-0 mt-auto">
-                    <Button 
-                      onClick={handleAnalyze} 
-                      disabled={isAnalyzing || isRefreshing} 
-                      className="w-full h-16 text-xs font-black uppercase tracking-[0.4em] bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-primary/40 transition-all"
-                    >
-                        {isAnalyzing ? <Loader2 className="w-5 h-5 mr-3 animate-spin"/> : <BrainCircuit className="mr-3 h-5 w-5" />}
-                        {isAnalyzing ? "Processing Logic Matrix..." : "Execute Intelligence Synthesis"}
-                    </Button>
-                </div>
             </Card>
-          </div>
-        )}
+        </div>
+      )}
 
-        <Card className="mt-16 mb-24 bg-card border-border overflow-hidden holographic-edge">
-          <CardHeader className="bg-muted/30 border-b border-border">
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle className="text-xs font-black uppercase tracking-[0.3em]">Detailed Registry</CardTitle>
-                <CardDescription className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground mt-1">Full database telemetry readout</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <div className="h-1 w-8 bg-primary/20 rounded-full" />
-                <div className="h-1 w-4 bg-primary/40 rounded-full" />
-                <div className="h-1 w-2 bg-primary rounded-full" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-              <ScrollArea className="h-96">
-                  <Table>
-                      <TableHeader className="sticky top-0 bg-popover/90 backdrop-blur-md z-10">
-                      <TableRow className="border-border">
-                          <TableHead className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Entity Identity</TableHead>
-                          <TableHead className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Asset Controller</TableHead>
-                          <TableHead className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Market Sector</TableHead>
-                          <TableHead className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Protocol Status</TableHead>
-                          <TableHead className="text-right text-[9px] font-black uppercase tracking-widest text-muted-foreground">Value Impact (USD)</TableHead>
-                      </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                      {filteredData.length > 0 ? filteredData.map((item) => (
-                          <TableRow key={item.id} onClick={() => setSelectedItem(item)} className="cursor-pointer border-border hover:bg-primary/5 transition-colors group">
-                          <TableCell className="font-black text-primary group-hover:text-foreground transition-colors">{item.accountName}</TableCell>
-                          <TableCell className="text-[10px] text-muted-foreground font-bold uppercase">{item.owner}</TableCell>
-                          <TableCell className="text-[10px] text-muted-foreground font-bold uppercase">{item.segment}</TableCell>
-                          <TableCell>
-                              <span className={cn(
-                                  "px-3 py-1 text-[8px] font-black rounded-full border tracking-widest",
-                                  item.status === 'Won' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                  item.status === 'Lost' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
-                                  'bg-primary/10 text-primary border-primary/20'
-                              )}>{item.status.toUpperCase()}</span>
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-[10px] font-bold text-muted-foreground">{usdCurrencyFormatter.format(item.revenue)}</TableCell>
-                          </TableRow>
-                      )) : (
-                          <TableRow>
-                              <TableCell colSpan={5} className="h-24 text-center text-muted-foreground font-bold uppercase text-[10px] tracking-widest">
-                                No entities match current sector filters.
-                              </TableCell>
-                          </TableRow>
-                      )}
-                      </TableBody>
-                  </Table>
-              </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Entity Details Dialog */}
-      <Dialog open={!!selectedItem} onOpenChange={(isOpen) => { if (!isOpen) setSelectedItem(null); }}>
-        <DialogContent className="sm:max-w-lg border-border bg-popover p-0 overflow-hidden font-code">
+      {/* Registry Table */}
+      <Card className="bg-white border border-slate-100 overflow-hidden rounded-[2rem] shadow-sm">
+        <CardHeader className="bg-slate-50/50 border-b border-slate-50 py-8 px-10">
+            <CardTitle className="text-xs font-black uppercase tracking-[0.4em] text-slate-400">Entity Registry Readout</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+            <ScrollArea className="h-[600px]">
+                <Table>
+                    <TableHeader className="sticky top-0 bg-white/95 backdrop-blur-xl z-20 border-b border-slate-100">
+                        <TableRow className="border-slate-100 h-16">
+                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400 pl-10">Account Identity</TableHead>
+                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400">Controller</TableHead>
+                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400">Sector</TableHead>
+                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
+                            <TableHead className="text-right text-[9px] font-black uppercase tracking-widest text-slate-400 pr-10">Impact (USD)</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredData.map((item) => (
+                            <TableRow 
+                                key={item.id} 
+                                onClick={() => setSelectedItem(item)} 
+                                className="cursor-pointer border-slate-50 h-20 hover:bg-slate-50 transition-colors group"
+                            >
+                                <TableCell className="font-black text-slate-900 pl-10 group-hover:text-primary transition-colors">{item.accountName}</TableCell>
+                                <TableCell className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{item.owner}</TableCell>
+                                <TableCell className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{item.segment}</TableCell>
+                                <TableCell>
+                                    <span className={cn(
+                                        "px-4 py-1.5 text-[8px] font-black rounded-full border tracking-widest shadow-sm",
+                                        item.status === 'Won' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' :
+                                        item.status === 'Lost' ? 'bg-red-50 text-red-500 border-red-100' :
+                                        'border-primary/10 text-primary bg-primary/5'
+                                    )}>{item.status.toUpperCase()}</span>
+                                </TableCell>
+                                <TableCell className="text-right font-black text-[11px] text-slate-600 pr-10">{usdCurrencyFormatter.format(item.revenue)}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </ScrollArea>
+        </CardContent>
+      </Card>
+
+      {/* Details Dialog */}
+      <Dialog open={!!selectedItem} onOpenChange={(isOpen) => !isOpen && setSelectedItem(null)}>
+        <DialogContent className="max-w-2xl bg-white border-slate-100 p-0 overflow-hidden rounded-[3rem] text-slate-900 shadow-2xl">
             {selectedItem && (
                 <>
-                    <div className="bg-primary/10 border-b border-border p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <Target size={14} className="text-primary"/>
-                              <span className="text-[8px] font-black text-primary uppercase tracking-[0.4em]">Detailed Analysis</span>
+                    <div className="bg-primary/5 border-b border-slate-50 p-12">
+                        <span className="text-[9px] font-black text-primary uppercase tracking-[0.5em] mb-4 block">Entity Analysis Record</span>
+                        <DialogTitle className="text-5xl font-black text-slate-900 tracking-tighter uppercase">{selectedItem.accountName}</DialogTitle>
+                    </div>
+                    <div className="p-12 space-y-12">
+                        <div className="grid grid-cols-2 gap-12">
+                            <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Valuation Impact</Label>
+                                <p className="text-3xl font-black text-primary tracking-tighter">{usdCurrencyFormatter.format(selectedItem.revenue)}</p>
                             </div>
-                            <DialogTitle className="text-3xl font-black text-foreground tracking-tighter uppercase">{selectedItem.accountName}</DialogTitle>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">Registry ID</p>
-                            <p className="text-xs font-mono font-bold text-primary">{selectedItem.id.toString().padStart(6, '0')}</p>
-                          </div>
+                            <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Protocol Success</Label>
+                                <p className="text-3xl font-black text-slate-900 tracking-tighter">{Math.round(selectedItem.probability * 100)}%</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center bg-slate-50 p-8 rounded-3xl border border-slate-100">
+                            <div className="flex items-center gap-4">
+                                <ShieldCheck className="text-emerald-500" size={24} />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Integrity Check Optimal</span>
+                            </div>
+                            <Button 
+                                onClick={() => { setItemToEdit(selectedItem); setSelectedItem(null); }}
+                                className="bg-slate-900 text-white hover:bg-primary font-black uppercase tracking-widest text-[10px] px-8 h-12 rounded-xl transition-all"
+                            >
+                                <Edit className="mr-2 h-4 w-4" /> Recalibrate
+                            </Button>
                         </div>
                     </div>
-                    
-                    <div className="p-8 space-y-6">
-                        <div className="grid grid-cols-2 gap-8">
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Impact Valuation</Label>
-                              <p className="text-2xl font-black text-primary tracking-tighter">{usdCurrencyFormatter.format(selectedItem.revenue)}</p>
-                              <p className="text-[9px] font-bold text-muted-foreground/40 font-mono">{inrCurrencyFormatter.format(selectedItem.revenue * EXCHANGE_RATE_USD_TO_INR)}</p>
-                            </div>
-                            <div>
-                              <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Protocol Status</Label>
-                              <div className={cn(
-                                "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border mt-1",
-                                selectedItem.status === 'Won' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                selectedItem.status === 'Lost' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
-                                'bg-primary/10 text-primary border-primary/20'
-                              )}>{selectedItem.status}</div>
-                            </div>
-                          </div>
-                          <div className="space-y-4">
-                            <div>
-                              <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Success Logic</Label>
-                              <div className="flex items-center gap-3 mt-1">
-                                <span className="text-xl font-black text-foreground font-mono">{Math.round(selectedItem.probability * 100)}%</span>
-                                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden border border-border">
-                                  <motion.div initial={{ width: 0 }} animate={{ width: `${selectedItem.probability * 100}%` }} className="h-full bg-primary" />
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Temporal Cycle</Label>
-                              <p className="text-sm font-black text-foreground uppercase tracking-widest mt-1">{selectedItem.closureMonth}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 py-6 border-y border-border">
-                          {[
-                            { label: 'Controller', val: selectedItem.owner },
-                            { label: 'Market Sector', val: selectedItem.segment },
-                            { label: 'Assigned Region', val: selectedItem.region },
-                            { label: 'Product Config', val: selectedItem.product },
-                          ].map((spec, i) => (
-                            <div key={i} className="space-y-1">
-                              <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">{spec.label}</span>
-                              <p className="text-xs font-bold text-foreground/70 uppercase truncate">{spec.val}</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="flex items-center gap-2">
-                            <ShieldCheck size={12} className="text-emerald-500/40"/>
-                            <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Integrity Verified</span>
-                          </div>
-                          {selectedItem.lastModified && (
-                            <span className="text-[8px] font-mono text-muted-foreground/40 uppercase">Sync: {new Date(selectedItem.lastModified).toLocaleTimeString()}</span>
-                          )}
-                        </div>
-                    </div>
-
-                    <DialogFooter className="p-6 bg-muted/30 border-t border-border gap-3">
-                        <Button 
-                          variant="outline" 
-                          className="flex-1 h-12 border-primary/20 bg-transparent hover:bg-primary/5 text-[10px] font-black uppercase tracking-[0.2em] text-primary" 
-                          onClick={() => { setItemToEdit(selectedItem); setSelectedItem(null); }}
-                        >
-                            <Edit className="mr-3 h-4 w-4" />
-                            Recalibrate Record
-                        </Button>
-                    </DialogFooter>
                 </>
             )}
         </DialogContent>
       </Dialog>
-
-      {/* Calibration Dialog (Edit) */}
-      <Dialog open={!!itemToEdit} onOpenChange={(isOpen) => { if(!isOpen) setItemToEdit(null)}}>
-        <DialogContent className="border-border bg-popover font-code p-0 overflow-hidden">
-          <div className="bg-primary/10 border-b border-border p-6">
-            <div className="flex items-center gap-2 mb-1">
-              <Activity size={14} className="text-primary"/>
-              <span className="text-[8px] font-black text-primary uppercase tracking-[0.4em]">System Calibration</span>
+      
+      {/* Edit Dialog */}
+      <Dialog open={!!itemToEdit} onOpenChange={(isOpen) => !isOpen && setItemToEdit(null)}>
+        <DialogContent className="max-w-xl bg-white border-slate-100 p-0 overflow-hidden rounded-[3rem] text-slate-900 shadow-2xl">
+            <div className="bg-slate-50 border-b border-slate-100 p-10">
+                <DialogTitle className="text-2xl font-black uppercase tracking-tighter">System Recalibration</DialogTitle>
             </div>
-            <DialogTitle className="text-2xl font-black text-foreground uppercase tracking-tighter">Recalibrate: {itemToEdit?.accountName}</DialogTitle>
-          </div>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onFormSubmit)} className="p-8 space-y-6">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Protocol Stage</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="bg-background border-border h-12 focus:ring-primary/30">
-                          <SelectValue placeholder="Stage select" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-popover border-border">
-                        <SelectItem value="Pipeline" className="text-xs">Active Pipeline Protocol</SelectItem>
-                        <SelectItem value="Won" className="text-xs">Success Validation (Won)</SelectItem>
-                        <SelectItem value="Lost" className="text-xs">Termination Cycle (Lost)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="text-[8px] uppercase font-black" />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="revenue"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Impact (USD)</FormLabel>
-                      <FormControl>
-                        <Input type="number" className="bg-background border-border h-12 font-mono font-bold" {...field} />
-                      </FormControl>
-                      <FormMessage className="text-[8px] uppercase font-black" />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="probability"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Success Probability (%)</FormLabel>
-                      <FormControl>
-                        <Input type="number" className="bg-background border-border h-12 font-mono font-bold" {...field} />
-                      </FormControl>
-                      <FormMessage className="text-[8px] uppercase font-black" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="owner"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Controller Identity</FormLabel>
-                      <FormControl>
-                        <Input className="bg-background border-border h-12 text-xs font-bold uppercase" {...field} />
-                      </FormControl>
-                      <FormMessage className="text-[8px] uppercase font-black" />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="segment"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Market Classification</FormLabel>
-                      <FormControl>
-                        <Input className="bg-background border-border h-12 text-xs font-bold uppercase" {...field} />
-                      </FormControl>
-                      <FormMessage className="text-[8px] uppercase font-black" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <DialogFooter className="pt-6 gap-4 bg-muted/30 -mx-8 -mb-8 p-8 border-t border-border">
-                <Button type="button" variant="ghost" className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground" onClick={() => setItemToEdit(null)}>Abort</Button>
-                <Button type="submit" disabled={isEditing} className="flex-1 h-12 bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] shadow-lg">
-                  {isEditing ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <ShieldCheck className="h-4 w-4 mr-2" />}
-                  Commit Calibration
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onFormSubmit)} className="p-10 space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Target Status</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger className="bg-slate-50 border-slate-100 h-14 rounded-xl text-slate-900 font-black uppercase tracking-widest text-[10px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="bg-white border-slate-100 text-slate-900 font-black">
+                                        <SelectItem value="Won" className="uppercase tracking-widest text-[10px] py-3">Won (Success)</SelectItem>
+                                        <SelectItem value="Lost" className="uppercase tracking-widest text-[10px] py-3">Lost (Termination)</SelectItem>
+                                        <SelectItem value="Pipeline" className="uppercase tracking-widest text-[10px] py-3">Pipeline (Active)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </FormItem>
+                        )}
+                    />
+                    <div className="grid grid-cols-2 gap-6">
+                        <FormField
+                            control={form.control}
+                            name="revenue"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Revenue (USD)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" className="bg-slate-50 border-slate-100 h-14 rounded-xl font-black text-slate-900 shadow-inner" {...field} />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="probability"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Probability (%)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" className="bg-slate-50 border-slate-100 h-14 rounded-xl font-black text-slate-900 shadow-inner" {...field} />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <DialogFooter className="pt-8 gap-4">
+                        <Button type="button" variant="ghost" onClick={() => setItemToEdit(null)} className="text-slate-400 font-black uppercase tracking-widest text-[10px] hover:bg-slate-50">Abort</Button>
+                        <Button type="submit" disabled={isEditing} className="flex-1 bg-primary text-white font-black uppercase tracking-widest text-[10px] h-14 rounded-xl shadow-[0_10px_30px_rgba(26,140,255,0.2)] hover:bg-slate-900/90 transition-all">
+                            {isEditing ? <Loader2 className="animate-spin mr-2"/> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                            Commit Data Stream
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </Form>
         </DialogContent>
       </Dialog>
     </div>
