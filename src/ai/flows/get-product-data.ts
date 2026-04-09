@@ -7,7 +7,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { google } from 'googleapis';
-import serviceAccount from '@/ai/service-account.json';
+import { getGoogleAuth } from '@/ai/lib/google-auth';
 import { ProductSchema } from '@/lib/quotation-schemas';
 
 const PRODUCT_SHEET_ID = process.env.GOOGLE_SHEET_ID || "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk";
@@ -26,12 +26,7 @@ const getProductDataFlow = ai.defineFlow(
     outputSchema: GetProductDataOutputSchema,
   },
   async () => {
-    const auth = new google.auth.JWT(
-      serviceAccount.client_email,
-      undefined,
-      serviceAccount.private_key,
-      ['https://www.googleapis.com/auth/spreadsheets.readonly']
-    );
+    const auth = getGoogleAuth(['https://www.googleapis.com/auth/spreadsheets.readonly']);
 
     const sheets = google.sheets({ version: 'v4', auth });
     const sheetName = "Products";

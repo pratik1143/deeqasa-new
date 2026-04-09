@@ -10,7 +10,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { google } from 'googleapis';
 import type { FunnelData } from '@/lib/types';
-import serviceAccount from '@/ai/service-account.json';
+import { getGoogleAuth } from '@/ai/lib/google-auth';
 import { FunnelDataSchema } from '@/lib/schemas';
 
 const GetSheetDataInputSchema = z.object({
@@ -40,12 +40,7 @@ const getSheetDataFlow = ai.defineFlow(
     outputSchema: GetSheetDataOutputSchema,
   },
   async ({ spreadsheetId }) => {
-    const auth = new google.auth.JWT(
-      serviceAccount.client_email,
-      undefined,
-      serviceAccount.private_key,
-      ['https://www.googleapis.com/auth/spreadsheets.readonly']
-    );
+    const auth = getGoogleAuth(['https://www.googleapis.com/auth/spreadsheets.readonly']);
 
     const sheets = google.sheets({ version: 'v4', auth });
 
@@ -153,7 +148,7 @@ const getSheetDataFlow = ai.defineFlow(
         console.error('Google Sheets API error: ', err.message);
         let friendlyMessage = 'An unexpected error occurred while fetching data from Google Sheets.';
         if (err.code === 403) {
-            friendlyMessage = `Permission Denied: The service account ('${serviceAccount.client_email}') does not have Viewer access to the Google Sheet. Please share the sheet with this email address.`;
+            friendlyMessage = `Permission Denied: The mission service account does not have Viewer access to the Google Sheet. Please share the sheet with the registered service account email.`;
         } else if (err.code === 404) {
             friendlyMessage = `Not Found: The Google Sheet with ID "${spreadsheetId}" could not be found.`;
         } else if (err.message) {

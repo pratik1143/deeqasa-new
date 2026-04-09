@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { google } from 'googleapis';
-import serviceAccount from '@/ai/service-account.json';
+import { getGoogleAuth } from '@/ai/lib/google-auth';
 import { FunnelDataSchema } from '@/lib/schemas';
 import type { FunnelData } from '@/lib/types';
 
@@ -27,12 +27,7 @@ const updateSheetDataFlow = ai.defineFlow(
   async (data) => {
     const SPREADSHEET_ID = "1gZWkQV-2TYIDZ_bFEQG6EHlHPImXjb6p-4oSiCFRKFk";
 
-    const auth = new google.auth.JWT(
-      serviceAccount.client_email,
-      undefined,
-      serviceAccount.private_key,
-      ['https://www.googleapis.com/auth/spreadsheets'] // Write scope is required
-    );
+    const auth = getGoogleAuth(['https://www.googleapis.com/auth/spreadsheets']);
     const sheets = google.sheets({ version: 'v4', auth });
 
     try {
@@ -112,7 +107,7 @@ const updateSheetDataFlow = ai.defineFlow(
       console.error('Google Sheets update error: ', err);
       let friendlyMessage = 'An unexpected error occurred while updating the Google Sheet.';
       if (err.code === 403) {
-          friendlyMessage = `Permission Denied: The service account ('${serviceAccount.client_email}') does not have Editor access to the Google Sheet. Please share the sheet and grant Editor permissions.`;
+          friendlyMessage = `Permission Denied: The mission service account does not have Editor access to the Google Sheet. Please share the sheet and grant Editor permissions.`;
       } else if (err.message) {
           friendlyMessage = err.message;
       }
