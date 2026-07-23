@@ -50,7 +50,7 @@ export function CRMAnalytics({ leads }: CRMAnalyticsProps) {
   }, [leads]);
 
   // 3. Conversion Rate Calculation
-  const convertedCount = leads.filter(l => l.status === 'Converted').length;
+  const convertedCount = leads.filter(l => (l.status as any) === 'Converted' || l.status === 'Won').length;
   const lostCount = leads.filter(l => l.status === 'Lost').length;
   const totalClosed = convertedCount + lostCount;
   const conversionRate = totalClosed > 0 ? (convertedCount / totalClosed) * 100 : 0;

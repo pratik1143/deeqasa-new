@@ -1,238 +1,125 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useEffect, useState, useRef } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
-import { LogOut, Menu, User as UserIcon } from "lucide-react";
-import { useAuth, useUser } from "@/firebase";
-import { useRouter, usePathname } from "next/navigation";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { ArrowRight, ShieldCheck, Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const navLinks = [
-  { name: "Home", href: "/" },
-  { name: "Solutions", href: "/solutions" },
-  { name: "Industries", href: "/industries" },
-  { name: "Case Studies", href: "/case-studies" },
-  { name: "Resources", href: "/resources" },
-  { name: "Support", href: "/support" },
+  { name: 'About', href: '/about' },
+  { name: 'Solutions', href: '/solutions' },
+  { name: 'Quotation', href: '/quotation' },
+  { name: 'Contact', href: '/contact' },
 ];
 
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { user, isUserLoading } = useUser();
-  const auth = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Hidden Access States
-  const logoClickCount = useRef(0);
-  const logoClickTimer = useRef<NodeJS.Timeout | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Removed forced dark mode to support system-wide light theme
-
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      setScrolled(window.scrollY > 20);
     };
-
-    // Keyboard Shortcut Trigger: Ctrl + Shift + A
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        router.push('/login');
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [router]);
-
-
-
-  const handleSignOut = async () => {
-    await auth.signOut();
-    setIsMenuOpen(false);
-    router.push('/');
-  };
-
-  // Hidden Logo Click Logic (Triple Click)
-  const handleLogoClick = () => {
-    logoClickCount.current += 1;
-    
-    if (logoClickTimer.current) clearTimeout(logoClickTimer.current);
-    
-    if (logoClickCount.current === 3) {
-      logoClickCount.current = 0;
-      router.push('/login');
-      return;
-    }
-
-    logoClickTimer.current = setTimeout(() => {
-      logoClickCount.current = 0;
-    }, 1000); // Reset after 1 second of inactivity
-  };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 no-print h-20 flex items-center border-b border-black/5 bg-white/60 backdrop-blur-xl",
-      isScrolled && "shadow-sm bg-white/90 border-slate-100"
-    )}>
-      <div className="container-enterprise flex justify-between items-center h-full">
-        <div className="flex items-center">
-          <div 
-            onClick={handleLogoClick}
-            className="flex flex-col justify-center cursor-default select-none active:scale-[0.98] transition-transform"
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled 
+          ? 'bg-[#030716]/85 backdrop-blur-2xl border-b border-slate-800/80 shadow-[0_10px_30px_rgba(0,0,0,0.8)] py-4' 
+          : 'bg-transparent py-6'
+      }`}
+    >
+      <div className="container-enterprise px-6 flex items-center justify-between">
+        
+        {/* Left Nav Link */}
+        <div className="hidden md:flex items-center gap-8 text-xs font-mono tracking-widest text-slate-400">
+          <Link 
+            href="/about" 
+            className={`hover:text-cyan-400 transition-colors flex items-center gap-1.5 ${
+              pathname === '/about' ? 'text-cyan-400 font-bold' : ''
+            }`}
           >
-            <Link href="/" className="pointer-events-none">
-              <span className="text-2xl font-black tracking-tight text-black uppercase whitespace-nowrap leading-none font-[Outfit]">
-                DEEQASA TECH
-              </span>
-            </Link>
-            <span className="text-[9px] font-black tracking-[0.4em] text-primary uppercase mt-1.5 ml-0.5 pointer-events-none">
-              HP CONNECT
+            <span>→</span> <span>About</span>
+          </Link>
+          <Link 
+            href="/solutions" 
+            className={`hover:text-cyan-400 transition-colors flex items-center gap-1.5 ${
+              pathname === '/solutions' ? 'text-cyan-400 font-bold' : ''
+            }`}
+          >
+            <span>→</span> <span>Solutions</span>
+          </Link>
+        </div>
+
+        {/* Center Brand Logo - Lucien + SR Enterprise Fusion */}
+        <Link href="/" className="group flex flex-col items-center text-center">
+          <span className="text-2xl md:text-3xl font-extrabold tracking-[0.3em] uppercase font-mono text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-blue-400 group-hover:from-cyan-300 group-hover:to-white transition-all">
+            DEEQASA
+          </span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.4em] font-mono">
+              HP CONNECT ENTERPRISE
             </span>
           </div>
+        </Link>
+
+        {/* Right CTA Button */}
+        <div className="hidden md:flex items-center gap-4">
+          <Button
+            asChild
+            className="h-11 px-6 bg-white hover:bg-slate-100 text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all group"
+          >
+            <Link href="/quotation">
+              Book a Demo <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-8 h-full">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link 
-                key={link.name} 
-                href={link.href} 
-                className={cn(
-                  "relative h-full flex items-center text-xs font-black uppercase tracking-widest transition-colors duration-200 py-2 font-[Outfit]",
-                  isActive ? "text-primary" : "text-primary/70 hover:text-primary"
-                )}
-              >
-                {link.name}
-                <span className={cn(
-                  "absolute bottom-0 left-0 w-full h-[2.5px] bg-primary transition-transform duration-300 scale-x-0 group-hover:scale-x-100",
-                  isActive && "scale-x-100"
-                )} />
-              </Link>
-            );
-          })}
-        </nav>
-        
-        <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              className="hidden xl:inline-flex text-foreground/60 font-bold hover:bg-primary/10 hover:text-primary uppercase tracking-widest text-xs font-[Outfit]"
-              onClick={() => router.push('/contact')}
-            >
-              Contact Sales
-            </Button>
-            
-            {isUserLoading ? (
-              <div className="w-10 h-10 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-              </div>
-            ) : user && (
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  className="hidden sm:flex items-center gap-2 border-primary/30 text-primary bg-primary/10 font-bold h-10 px-4 text-xs font-[Outfit] uppercase" 
-                  onClick={() => router.push('/dashboard')}
-                >
-                  <UserIcon className="h-3.5 w-3.5" />
-                  <span>Admin Terminal</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-slate-400 hover:text-primary transition-colors"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
+        {/* Mobile Menu Trigger */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-white"
+        >
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
 
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden text-slate-600 hover:bg-slate-100 hover:text-primary">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="bg-white/95 backdrop-blur-2xl border-l border-slate-100 w-[300px] p-0 font-[Outfit]">
-                <SheetHeader className="p-6 border-b border-slate-100 bg-slate-50">
-                  <SheetTitle className="text-left">
-                    <span className="text-xl font-black tracking-tight text-slate-900 uppercase whitespace-nowrap leading-none block">
-                      DEEQASA TECH
-                    </span>
-                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mt-2">HP CONNECT</p>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col p-6 space-y-6">
-                  <nav className="flex flex-col space-y-4">
-                    {navLinks.map((link) => (
-                      <Link 
-                        key={link.name} 
-                        href={link.href}
-                        onClick={() => setIsMenuOpen(false)}
-                        className={cn(
-                          "text-sm font-bold uppercase tracking-[0.2em] py-2 transition-colors",
-                          pathname === link.href ? "text-primary" : "text-slate-400 hover:text-slate-900"
-                        )}
-                      >
-                        {link.name}
-                      </Link>
-                    ))}
-                  </nav>
-                  
-                  <div className="pt-6 border-t border-slate-100 space-y-4">
-                    <Button 
-                      className="w-full h-12 bg-slate-50 border border-slate-100 text-slate-600 font-bold hover:bg-primary hover:text-white hover:border-primary justify-start px-4 uppercase tracking-widest text-xs"
-                      onClick={() => { setIsMenuOpen(false); router.push('/contact'); }}
-                    >
-                      Contact Sales
-                    </Button>
-                    
-                    {user && (
-                      <>
-                        <Button 
-                          variant="outline" 
-                          className="w-full h-12 flex items-center gap-2 border-primary/30 text-primary bg-primary/10 font-bold justify-start px-4 uppercase tracking-widest text-xs" 
-                          onClick={() => { setIsMenuOpen(false); router.push('/dashboard'); }}
-                        >
-                          <UserIcon className="h-3.5 w-3.5" />
-                          <span>Admin Terminal</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          className="w-full h-12 flex items-center gap-2 text-slate-400 font-bold justify-start px-4 uppercase tracking-widest text-xs hover:text-red-500 hover:bg-red-50" 
-                          onClick={handleSignOut}
-                        >
-                          <LogOut className="h-4 w-4" />
-                          <span>Sign Out</span>
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="absolute bottom-8 left-6 right-6">
-                  <p className="text-[10px] font-bold text-slate-200 uppercase tracking-[0.3em] text-center">
-                    Secure Terminal v4.0.1
-                  </p>
-                </div>
-              </SheetContent>
-            </Sheet>
-        </div>
       </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:hidden bg-[#030716] border-b border-slate-800 p-6 space-y-4 font-mono text-sm"
+        >
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-slate-300 hover:text-cyan-400 py-2 border-b border-slate-900 uppercase tracking-widest"
+            >
+              {link.name}
+            </Link>
+          ))}
+          <Button
+            asChild
+            className="w-full h-12 bg-white text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full mt-4"
+          >
+            <Link href="/quotation" onClick={() => setMobileMenuOpen(false)}>
+              Book a Demo
+            </Link>
+          </Button>
+        </motion.div>
+      )}
+
     </header>
   );
 }

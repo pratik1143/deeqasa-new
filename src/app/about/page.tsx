@@ -1,177 +1,283 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { CorporatePageLayout } from '@/components/layout/corporate-page-layout';
-import { ShieldCheck, Zap, Globe, Cpu, Users, Award, Target, Landmark, ArrowRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { 
+  ShieldCheck, 
+  Award, 
+  Server, 
+  Cpu, 
+  CheckCircle2, 
+  ArrowRight, 
+  Building2, 
+  Users,
+  MapPin,
+  Sparkles,
+  Target,
+  Eye,
+  Handshake,
+  Wrench,
+  Globe,
+  Bot
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { SmoothScrollProvider } from "@/components/ui/smooth-scroll-provider";
+import { CustomCursor } from "@/components/ui/custom-cursor";
+
+const whyChooseUsPoints = [
+  "Authorized HP Connect Partner",
+  "Complete End-to-End IT Infrastructure Solutions",
+  "Enterprise Hardware & Commercial Computing",
+  "Custom Software & Web Application Development",
+  "AI-Powered Business Automation Solutions",
+  "Cloud, Networking & Cybersecurity Expertise",
+  "CCTV, Access Control & Surveillance Systems",
+  "Annual Maintenance Contracts (AMC)",
+  "Professional Deployment & Technical Support",
+  "Solutions for Healthcare, Education, Government, Retail & Corporate",
+  "Genuine Products with Trusted Service",
+  "Customer-First Approach with Long-Term Partnership"
+];
+
+const portfolioHighlights = [
+  { title: "Enterprise Computing", desc: "Desktops, laptops, workstations & HPE servers", icon: Server },
+  { title: "Cloud & Cyber Security", desc: "M365, Google Workspace, HP Wolf & Firewalls", icon: ShieldCheck },
+  { title: "Software & AI Solutions", desc: "ERP, CRM, Hospital Software & AI Automation", icon: Bot },
+  { title: "Surveillance & Physical Security", desc: "CCTV, Biometric Attendance & Access Control", icon: Building2 },
+  { title: "Managed Services & AMC", desc: "24/7 SLA Support, On-Site Engineers & Updates", icon: Wrench },
+  { title: "Web & Digital Portals", desc: "Corporate Sites, E-Commerce & Customer Portals", icon: Globe }
+];
 
 export default function AboutPage() {
-  const stats = [
-    { label: 'Infrastructure Nodes', value: '25,000+', icon: Cpu },
-    { label: 'Security Protocols', value: 'Infinite', icon: ShieldCheck },
-    { label: 'Global Compliance', value: '100%', icon: Globe },
-    { label: 'OEM Partnership', value: 'Platinum', icon: Award },
-  ];
+  const [scrambleTitle, setScrambleTitle] = useState("");
+  const targetHeading = "About Deeqasa Tech – Authorized HP Connect Partner";
 
-  const values = [
-    {
-      title: "The Architecture Paradigm",
-      description: "We don't just build infrastructure; we engineer digital resilience. Our philosophy centers on pure efficiency and unyielding security protocols.",
-      icon: Target
-    },
-    {
-      title: "Strategic Intelligence",
-      description: "Harnessing the power of HP Enterprise solutions to deliver mission-critical reliability for the modern world's most demanding sectors.",
-      icon: Zap
-    },
-    {
-      title: "Institutional Trust",
-      description: "Trusted by government agencies and academic institutions across the region for over a decade of operational excellence and transparency.",
-      icon: Landmark
-    }
-  ];
+  useEffect(() => {
+    let iteration = 0;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+    const interval = setInterval(() => {
+      setScrambleTitle(
+        targetHeading
+          .split('')
+          .map((char, idx) => (idx < iteration ? targetHeading[idx] : chars[Math.floor(Math.random() * chars.length)]))
+          .join('')
+      );
+      if (iteration >= targetHeading.length) clearInterval(interval);
+      iteration += 1 / 2;
+    }, 25);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <CorporatePageLayout 
-      title="Foundations of Trust" 
-      subtitle="DEEQASA TECH is the mission-control partner for global institutional and enterprise infrastructure."
-    >
-      {/* Vision Section */}
-      <section className="py-48 px-6">
-        <div className="container-enterprise">
-          <div className="grid lg:grid-cols-2 gap-32 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-            >
-              <div className="flex items-center gap-4 mb-10">
-                <div className="h-px w-12 bg-primary" />
-                <span className="text-[10px] font-black uppercase tracking-[1em] text-primary">STRATEGIC VISION</span>
-              </div>
-              <div className="space-y-16">
-                <h2 className="text-7xl md:text-9xl font-black text-slate-900 leading-[0.85] tracking-tighter uppercase whitespace-pre-line">
-                  Engineering the{"\n"}
-                  <span className="text-primary italic">Foundation</span>{"\n"}
-                  of Sovereignty.
-                </h2>
-                <p className="text-2xl text-slate-400 font-bold italic leading-relaxed max-w-xl">
-                  At DEEQASA TECH, we envision a world where the infrastructure is invisible but invincible. We provide the hardware, security, and intelligence that powers the future of civilization.
-                </p>
-                <div className="flex items-center gap-10 pt-10">
-                   <div className="flex -space-x-4">
-                      {[1,2,3,4].map(i => (
-                        <div key={i} className="h-16 w-16 rounded-full border-4 border-white bg-slate-100 overflow-hidden relative shadow-xl">
-                           <Image src={`https://i.pravatar.cc/150?u=${i}`} alt="Partner" fill className="object-cover grayscale" />
-                        </div>
-                      ))}
-                   </div>
-                   <div className="space-y-1">
-                      <div className="text-sm font-black text-slate-900 uppercase tracking-widest">Global Coalition</div>
-                      <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">HP Connect Accredited</div>
-                   </div>
-                </div>
-              </div>
-            </motion.div>
+    <SmoothScrollProvider>
+      <CustomCursor />
+      <div className="relative min-h-screen bg-[#030716] text-white font-[Outfit] selection:bg-blue-500/30 overflow-hidden">
+        <Header />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {stats.map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1, duration: 0.8 }}
-                  className="bg-white border border-slate-100 p-12 rounded-[3.5rem] group hover:border-primary/40 hover:shadow-2xl hover:-translate-y-2 transition-all duration-700 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.03)]"
-                >
-                  <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-primary mb-10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                    <stat.icon size={32} />
-                  </div>
-                  <div className="text-5xl font-black text-slate-900 mb-2 tracking-tighter">{stat.value}</div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 group-hover:text-primary transition-colors">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+        {/* Lucien Signature Next-Level Animated Blue Radial Aura Mesh */}
+        <motion.div 
+          animate={{ opacity: [0.7, 0.95, 0.7], scale: [1, 1.05, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            background: `
+              radial-gradient(ellipse 80% 55% at 50% 30%, rgba(147, 197, 253, 0.4) 0%, rgba(59, 130, 246, 0.22) 40%, rgba(3, 7, 22, 0.95) 75%),
+              radial-gradient(ellipse 100% 70% at 50% 80%, rgba(30, 64, 175, 0.25) 0%, transparent 70%)
+            `
+          }}
+        />
 
-      {/* Philosophy Grid */}
-      <section className="py-48 px-6 bg-slate-50/50 border-y border-slate-100 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[60%] h-full opacity-[0.03] pointer-events-none grayscale">
-           <Image src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80" alt="Building" fill className="object-cover" />
-        </div>
-        
-        <div className="container-enterprise relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-32 gap-10">
-            <div className="max-w-3xl space-y-10">
-              <div className="flex items-center gap-4">
-                <div className="h-px w-12 bg-primary" />
-                <span className="text-[10px] font-black uppercase tracking-[1em] text-primary">CORE PHILOSOPHY</span>
-              </div>
-              <h3 className="text-7xl md:text-9xl font-black text-slate-900 uppercase tracking-tighter leading-[0.85]">
-                The <span className="text-slate-200">Collective</span>{"\n"}Intelligence Matrix.
-              </h3>
-            </div>
-            <div className="text-right space-y-2 pb-4">
-               <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">REGIONAL HQ // SECTOR 14</p>
-               <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">ESTABLISHED MMXVI</p>
-            </div>
-          </div>
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none z-0" />
 
-          <div className="grid md:grid-cols-3 gap-10">
-            {values.map((val, i) => (
-              <motion.div
-                key={val.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2, duration: 1 }}
-                className="relative p-16 bg-white border border-slate-100 rounded-[4rem] overflow-hidden group hover:shadow-2xl transition-all duration-700 shadow-sm"
-              >
-                <div className="absolute top-0 right-0 p-16 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity text-primary">
-                   <val.icon size={180} />
-                </div>
-                <div className="relative z-10 space-y-8">
-                   <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter group-hover:text-primary transition-colors leading-tight">{val.title}</h4>
-                   <p className="text-xl text-slate-400 leading-relaxed font-bold italic">
-                     {val.description}
-                   </p>
-                   <div className="h-px w-20 bg-slate-100 group-hover:w-full transition-all duration-1000" />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-64 px-6 relative overflow-hidden">
-        <div className="container-enterprise text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1 }}
-            className="flex flex-col items-center gap-16"
-          >
-            <div className="inline-flex items-center gap-4 px-8 py-3 rounded-full border border-slate-100 bg-white shadow-xl">
-               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-               <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.4em]">Initialize Enterprise Protocol</span>
-            </div>
-            <h2 className="text-7xl md:text-[12rem] font-black text-slate-900 uppercase tracking-tighter leading-[0.75] max-w-7xl">
-              Your <span className="text-slate-200">Infrastructure</span>{"\n"}Command Center.
-            </h2>
-            <button className="group relative h-24 px-20 rounded-3xl bg-slate-900 text-white font-black uppercase tracking-[0.4em] text-xs overflow-hidden shadow-2xl hover:bg-primary transition-colors duration-500">
-              <span className="relative z-10 flex items-center gap-4">
-                Establish Direct Link <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+        <main className="relative z-10 pt-36 pb-24 space-y-24">
+          
+          {/* Hero Section */}
+          <section className="container-enterprise relative px-6">
+            <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10">
+              <span className="text-xs font-mono uppercase tracking-[0.4em] text-blue-400 block">
+                ABOUT DEEQASA TECH —
               </span>
-            </button>
-          </motion.div>
-        </div>
-      </section>
-    </CorporatePageLayout>
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight leading-[1.05] text-white select-none">
+                {scrambleTitle || targetHeading}
+              </h1>
+              <p className="text-slate-300 text-lg md:text-xl font-normal leading-relaxed max-w-3xl mx-auto">
+                Deeqasa Tech is a trusted IT solutions provider committed to helping businesses embrace digital transformation through innovative technology, enterprise infrastructure, and intelligent software solutions.
+              </p>
+            </div>
+          </section>
+
+          {/* Core Introduction & Authorized HP Partner Card */}
+          <section className="container-enterprise px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+              
+              <div className="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 p-8 md:p-12 rounded-[2.5rem] space-y-6 shadow-2xl backdrop-blur-2xl flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Award size={24} className="text-blue-400" />
+                    <span className="text-xs font-mono uppercase text-blue-400 tracking-widest font-bold">
+                      AUTHORIZED HP CONNECT PARTNER
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-light tracking-tight text-white">
+                    End-to-End Technology Ecosystems
+                  </h2>
+                  <p className="text-slate-300 text-sm md:text-base leading-relaxed">
+                    We are proud to be an Authorized HP Connect Partner, offering genuine HP products along with expert consultation, deployment, and after-sales support. Our experience spans corporate offices, educational institutions, healthcare organizations, government departments, retail businesses, manufacturing units, and startups.
+                  </p>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    At Deeqasa Tech, we believe technology should simplify business, improve productivity, and accelerate growth. That's why we don't just sell products—we design complete technology ecosystems tailored to each client's unique requirements.
+                  </p>
+                </div>
+
+                <div className="pt-6 border-t border-slate-800 flex flex-wrap gap-4 text-xs font-mono text-slate-400">
+                  <span className="text-blue-400 font-bold">✓ Genuine Products</span>
+                  <span className="text-blue-400 font-bold">✓ Direct HP SLA</span>
+                  <span className="text-blue-400 font-bold">✓ PAN India Support</span>
+                </div>
+              </div>
+
+              {/* Showroom Location Card */}
+              <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-800 p-8 md:p-10 rounded-[2.5rem] space-y-6 shadow-2xl backdrop-blur-2xl flex flex-col justify-between relative overflow-hidden">
+                <div className="space-y-4 relative z-10">
+                  <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                    <MapPin size={24} />
+                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-blue-400 block">
+                    OUR CORPORATE SHOWROOM
+                  </span>
+                  <h3 className="text-2xl font-light tracking-tight text-white">
+                    Deeqasa Tech – HP Connect
+                  </h3>
+                  <p className="text-slate-300 text-sm font-mono leading-relaxed bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+                    1st Floor, SCO 105 & 106, Sector 70, Sahibzada Ajit Singh Nagar (Mohali), Punjab – 160071
+                  </p>
+                </div>
+
+                <Button 
+                  asChild 
+                  className="w-full h-12 bg-white hover:bg-slate-100 text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full shadow-lg"
+                >
+                  <Link href="/contact">
+                    Visit Showroom & Map <ArrowRight size={16} className="ml-2" />
+                  </Link>
+                </Button>
+              </div>
+
+            </div>
+          </section>
+
+          {/* Portfolio Highlights */}
+          <section className="container-enterprise px-6 space-y-10">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <span className="text-xs font-mono uppercase tracking-[0.4em] text-blue-400 block">
+                OUR SOLUTION PORTFOLIO —
+              </span>
+              <h2 className="text-3xl md:text-5xl font-light tracking-tight text-white">
+                Comprehensive Technology Ecosystem
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {portfolioHighlights.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div key={idx} className="bg-slate-900/80 border border-slate-800 p-8 rounded-[2.5rem] space-y-4 hover:border-blue-500/50 transition-colors backdrop-blur-xl group">
+                    <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
+                      <Icon size={22} />
+                    </div>
+                    <h3 className="text-xl font-light tracking-tight text-white">{item.title}</h3>
+                    <p className="text-slate-400 text-xs leading-relaxed font-normal">{item.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Why Businesses Choose Deeqasa Tech */}
+          <section className="container-enterprise px-6 space-y-10">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <span className="text-xs font-mono uppercase tracking-[0.4em] text-blue-400 block">
+                THE DEEQASA ADVANTAGE —
+              </span>
+              <h2 className="text-3xl md:text-5xl font-light tracking-tight text-white">
+                Why Businesses Choose Deeqasa Tech
+              </h2>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-[2.5rem] p-8 md:p-12 shadow-2xl backdrop-blur-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {whyChooseUsPoints.map((point, idx) => (
+                  <div key={idx} className="flex items-start gap-3 bg-slate-950/80 p-4 rounded-2xl border border-slate-800">
+                    <CheckCircle2 size={18} className="text-blue-400 shrink-0 mt-0.5" />
+                    <span className="text-xs font-medium text-slate-300 leading-snug">{point}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Mission & Vision Section */}
+          <section className="container-enterprise px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div className="bg-slate-900/80 border border-slate-800 p-8 md:p-12 rounded-[2.5rem] space-y-6 backdrop-blur-2xl relative overflow-hidden">
+              <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <Target size={24} />
+              </div>
+              <span className="text-xs font-mono uppercase tracking-[0.4em] text-blue-400 block">OUR MISSION</span>
+              <h3 className="text-2xl font-light text-white tracking-tight">Empowering Digital Operational Growth</h3>
+              <p className="text-slate-300 text-sm leading-relaxed font-normal">
+                To empower organizations with reliable, innovative, and scalable technology solutions that improve operational efficiency, strengthen security, and accelerate digital transformation.
+              </p>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 p-8 md:p-12 rounded-[2.5rem] space-y-6 backdrop-blur-2xl relative overflow-hidden">
+              <div className="h-12 w-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <Eye size={24} />
+              </div>
+              <span className="text-xs font-mono uppercase tracking-[0.4em] text-blue-400 block">OUR VISION</span>
+              <h3 className="text-2xl font-light text-white tracking-tight">India's Most Trusted Tech Partner</h3>
+              <p className="text-slate-300 text-sm leading-relaxed font-normal">
+                To become one of India's most trusted technology partners by delivering exceptional products, innovative software solutions, and world-class customer service that enable businesses to grow with confidence.
+              </p>
+            </div>
+
+          </section>
+
+          {/* Closing Partnership Banner */}
+          <section className="container-enterprise px-6">
+            <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-[2.5rem] p-10 md:p-16 text-center space-y-6 relative overflow-hidden shadow-2xl">
+              <div className="relative z-10 space-y-6 max-w-3xl mx-auto">
+                <div className="h-14 w-14 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-400 flex items-center justify-center mx-auto">
+                  <Handshake size={28} />
+                </div>
+                <h2 className="text-3xl md:text-5xl font-light tracking-tight text-white leading-tight">
+                  Long-Term Partnerships That Help Businesses Scale
+                </h2>
+                <p className="text-slate-300 text-base md:text-lg leading-relaxed font-normal">
+                  At Deeqasa Tech, we don't simply provide technology—we build long-term partnerships that help businesses innovate, scale, and succeed in an ever-changing digital world.
+                </p>
+                <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Button 
+                    asChild 
+                    className="w-full sm:w-auto h-14 px-8 bg-white hover:bg-slate-100 text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full shadow-xl"
+                  >
+                    <Link href="/quotation">
+                      Configure IT Proposal <ArrowRight size={16} className="ml-2" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+
+        <Footer />
+      </div>
+    </SmoothScrollProvider>
   );
 }

@@ -42,16 +42,24 @@ export function CorporatePageLayout({ children, title, subtitle, className }: Co
                   <span className="text-[10px] font-black uppercase tracking-[0.5em] text-primary">DEEQASA // ENTERPRISE ARCHITECTURE</span>
                 </div>
                 
-                <h1 className="text-8xl md:text-[12rem] font-black text-slate-900 uppercase tracking-tighter leading-[0.8] select-none">
+                <h1 className="text-6xl md:text-8xl lg:text-[9rem] font-black uppercase tracking-tighter leading-[0.85] select-none">
                   {title.split(' ').map((word, i) => (
-                    <span key={i} className={cn("block", i % 2 !== 0 && "text-slate-200")}>
+                    <span 
+                      key={i} 
+                      className={cn(
+                        "block", 
+                        i % 2 === 0 
+                          ? "text-slate-900 dark:text-white" 
+                          : "bg-gradient-to-r from-primary via-blue-500 to-cyan-400 bg-clip-text text-transparent"
+                      )}
+                    >
                       {word}
                     </span>
                   ))}
                 </h1>
                 
                 {subtitle && (
-                  <p className="text-xl md:text-2xl text-slate-400 font-bold uppercase tracking-[0.2em] max-w-3xl leading-relaxed italic">
+                  <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 font-semibold uppercase tracking-widest max-w-3xl leading-relaxed">
                     {subtitle}
                   </p>
                 )}

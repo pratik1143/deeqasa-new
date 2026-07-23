@@ -40,9 +40,9 @@ export function DashboardHome() {
   const stats = React.useMemo(() => {
     if (!allLeads) return [];
     
-    const converted = allLeads.filter(l => l.status === 'Converted').length;
+    const converted = allLeads.filter(l => (l.status as any) === 'Converted' || l.status === 'Won').length;
     const pending = allLeads.filter(l => ['New', 'Follow-up Scheduled', 'Contacted'].includes(l.status)).length;
-    const totalRevenue = allLeads.filter(l => l.status === 'Converted').reduce((acc, curr) => acc + (curr.revenue || 0), 0);
+    const totalRevenue = allLeads.filter(l => (l.status as any) === 'Converted' || l.status === 'Won').reduce((acc, curr) => acc + (curr.revenue || 0), 0);
 
     return [
       { 

@@ -1,97 +1,99 @@
-import Link from 'next/link';
+'use client';
 
-const footerLinks = {
-  Company: [
-    { name: 'About DEEQASA TECH', href: '/about' },
-    { name: 'Infrastructure Solutions', href: '/infrastructure' },
-    { name: 'Careers', href: '/careers' },
-    { name: 'Newsroom', href: '/newsroom' },
-  ],
-  Enterprise: [
-    { name: 'Cloud Services', href: '/services/cloud' },
-    { name: 'Cybersecurity', href: '/services/cybersecurity' },
-    { name: 'Data Center', href: '/services/data-center' },
-    { name: 'Managed Services', href: '/services/managed-services' },
-  ],
-  Support: [
-    { name: 'Partner Portal', href: '/support/portal' },
-    { name: 'Documentation', href: '/support/docs' },
-    { name: 'Status Page', href: '/support/status' },
-    { name: 'Training', href: '/support/training' },
-  ],
-  Legal: [
-    { name: 'Privacy Policy', href: '/legal/privacy' },
-    { name: 'Terms of Service', href: '/legal/terms' },
-    { name: 'Compliance', href: '/legal/compliance' },
-    { name: 'Cookie Policy', href: '/legal/cookies' },
-  ],
-};
+import React from 'react';
+import Link from 'next/link';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function Footer() {
   return (
-    <footer className="bg-white border-t border-slate-100 relative z-20">
-      <div className="container-enterprise py-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16">
-          <div className="lg:col-span-4 space-y-10">
-            <Link href="/" className="block">
-              <span className="text-3xl font-black tracking-tighter text-black uppercase font-[Outfit]">
-                DEEQASA TECH
-              </span>
-              <p className="text-[10px] font-black text-primary uppercase tracking-[0.5em] mt-2">HP CONNECT PARTNER</p>
+    <footer className="bg-[#030712] text-white relative z-20 overflow-hidden font-[Outfit] border-t border-blue-900/30">
+      
+      {/* Lucien Exact Background Spotlight Gradient & Matrix Character Grid */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-0 opacity-90"
+        style={{
+          background: `
+            radial-gradient(ellipse 90% 60% at 50% 30%, rgba(37, 99, 235, 0.4) 0%, rgba(29, 78, 216, 0.2) 45%, rgba(3, 7, 18, 0.98) 80%),
+            radial-gradient(ellipse 100% 70% at 50% 100%, rgba(37, 99, 235, 0.65) 0%, rgba(30, 58, 138, 0.4) 40%, rgba(3, 7, 18, 1) 90%)
+          `
+        }}
+      />
+
+      {/* Subtle Digital Code Grid Overlay (Exact Lucien Style) */}
+      <div className="absolute inset-0 opacity-15 pointer-events-none z-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px]" />
+
+      {/* Lucien Pre-Footer CTA Section */}
+      <div className="pt-32 pb-24 px-6 text-center space-y-8 relative z-10">
+        
+        {/* Centered Logo Emblem */}
+        <div className="h-12 w-12 rounded-2xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-blue-300 mx-auto shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+          <ShieldCheck size={26} />
+        </div>
+
+        {/* Headline */}
+        <div className="space-y-4 max-w-4xl mx-auto">
+          <h2 className="text-4xl sm:text-6xl md:text-7xl font-light tracking-tight text-white leading-[1.08]">
+            Deploy with certainty, <br />
+            scale without hesitation
+          </h2>
+          <p className="text-slate-300 text-base md:text-lg max-w-xl mx-auto font-normal pt-2">
+            Your AI investments deserve protection you can prove. <br className="hidden sm:inline" />
+            Let us show you how Deeqasa delivers it.
+          </p>
+        </div>
+
+        {/* Center Contact Button */}
+        <div className="pt-4 flex justify-center">
+          <Button
+            asChild
+            className="h-12 px-8 bg-white hover:bg-slate-100 text-slate-950 font-mono font-bold text-xs rounded-lg shadow-[0_0_30px_rgba(255,255,255,0.4)] hover:scale-105 transition-all group"
+          >
+            <Link href="/contact">
+              Contact
             </Link>
-            <p className="text-lg text-slate-500 max-w-sm leading-relaxed font-bold italic">
-              Architecting secure, sustainable, and intelligent digital infrastructure for the global enterprise.
-            </p>
-            <div className="flex gap-4">
-               {['LinkedIn', 'Twitter', 'GitHub'].map(social => (
-                 <Link key={social} href="#" className="h-12 w-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary/30 transition-all bg-slate-50/50">
-                    <span className="text-[10px] font-black uppercase tracking-tighter">{social[0]}</span>
-                 </Link>
-               ))}
-            </div>
-          </div>
-
-          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-12">
-            {Object.entries(footerLinks).map(([title, links]) => (
-              <div key={title} className="space-y-8">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-black border-b border-slate-100 pb-4">{title}</h4>
-                <ul className="space-y-4">
-                  {links.map((link) => (
-                    <li key={link.name}>
-                      <Link 
-                        href={link.href} 
-                        className="text-xs font-bold text-slate-400 hover:text-primary transition-colors uppercase tracking-widest block"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          </Button>
         </div>
+
       </div>
 
-      <div className="border-t border-slate-50 bg-slate-50/30">
-        <div className="container-enterprise py-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-              &copy; {new Date().getFullYear()} DEEQASA TECHNOLOGY PRIVATE LIMITED.
-            </p>
-            <div className="h-4 w-px bg-slate-200 hidden md:block" />
-            <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">All Systems Nominal</span>
-            </div>
-          </div>
+      {/* Monospace Links & Copyright Line */}
+      <div className="container-enterprise px-8 pb-12 relative z-10">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-xs font-mono text-slate-300">
           
-          <div className="flex items-center gap-8 text-[10px] font-black text-slate-300 uppercase tracking-widest">
-             <span className="hover:text-primary cursor-default transition-colors">ISO 27001:2022</span>
-             <span className="hover:text-primary cursor-default transition-colors">SOC2 TYPE II</span>
+          {/* Monospace Links */}
+          <div className="flex flex-wrap items-center gap-8">
+            <Link href="/about" className="hover:text-cyan-400 transition-colors">
+              → About
+            </Link>
+            <Link href="/contact" className="hover:text-cyan-400 transition-colors">
+              → Contact
+            </Link>
+            <Link href="/terms" className="hover:text-cyan-400 transition-colors">
+              → Terms and Conditions
+            </Link>
+            <Link href="/privacy" className="hover:text-cyan-400 transition-colors">
+              → Privacy Policy
+            </Link>
           </div>
+
+          {/* Copyright */}
+          <div className="text-slate-300 tracking-wider">
+            @ {new Date().getFullYear()} Deeqasa Technologies, Inc. All rights reserved.
+          </div>
+
         </div>
       </div>
+
+      {/* Lucien Exact Giant Full-Width DEEQASA Bottom Typography */}
+      <div className="relative w-full overflow-hidden select-none pointer-events-none pt-2 pb-0">
+        <div className="w-full px-2 text-center relative z-10">
+          <span className="text-[17.5vw] leading-none font-extrabold uppercase font-mono tracking-[-0.03em] text-white block opacity-95">
+            DEEQASA
+          </span>
+        </div>
+      </div>
+
     </footer>
   );
 }
