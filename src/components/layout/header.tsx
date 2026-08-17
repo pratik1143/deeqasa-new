@@ -76,7 +76,7 @@ export function Header() {
             asChild
             className="h-11 px-6 bg-white hover:bg-slate-100 text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all group"
           >
-            <Link href="/quotation">
+            <Link href="/hp-intel-spark?intent=demo">
               Book a Demo <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>

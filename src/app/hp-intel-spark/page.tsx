@@ -1,252 +1,596 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { 
-  ShieldCheck, 
-  Cpu, 
-  Zap, 
-  Laptop, 
-  Server, 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
-  PhoneCall, 
-  Building2, 
-  Globe,
-  Award
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { LeadForm } from '@/components/campaigns/hp-intel-spark/LeadForm';
-import { OfficialPackageNotice } from '@/components/campaigns/hp-intel-spark/OfficialPackageNotice';
-import { trackCTAClick, trackPageView } from '@/lib/analytics';
-import { captureUTMParameters } from '@/lib/utm-tracker';
+import Script from 'next/script';
+import { trackLeadGeneration, trackFormStart, trackFormError, trackCTAClick, trackPageView } from '@/lib/analytics';
+import { captureUTMParameters, getStoredUTMAttribution } from '@/lib/utm-tracker';
 
-export default function HPIntelSparkPage() {
+function HPIntelSparkContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    fullName: '',
+    phoneNumber: '',
+    emailAddress: '',
+    designation: '',
+    company: '',
+    city: '',
+    consentProcessing: false,
+    consentMarketing: false,
+    honeypot: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [hasStartedForm, setHasStartedForm] = useState(false);
+  const [requestType, setRequestType] = useState<'document' | 'demo' | 'quote'>('document');
+
   useEffect(() => {
-    // Capture UTM attribution on page visit
+    // 1. Capture UTM attribution
     captureUTMParameters();
-    // Track PageView for GA4
-    trackPageView('/hp-intel-spark');
-  }, []);
 
-  const scrollToForm = (location: string, ctaName: string) => {
-    trackCTAClick(ctaName, location, 'hp_intel_spark_2026');
-    const formElement = document.getElementById('enquire-lead-form');
+    // 2. Track page view
+    trackPageView('/hp-intel-spark');
+
+    // 3. Handle intent parameter (?intent=demo or ?intent=quote)
+    const intent = searchParams.get('intent');
+    if (intent === 'demo') {
+      setRequestType('demo');
+      scrollToForm('intent_param', 'book_a_demo');
+    } else if (intent === 'quote') {
+      setRequestType('quote');
+      scrollToForm('intent_param', 'request_a_quote');
+    }
+  }, [searchParams]);
+
+  const scrollToForm = (location: string, ctaName: string, targetType?: 'demo' | 'quote' | 'document') => {
+    if (targetType) setRequestType(targetType);
+    trackCTAClick(ctaName, location, 'hp_intel_spark');
+
+    const formElement = document.getElementById('official-lead-form');
     if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        formElement.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
+  const handleFieldFocus = () => {
+    if (!hasStartedForm) {
+      setHasStartedForm(true);
+      trackFormStart('hp_intel_spark_official_form', 'hp_intel_spark');
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Please enter your full name.';
+    }
+
+    const phoneClean = formData.phoneNumber.replace(/\D/g, '');
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Please enter your mobile number.';
+    } else if (phoneClean.length < 10) {
+      newErrors.phoneNumber = 'Please enter a valid 10-digit mobile number.';
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.emailAddress.trim()) {
+      newErrors.emailAddress = 'Please enter your email address.';
+    } else if (!emailRegex.test(formData.emailAddress.trim())) {
+      newErrors.emailAddress = 'Please enter a valid email address.';
+    }
+
+    if (!formData.company.trim()) {
+      newErrors.company = 'Please enter your company name.';
+    }
+
+    if (!formData.city.trim()) {
+      newErrors.city = 'Please enter your city.';
+    }
+
+    if (!formData.consentProcessing) {
+      newErrors.consentProcessing = 'Please accept the processing of your data to proceed.';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorField = Object.keys(newErrors)[0];
+      trackFormError('hp_intel_spark_official_form', firstErrorField, 'validation_error');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const utmAttribution = getStoredUTMAttribution();
+
+      const response = await fetch('/api/hp-intel-spark/lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          requestType,
+          utm: utmAttribution,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to submit enquiry.');
+      }
+
+      // CRITICAL: Fire generate_lead ONLY after confirmed 200 OK from server/CRM
+      trackLeadGeneration({
+        lead_source: 'hp_intel_spark',
+        campaign: utmAttribution.campaign || 'hp_intel_spark',
+        landing_page: '/hp-intel-spark',
+        form_name: 'hp_intel_spark_official_form',
+      });
+
+      // Trigger automatic download/opening of the official PDF brochure
+      try {
+        const link = document.createElement('a');
+        link.href = '/campaigns/hp-intel-spark/HP-Deeqasa Brochure.pdf';
+        link.target = '_blank';
+        link.download = 'HP-Deeqasa Brochure.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (dlErr) {
+        console.warn('Brochure download trigger warning', dlErr);
+      }
+
+      // Redirect to Thank-You Page
+      router.push('/hp-intel-spark/thank-you');
+    } catch (err: any) {
+      console.error('Official Lead Submission Error:', err);
+      setSubmitError(err.message || 'An error occurred. Please try again.');
+      trackFormError('hp_intel_spark_official_form', 'submit_button', 'api_error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen bg-[#030716] text-white font-[Outfit] selection:bg-cyan-500/30 overflow-x-hidden">
+    <div className="hp-intel-spark-page bg-white text-slate-900 selection:bg-blue-500/20 font-sans">
       
-      {/* Navigation Header */}
-      <Header />
+      {/* Load Official Campaign Stylesheets */}
+      <link rel="stylesheet" href="/campaigns/hp-intel-spark/css/bootstrap.min.css" />
+      <link rel="stylesheet" href="/campaigns/hp-intel-spark/font/stylesheet.css" />
+      <link rel="stylesheet" href="/campaigns/hp-intel-spark/css/main.css" />
 
-      {/* Radiant Background Glow & Grid Overlay */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-0 opacity-80"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 50% at 50% -10%, rgba(6, 182, 212, 0.35) 0%, rgba(59, 130, 246, 0.18) 45%, rgba(3, 7, 22, 0.98) 85%),
-            radial-gradient(ellipse 90% 60% at 50% 80%, rgba(30, 64, 175, 0.25) 0%, transparent 70%)
-          `
-        }}
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none z-0" />
-
-      <main className="relative z-10 pt-32 pb-24 space-y-20 max-w-full">
-
-        {/* 1. HERO SECTION */}
-        <section className="container-enterprise px-4 sm:px-6 lg:px-8 pt-6 sm:pt-10 text-center space-y-8">
-          
-          {/* Partnership Badge */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-cyan-500/40 text-cyan-300 font-mono text-[10px] sm:text-xs tracking-widest uppercase shadow-[0_0_20px_rgba(6,182,212,0.25)]"
-          >
-            <Sparkles size={14} className="text-cyan-400 animate-pulse" />
-            <span>HP & INTEL SPARK PROGRAM — DEEQASA ALLIANCE</span>
-          </motion.div>
-
-          {/* Main Hero Headline */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="space-y-4 max-w-5xl mx-auto"
-          >
-            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white leading-[1.08] font-[Outfit]">
-              Power Enterprise GenAI & Compute with <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-indigo-400">
-                HP & Intel SPARK Program
-              </span>
-            </h1>
-            <p className="text-slate-300 text-base sm:text-lg md:text-xl max-w-3xl mx-auto font-normal leading-relaxed pt-2">
-              Transform your organization's digital architecture with high-performance HP ZBook workstations, Intel® Core™ Ultra AI processors, and Intel® Xeon® server nodes backed by DeeQasa’s certified fleet deployment.
-            </p>
-          </motion.div>
-
-          {/* CTA Buttons */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-wrap items-center justify-center gap-4 pt-2"
-          >
-            <Button
-              onClick={() => scrollToForm('hero', 'get_started')}
-              className="h-14 px-8 bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:from-cyan-300 hover:to-blue-600 text-slate-950 font-black uppercase tracking-widest text-xs rounded-full shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all hover:scale-105"
-            >
-              Get Started Now <ArrowRight size={16} className="ml-2" />
-            </Button>
-
-            <Button
-              onClick={() => scrollToForm('hero', 'enquire_now')}
-              variant="outline"
-              className="h-14 px-8 bg-slate-900/90 border-slate-700 hover:border-cyan-400 text-white font-mono font-bold uppercase tracking-wider text-xs rounded-full hover:bg-slate-800 transition-all"
-            >
-              Enquire Now
-            </Button>
-          </motion.div>
-
-          {/* Key Value Pill Highlights */}
-          <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto font-mono text-[11px] text-slate-300">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-center gap-2">
-              <CheckCircle2 size={16} className="text-cyan-400 shrink-0" />
-              <span>Intel® NPU AI Hardware</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-center gap-2">
-              <CheckCircle2 size={16} className="text-cyan-400 shrink-0" />
-              <span>HP Wolf Pro Security</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-center gap-2">
-              <CheckCircle2 size={16} className="text-cyan-400 shrink-0" />
-              <span>OpEx DaaS Leasing</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-center gap-2">
-              <CheckCircle2 size={16} className="text-cyan-400 shrink-0" />
-              <span>24/7 Enterprise Uplink</span>
-            </div>
-          </div>
-
-        </section>
-
-        {/* 2. PROGRAM OVERVIEW & ARCHITECTURE HIGHLIGHTS */}
-        <section className="container-enterprise px-4 sm:px-6 lg:px-8">
-          <div className="bg-slate-900/60 border border-slate-800 rounded-[2.5rem] p-8 sm:p-12 space-y-12 backdrop-blur-xl">
-            
-            <div className="text-center space-y-3 max-w-3xl mx-auto">
-              <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-cyan-400 block">
-                ENTERPRISE SPECIFICATIONS —
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
-                Engineered for Next-Gen Compute
-              </h2>
-              <p className="text-slate-400 text-sm sm:text-base">
-                The HP & Intel SPARK initiative provides organizations with immediate access to cutting-edge hardware architectures designed for high-density computing, local AI model execution, and Zero-Trust cyber resilience.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              
-              {/* Card 1 */}
-              <div className="p-8 rounded-3xl bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/40 transition-all space-y-4 group">
-                <div className="h-14 w-14 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
-                  <Cpu size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-white">Intel® Core™ Ultra AI Acceleration</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Integrated Neural Processing Units (NPUs) deliver energy-efficient on-device AI inference for enterprise LLMs, data analytics, and real-time processing without cloud dependency.
-                </p>
-              </div>
-
-              {/* Card 2 */}
-              <div className="p-8 rounded-3xl bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/40 transition-all space-y-4 group">
-                <div className="h-14 w-14 rounded-2xl bg-blue-500/10 border border-blue-400/30 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                  <Laptop size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-white">HP Commercial ZBook & EliteBook Fleet</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Ultra-rugged mobile workstations engineered for data scientists, engineers, and executive teams, featuring HP Wolf Security and self-healing BIOS architecture.
-                </p>
-              </div>
-
-              {/* Card 3 */}
-              <div className="p-8 rounded-3xl bg-slate-950/80 border border-slate-800/90 hover:border-cyan-500/40 transition-all space-y-4 group">
-                <div className="h-14 w-14 rounded-2xl bg-indigo-500/10 border border-indigo-400/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                  <Server size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-white">Intel® Xeon® Scalable Compute Clusters</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                  Enterprise datacenter nodes optimized for high-concurrency cloud workloads, deep learning acceleration, and scalable virtualized infrastructures.
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
-
-        {/* 3. MID-PAGE CTA BANNER */}
-        <section className="container-enterprise px-4 sm:px-6 lg:px-8">
-          <div className="p-8 sm:p-12 rounded-[2.5rem] bg-gradient-to-r from-cyan-950/60 via-slate-900 to-blue-950/60 border border-cyan-500/30 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-            <div className="space-y-2 max-w-2xl">
-              <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-400 block">
-                SPECIAL PROGRAM ALLOCATION
-              </span>
-              <h3 className="text-2xl sm:text-4xl font-extrabold text-white">
-                Ready to Upgrade Your Enterprise Compute Fleet?
-              </h3>
-              <p className="text-slate-300 text-xs sm:text-sm">
-                Get custom HP Gold Partner pricing, proof-of-concept units, and dedicated technical assistance under the HP & Intel SPARK Program.
-              </p>
-            </div>
-            
-            <Button
-              onClick={() => scrollToForm('mid_page', 'talk_to_us')}
-              className="h-14 px-8 bg-white hover:bg-slate-100 text-slate-950 font-black uppercase tracking-widest text-xs rounded-full shadow-[0_0_25px_rgba(255,255,255,0.3)] shrink-0 transition-transform hover:scale-105"
-            >
-              Talk to Solutions Architect <PhoneCall size={16} className="ml-2" />
-            </Button>
-          </div>
-        </section>
-
-        {/* 4. LEAD GENERATION FORM SECTION */}
-        <section id="enquire-lead-form" className="container-enterprise px-4 sm:px-6 lg:px-8 scroll-mt-28">
-          <div className="max-w-4xl mx-auto space-y-6">
-            
-            {/* High Conversion Lead Form Component */}
-            <LeadForm />
-
-          </div>
-        </section>
-
-      </main>
-
-      {/* Sticky Mobile Bottom CTA Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#030716]/95 border-t border-slate-800 p-4 backdrop-blur-xl flex items-center justify-between gap-4">
-        <div>
-          <span className="text-[9px] font-mono uppercase text-cyan-400 block">HP & INTEL SPARK</span>
-          <span className="text-xs font-bold text-white">Priority Registration</span>
+      {/* Top Banner */}
+      <div className="bg-banner">
+        <div className="bannerTop">
+          <img src="/campaigns/hp-intel-spark/images/banner.jpg" alt="HP Deeqasa Spark Campaign Banner" className="responsive-wth w-full h-auto block" />
         </div>
-        <Button
-          onClick={() => scrollToForm('mobile_sticky', 'register_interest')}
-          className="h-11 px-6 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black uppercase tracking-wider text-xs rounded-full shadow-[0_0_15px_rgba(6,182,212,0.5)]"
-        >
-          Enquire Now
-        </Button>
+      </div>
+      <div className="gap-2"></div>
+
+      {/* Section 1: Product Intro */}
+      <div className="container my-8">
+        <div className="row flex flex-wrap items-center">
+          <div className="col-sm-5 col-md-5 col-lg-5 col-xs-12 mb-6 sm:mb-0">
+            <img src="/campaigns/hp-intel-spark/images/pro-1.png" className="img-responsive max-w-full h-auto mx-auto" alt="HP EliteBook X Series" />
+          </div>
+          
+          <div className="col-sm-7 col-md-7 col-lg-7 col-xs-12">
+            <div className="heading-new">
+              <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">One portfolio. Every role.</h1>
+            </div>
+            <div className="heading-new">
+              <h2 className="text-xl sm:text-2xl font-medium text-slate-700 mb-4">
+                Introducing the HP EliteBook X Series AI PCs <br className="hidden sm:inline" />
+                Powered by Intel® Core™ Ultra processors
+              </h2>
+            </div>
+            
+            <div className="list-1">
+              <ul className="space-y-2 text-sm text-slate-700">
+                <li>Built to move. Ultra-light, ultra-secure, AI power for all day productivity.</li>
+                <li>Ultra-thin power meets AI-ready performance.</li>
+                <li>AI muscle. Relentless speed. For leaders on the move.</li>
+                <li>Clear voice. Crisp visuals. Confident meetings.</li>
+                <li>Transform productivity with the HP IQ-enabled intelligent ecosystem.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Global Footer */}
-      <Footer />
+      {/* Section 2: Product Feature Highlight (Gray Container) */}
+      <div className="bg-gray py-12 bg-slate-100 border-y border-slate-200">
+        <div className="container">
+          <div className="heading-new-2 mb-8 text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug">
+              HP EliteBook X Flip G2i 14 inch Notebook Next Gen AI PC <br className="hidden sm:inline" />
+              Powered by Intel® Core™ Ultra processors
+            </h1>
+          </div>
+          
+          <div className="row flex flex-wrap items-center">
+            <div className="col-sm-6 col-md-6 col-lg-6 col-xs-12 mb-6 sm:mb-0">
+              <p className="align-new-4 text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+                From sketching ideas to presenting bold visions, the HP EliteBook X Flip G2i 14 inch Notebook AI PC empowers mobile professionals with a lightweight convertible design, touch input, and enterprise-grade security—built to support today’s AI-powered workflows and tomorrow’s innovations.
+              </p>
+              
+              <div className="list-1">
+                <ul className="space-y-2 text-sm text-slate-700">
+                  <li>Intel® powers next Gen AI PCs</li>
+                  <li>Protected by HP Wolf Security</li>
+                  <li>Speed up the basics of IT management</li>
+                  <li>Business-ready AI with real-world benefits</li>
+                  <li>Fast and efficient wireless LAN</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="col-sm-6 col-md-6 col-lg-6 col-xs-12">
+              <img src="/campaigns/hp-intel-spark/images/pro-2.png" className="img-responsive max-w-full h-auto mx-auto" alt="HP EliteBook X Flip G2i" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="gap-2 my-8"></div>
+
+      {/* Section 3: Official Lead Form & Features Grid */}
+      <div className="container my-12">
+        <div className="row flex flex-wrap">
+          
+          {/* Left Column: Official Lead Form */}
+          <div className="col-sm-6 col-md-6 col-lg-6 col-xs-12 mb-8 sm:mb-0" id="official-lead-form">
+            <div className="form-bg p-6 sm:p-8 bg-slate-900 text-white rounded-2xl shadow-xl">
+              <div className="form-main space-y-4">
+                
+                <div className="form-logo mb-4">
+                  <img src="/campaigns/hp-intel-spark/images/logo.png" alt="Deeqasa Logo" className="h-10 w-auto" />
+                </div>
+
+                <div className="align-new-1">
+                  <p className="text-xl font-bold text-white">Download the free guide</p>
+                </div>
+                <div className="align-new-2">
+                  <p className="text-xs text-slate-300">Fill in your details and you will receive the document in your email.</p>
+                </div>
+
+                {submitError && (
+                  <div className="p-3 bg-red-500/20 border border-red-500/40 text-red-300 text-xs rounded-lg">
+                    {submitError}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                  
+                  {/* Honeypot field */}
+                  <input
+                    type="text"
+                    name="website_url"
+                    value={formData.honeypot}
+                    onChange={(e) => setFormData({ ...formData, honeypot: e.target.value })}
+                    className="hidden"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+
+                  <div className="row">
+                    <div className="col-xs-12 col-sm-6 mb-3">
+                      <input
+                        type="text"
+                        className="form-control w-full bg-slate-800 border-slate-700 text-white text-xs p-3 rounded-lg placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                        id="fullName"
+                        placeholder="Name"
+                        value={formData.fullName}
+                        onFocus={handleFieldFocus}
+                        onChange={(e) => {
+                          setFormData({ ...formData, fullName: e.target.value });
+                          if (errors.fullName) setErrors({ ...errors, fullName: '' });
+                        }}
+                      />
+                      {errors.fullName && <span className="text-red-400 text-[11px] block mt-1">{errors.fullName}</span>}
+                    </div>
+
+                    <div className="col-xs-12 col-sm-6 mb-3">
+                      <input
+                        type="tel"
+                        className="form-control w-full bg-slate-800 border-slate-700 text-white text-xs p-3 rounded-lg placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                        id="phoneNumber"
+                        placeholder="Mobile Number"
+                        value={formData.phoneNumber}
+                        onFocus={handleFieldFocus}
+                        onChange={(e) => {
+                          setFormData({ ...formData, phoneNumber: e.target.value });
+                          if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: '' });
+                        }}
+                      />
+                      {errors.phoneNumber && <span className="text-red-400 text-[11px] block mt-1">{errors.phoneNumber}</span>}
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-xs-12 col-sm-6 mb-3">
+                      <input
+                        type="email"
+                        className="form-control w-full bg-slate-800 border-slate-700 text-white text-xs p-3 rounded-lg placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                        id="emailAddress"
+                        placeholder="E-mail"
+                        value={formData.emailAddress}
+                        onFocus={handleFieldFocus}
+                        onChange={(e) => {
+                          setFormData({ ...formData, emailAddress: e.target.value });
+                          if (errors.emailAddress) setErrors({ ...errors, emailAddress: '' });
+                        }}
+                      />
+                      {errors.emailAddress && <span className="text-red-400 text-[11px] block mt-1">{errors.emailAddress}</span>}
+                    </div>
+
+                    <div className="col-xs-12 col-sm-6 mb-3">
+                      <input
+                        type="text"
+                        className="form-control w-full bg-slate-800 border-slate-700 text-white text-xs p-3 rounded-lg placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                        id="Designation"
+                        placeholder="Designation"
+                        value={formData.designation}
+                        onFocus={handleFieldFocus}
+                        onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-xs-12 col-sm-6 mb-3">
+                      <input
+                        type="text"
+                        className="form-control w-full bg-slate-800 border-slate-700 text-white text-xs p-3 rounded-lg placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                        id="Company"
+                        placeholder="Company"
+                        value={formData.company}
+                        onFocus={handleFieldFocus}
+                        onChange={(e) => {
+                          setFormData({ ...formData, company: e.target.value });
+                          if (errors.company) setErrors({ ...errors, company: '' });
+                        }}
+                      />
+                      {errors.company && <span className="text-red-400 text-[11px] block mt-1">{errors.company}</span>}
+                    </div>
+
+                    <div className="col-xs-12 col-sm-6 mb-3">
+                      <input
+                        type="text"
+                        className="form-control w-full bg-slate-800 border-slate-700 text-white text-xs p-3 rounded-lg placeholder-slate-400 focus:outline-none focus:border-cyan-400"
+                        id="City"
+                        placeholder="City"
+                        value={formData.city}
+                        onFocus={handleFieldFocus}
+                        onChange={(e) => {
+                          setFormData({ ...formData, city: e.target.value });
+                          if (errors.city) setErrors({ ...errors, city: '' });
+                        }}
+                      />
+                      {errors.city && <span className="text-red-400 text-[11px] block mt-1">{errors.city}</span>}
+                    </div>
+                  </div>
+
+                  <div className="align-new-3 text-[10px] text-slate-400 leading-normal my-3">
+                    <p>
+                      To process your request and send you the downloaded document, as well as, if you authorize it, to send you marketing communications and perform segmentation for marketing purposes – Rights: To withdraw your consent. Access, rectification, erasure, restriction or objection to processing, the right not to be subject to automated decisions, as well as the right to obtain clear and transparent information about the processing of your data. – You can consult the privacy policy in more detail{' '}
+                      <Link href="/hp-intel-spark/privacy-policy" className="text-cyan-400 underline">
+                        here
+                      </Link>
+                    </p>
+                  </div>
+
+                  {/* Consent Checkboxes */}
+                  <div className="check-box-main flex items-start gap-3 my-2">
+                    <input
+                      className="form-check-input mt-1 accent-cyan-500 cursor-pointer"
+                      type="checkbox"
+                      id="consentProcessing"
+                      checked={formData.consentProcessing}
+                      onChange={(e) => {
+                        setFormData({ ...formData, consentProcessing: e.target.checked });
+                        if (errors.consentProcessing) setErrors({ ...errors, consentProcessing: '' });
+                      }}
+                    />
+                    <label htmlFor="consentProcessing" className="check-box-right text-xs text-slate-300 cursor-pointer">
+                      I accept the processing of my data to receive the requested document
+                    </label>
+                  </div>
+                  {errors.consentProcessing && (
+                    <span className="text-red-400 text-[11px] block mb-2">{errors.consentProcessing}</span>
+                  )}
+
+                  <div className="check-box-main flex items-start gap-3 my-2">
+                    <input
+                      className="form-check-input mt-1 accent-cyan-500 cursor-pointer"
+                      type="checkbox"
+                      id="consentMarketing"
+                      checked={formData.consentMarketing}
+                      onChange={(e) => setFormData({ ...formData, consentMarketing: e.target.checked })}
+                    />
+                    <label htmlFor="consentMarketing" className="check-box-right text-xs text-slate-300 cursor-pointer">
+                      I agree to receive marketing communications from Deeqasa
+                    </label>
+                  </div>
+
+                  {/* Submit Action Button */}
+                  <div className="pt-3">
+                    <button
+                      className="btn btn-primary w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold uppercase tracking-wider text-xs rounded-lg transition-colors disabled:opacity-50"
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Obtain Document'}
+                    </button>
+                  </div>
+
+                </form>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: AI Features & Intent CTAs */}
+          <div className="col-sm-6 col-md-6 col-lg-6 col-xs-12">
+            <div className="heading-new mb-4">
+              <h1 className="text-3xl font-bold text-slate-900">
+                Meet the Next <br />
+                Generation of AI PCs
+              </h1>
+            </div>
+            
+            <div className="align-new-4 mb-6">
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Experience exceptional performance that empowers you to do your best work, create with confidence, and make an impact where it matters most.
+              </p>
+            </div>
+
+            {/* Feature Icons Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+              
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <img src="/campaigns/hp-intel-spark/images/icon-1.png" alt="" className="w-10 h-10 shrink-0" />
+                <div>
+                  <div className="font-bold text-xs text-slate-900">AI-Powered Performance</div>
+                  <div className="text-[11px] text-slate-500">On-device AI with dedicated NPU</div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <img src="/campaigns/hp-intel-spark/images/icon-2.png" alt="" className="w-10 h-10 shrink-0" />
+                <div>
+                  <div className="font-bold text-xs text-slate-900">Built-in Security</div>
+                  <div className="text-[11px] text-slate-500">HP Wolf Security protection</div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <img src="/campaigns/hp-intel-spark/images/icon-3.png" alt="" className="w-10 h-10 shrink-0" />
+                <div>
+                  <div className="font-bold text-xs text-slate-900">All-Day Battery Life</div>
+                  <div className="text-[11px] text-slate-500">Long-lasting with fast charging</div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <img src="/campaigns/hp-intel-spark/images/icon-4.png" alt="" className="w-10 h-10 shrink-0" />
+                <div>
+                  <div className="font-bold text-xs text-slate-900">Smart Experiences</div>
+                  <div className="text-[11px] text-slate-500">AI-enhanced collaboration</div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Intent Action Buttons */}
+            <div className="flex flex-wrap gap-4 pt-2">
+              <button
+                type="button"
+                onClick={() => scrollToForm('features_grid', 'book_a_demo', 'demo')}
+                className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
+              >
+                Book a Demo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => scrollToForm('features_grid', 'request_a_quote', 'quote')}
+                className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
+              >
+                Request a Quote
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      {/* Official Footer Contact Section */}
+      <div className="bg-slate-900 text-white py-10 mt-12 border-t border-slate-800">
+        <div className="container">
+          <div className="row flex flex-wrap items-center">
+            
+            <div className="col-sm-10 col-md-10 col-lg-10 col-xs-12 space-y-3">
+              
+              <div className="flex items-center gap-3 text-xs text-slate-300">
+                <img src="/campaigns/hp-intel-spark/images/address-icon.png" alt="" className="w-5 h-5 shrink-0" />
+                <span>Jubilee walk, 1st Floor, SCO 105 & 106, Sector 70, Sahibzada Ajit Singh Nagar, Punjab 160071</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-300">
+                <img src="/campaigns/hp-intel-spark/images/email-icon.png" alt="" className="w-5 h-5 shrink-0" />
+                <a href="mailto:pratikofficial@deeqasa.com" className="text-cyan-400 hover:underline">
+                  pratikofficial@deeqasa.com
+                </a>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-300">
+                <img src="/campaigns/hp-intel-spark/images/web-icon.png" alt="" className="w-5 h-5 shrink-0" />
+                <a href="https://www.deeqasa.com/" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">
+                  www.deeqasa.com
+                </a>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-300">
+                <img src="/campaigns/hp-intel-spark/images/phone.png" alt="" className="w-5 h-5 shrink-0" />
+                <span>+91 85952 70950</span>
+              </div>
+
+            </div>
+
+            <div className="col-sm-2 col-md-2 col-lg-2 col-xs-12 text-right mt-6 sm:mt-0">
+              <img src="/campaigns/hp-intel-spark/images/logo2.png" alt="Deeqasa" className="h-10 w-auto inline-block" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      {/* Copyright & Privacy Bar */}
+      <div className="bg-slate-950 py-4 text-xs text-slate-400 border-t border-slate-900">
+        <div className="container">
+          <div className="row flex flex-wrap items-center justify-between">
+            <div className="col-sm-10 col-md-10 col-lg-10 col-xs-12">
+              © Copyright 2026. HP Development Company, L.P. The information contained herein is subject to change without notice.
+            </div>
+            <div className="col-sm-2 col-md-2 col-lg-2 col-xs-12 text-right mt-2 sm:mt-0 font-mono">
+              <Link href="/hp-intel-spark/privacy-policy" className="text-cyan-400 hover:underline">
+                Privacy Policy
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
+  );
+}
+
+export default function HPIntelSparkPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-slate-500 font-mono text-xs">Loading HP & Intel SPARK Campaign...</div>}>
+      <HPIntelSparkContent />
+    </Suspense>
   );
 }

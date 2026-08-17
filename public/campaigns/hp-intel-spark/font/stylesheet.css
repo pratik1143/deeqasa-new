@@ -1,0 +1,39 @@
+@font-face {
+    font-family: 'Forma DJR Banner';
+    src: url('FormaDJRBanner-Medium.eot');
+    src: local('Forma DJR Banner Medium'), local('FormaDJRBanner-Medium'),
+        url('FormaDJRBanner-Medium.eot?#iefix') format('embedded-opentype'),
+        url('FormaDJRBanner-Medium.woff2') format('woff2'),
+        url('FormaDJRBanner-Medium.woff') format('woff'),
+        url('FormaDJRBanner-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Forma DJR Banner Extra';
+    src: url('FormaDJRBanner-ExtraBold.eot');
+    src: local('Forma DJR Banner Extra Bold'), local('FormaDJRBanner-ExtraBold'),
+        url('FormaDJRBanner-ExtraBold.eot?#iefix') format('embedded-opentype'),
+        url('FormaDJRBanner-ExtraBold.woff2') format('woff2'),
+        url('FormaDJRBanner-ExtraBold.woff') format('woff'),
+        url('FormaDJRBanner-ExtraBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Forma DJR Banner';
+    src: url('FormaDJRBanner-Regular.eot');
+    src: local('Forma DJR Banner Regular'), local('FormaDJRBanner-Regular'),
+        url('FormaDJRBanner-Regular.eot?#iefix') format('embedded-opentype'),
+        url('FormaDJRBanner-Regular.woff2') format('woff2'),
+        url('FormaDJRBanner-Regular.woff') format('woff'),
+        url('FormaDJRBanner-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

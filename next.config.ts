@@ -30,15 +30,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/hp-intel-spark',
-        permanent: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;

@@ -4,7 +4,6 @@ import { getFirestore, collection, addDoc } from 'firebase/firestore';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { firebaseConfig } from '@/firebase/config';
 
-// Initialize Firebase App for server API route
 function getFirebase() {
   const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
   const db = getFirestore(app);
@@ -17,14 +16,21 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const {
+      fullName,
       name,
-      email,
+      phoneNumber,
       phone,
+      emailAddress,
+      email,
+      designation,
+      Company,
       company,
+      City,
       city,
-      requirement,
-      message,
-      honeypot, // Anti-spam field
+      requestType = 'document',
+      consentProcessing = false,
+      consentMarketing = false,
+      honeypot = '',
       utm = {},
     } = body;
 
@@ -34,22 +40,25 @@ export async function POST(request: Request) {
     }
 
     // 2. Server-side Input Validation
-    if (!name || name.trim().length < 2) {
+    const leadName = (fullName || name || '').trim();
+    if (!leadName || leadName.length < 2) {
       return NextResponse.json(
         { success: false, error: 'Please enter your full name (min 2 characters).' },
         { status: 400 }
       );
     }
 
+    const leadEmail = (emailAddress || email || '').trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    if (!leadEmail || !emailRegex.test(leadEmail)) {
       return NextResponse.json(
-        { success: false, error: 'Please enter a valid business email address.' },
+        { success: false, error: 'Please enter a valid email address.' },
         { status: 400 }
       );
     }
 
-    const phoneClean = phone ? String(phone).replace(/\D/g, '') : '';
+    const rawPhone = (phoneNumber || phone || '').trim();
+    const phoneClean = rawPhone.replace(/\D/g, '');
     if (!phoneClean || phoneClean.length < 10) {
       return NextResponse.json(
         { success: false, error: 'Please enter a valid mobile number (min 10 digits).' },
@@ -57,27 +66,35 @@ export async function POST(request: Request) {
       );
     }
 
+    const leadCompany = (Company || company || 'Not Specified').trim();
+    const leadCity = (City || city || 'Not Specified').trim();
+    const leadDesignation = (designation || 'Not Specified').trim();
+
     const nowISO = new Date().toISOString();
 
     // 3. Construct Lead Payload matching DeeQasa CRM schema exactly
     const leadPayload = {
-      name: name.trim(),
-      company: (company || 'Not Specified').trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone.trim(),
-      city: (city || 'Not Specified').trim(),
-      requirement: (requirement || 'HP & Intel SPARK AI Acceleration Fleet').trim(),
-      notes: (message || '').trim(),
+      name: leadName,
+      company: leadCompany,
+      email: leadEmail,
+      phone: rawPhone,
+      city: leadCity,
+      designation: leadDesignation,
+      requestType: requestType, // 'demo' | 'quote' | 'document'
+      consentProcessing: Boolean(consentProcessing),
+      consentMarketing: Boolean(consentMarketing),
+      notes: `Request Type: ${requestType.toUpperCase()} | Designation: ${leadDesignation} | City: ${leadCity}`,
       status: 'New',
-      source: 'HP & Intel SPARK Campaign',
+      source: 'HP & Intel SPARK',
+      campaign: 'HP & Intel SPARK Program',
       priority: 'Warm',
       score: 0,
-      tags: ['HP', 'Intel SPARK', 'Campaign 2026', utm.source || 'Direct'],
+      tags: ['HP', 'Intel SPARK', 'Official Campaign', requestType],
       revenue: 0,
       
-      // First-Class Attribution Data for CRM Filtering (All Leads -> Campaign -> Channel)
+      // First-Class Attribution Data for CRM Filtering
       attribution: {
-        campaign: utm.campaign || 'hp_intel_spark_2026',
+        campaign: utm.campaign || 'hp_intel_spark',
         source: utm.source || 'direct',
         medium: utm.medium || 'none',
         content: utm.content || '',
@@ -92,7 +109,7 @@ export async function POST(request: Request) {
         {
           id: `act_${Date.now()}`,
           type: 'lead_creation',
-          action: `Ingested via HP & Intel SPARK Landing Page (${utm.source || 'direct'})`,
+          action: `Ingested via Official HP & Intel SPARK Landing Page (${requestType.toUpperCase()})`,
           timestamp: nowISO,
           performer: 'HP & Intel SPARK Campaign Engine',
         },
@@ -101,15 +118,13 @@ export async function POST(request: Request) {
       updatedAt: nowISO,
     };
 
-    // Log received lead details to server console
-    console.log('[HP & Intel SPARK Lead Ingested]:', JSON.stringify(leadPayload, null, 2));
+    console.log('[HP & Intel SPARK Official Lead Ingested]:', JSON.stringify(leadPayload, null, 2));
 
     // 4. Attempt Firestore insertion
     let leadId = `lead_${Date.now()}`;
     try {
       const { db, auth } = getFirebase();
 
-      // Sign in anonymously if not authenticated to establish auth context
       if (!auth.currentUser) {
         try {
           await signInAnonymously(auth);
@@ -123,14 +138,14 @@ export async function POST(request: Request) {
       leadId = docRef.id;
     } catch (dbError: any) {
       console.warn('[HP & Intel SPARK Lead DB Warning]: Cloud Firestore rules restricted direct write.', dbError?.message);
-      // Lead is still logged on server and returned successfully to prevent visitor friction
     }
 
     return NextResponse.json(
       {
         success: true,
         leadId,
-        message: 'Thank you. Our team will get in touch with you shortly.',
+        downloadUrl: '/campaigns/hp-intel-spark/HP-Deeqasa Brochure.pdf',
+        message: 'Thank you for your interest. Your enquiry has been received.',
       },
       { status: 200 }
     );
