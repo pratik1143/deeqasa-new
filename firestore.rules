@@ -46,7 +46,9 @@ service cloud.firestore {
     }
 
     match /leads/{leadId} {
-      allow read, write: if request.auth.token.email == 'deeqasa@admin.in';
+      allow create: if true;
+      allow read, update, delete: if isSignedIn() || request.auth.token.email == 'deeqasa@admin.in';
     }
   }
 }
+

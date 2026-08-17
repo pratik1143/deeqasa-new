@@ -46,3 +46,4 @@ firestore-debug.log
 
 # secrets
 src/ai/service-account.json
+.cora
