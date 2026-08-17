@@ -23,67 +23,8 @@
 
     <script src="/hp-intel-spark/js/jquery-latest.js"></script>
 
-    <style>
-      .top-brochure-bar {
-        background-color: #0f172a;
-        color: #ffffff;
-        padding: 10px 0;
-        border-bottom: 3px solid #0096ff;
-      }
-      .top-brochure-bar .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .top-brochure-title {
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.3px;
-        color: #f8fafc;
-      }
-      .btn-download-top {
-        background-color: #0096ff;
-        color: #ffffff !important;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 7px 18px;
-        font-size: 12px;
-        border-radius: 6px;
-        text-decoration: none !important;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        box-shadow: 0 2px 10px rgba(0, 150, 255, 0.3);
-        transition: all 0.2s ease;
-      }
-      .btn-download-top:hover {
-        background-color: #007acc;
-        transform: translateY(-1px);
-      }
-      .hero-brochure-btn {
-        margin-top: 15px;
-        display: inline-block;
-      }
-    </style>
 </head>
 <body>
-
-    <!-- Top Announcement Bar with Brochure Download Link -->
-    <div class="top-brochure-bar">
-        <div class="container">
-            <div class="top-brochure-title">
-                HP & Intel SPARK Program — Official Solution Guide & Product Specifications
-            </div>
-            <a href="/hp-intel-spark/HP-Deeqasa Brochure.pdf" target="_blank" download="HP-Deeqasa Brochure.pdf" class="btn-download-top">
-                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                Download Brochure
-            </a>
-        </div>
-    </div>
-
     <div class="bg-banner">
         <div class="bannerTop">
             <img src="/hp-intel-spark/images/Banner.jpg" alt="HP Deeqasa Campaign Banner" class="responsive-wth" />
@@ -110,14 +51,6 @@ Powered by Intel® Core™ Ultra processors</h2></div>
 	<li>Transform productivity with the HP IQ-enabled intelligent ecosystem.</li>
 	</ul>
 	</div>	
-
-    <div class="hero-brochure-btn">
-        <a href="/hp-intel-spark/HP-Deeqasa Brochure.pdf" target="_blank" download="HP-Deeqasa Brochure.pdf" class="btn-download-top" style="padding: 10px 24px; font-size: 13px;">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-            Download Official Brochure (PDF)
-        </a>
-    </div>
-
 		</div>
 	   </div>
 	
@@ -167,6 +100,10 @@ Powered by Intel® Core™ Ultra processors</h1></div>
 
 <div class="align-new-1"><p>Download the free guide</p></div>
 <div class="align-new-2"><p>Fill in your details and you will receive the document in your email.</p></div>
+
+<div id="form-success-msg" style="display: none; background-color: #059669; color: #ffffff; padding: 15px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-bottom: 20px; text-align: center;">
+    ✓ Thank you! Your document has been downloaded successfully.
+</div>
 	
 <form id="official-campaign-form">
 	
@@ -454,7 +391,7 @@ Powered by Intel® Core™ Ultra processors</h1></div>
                             });
                         }
 
-                        // Download brochure PDF
+                        // Download brochure PDF immediately
                         try {
                             var a = document.createElement('a');
                             a.href = '/hp-intel-spark/HP-Deeqasa Brochure.pdf';
@@ -465,8 +402,10 @@ Powered by Intel® Core™ Ultra processors</h1></div>
                             document.body.removeChild(a);
                         } catch(err) {}
 
-                        // Redirect to Thank-You Page
-                        window.location.href = '/hp-intel-spark/thank-you';
+                        // Display inline success message without redirecting to thank-you page
+                        $('#form-success-msg').fadeIn();
+                        submitBtn.prop('disabled', false).text('Document Downloaded ✓');
+                        $('#official-campaign-form')[0].reset();
                     } else {
                         alert(data.error || 'Submission failed. Please try again.');
                         submitBtn.prop('disabled', false).text('Obtain Document');

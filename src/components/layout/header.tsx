@@ -3,25 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { ArrowRight, ShieldCheck, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const navLinks = [
-  { name: 'About', href: '/about' },
-  { name: 'Solutions', href: '/solutions' },
-  { name: 'Quotation', href: '/quotation' },
-  { name: 'Contact', href: '/contact' },
-];
+import { ArrowRight, Menu, X, FileText } from 'lucide-react';
 
 export function Header() {
-  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -37,8 +33,8 @@ export function Header() {
     >
       <div className="container-enterprise px-6 flex items-center justify-between">
         
-        {/* Left Nav Link */}
-        <div className="hidden md:flex items-center gap-8 text-xs font-mono tracking-widest text-slate-400">
+        {/* Left Nav Links */}
+        <div className="hidden md:flex items-center gap-6 text-xs font-mono tracking-widest text-slate-400">
           <Link 
             href="/about" 
             className={`hover:text-cyan-400 transition-colors flex items-center gap-1.5 ${
@@ -55,6 +51,19 @@ export function Header() {
           >
             <span>→</span> <span>Solutions</span>
           </Link>
+          
+          {/* Highlighted & Glowing "Obtain Document" CTA Link */}
+          <Link 
+            href="/hp-intel-spark" 
+            className="relative inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono tracking-wider uppercase text-cyan-300 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 hover:border-cyan-400 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.35)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:scale-105 transition-all group"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            </span>
+            <FileText size={15} className="text-cyan-400 group-hover:scale-110 transition-transform" />
+            <span className="text-cyan-100 font-extrabold group-hover:text-white">Obtain Document</span>
+          </Link>
         </div>
 
         {/* Center Brand Logo - Lucien + SR Enterprise Fusion */}
@@ -70,13 +79,13 @@ export function Header() {
           </div>
         </Link>
 
-        {/* Right CTA Button */}
+        {/* Right CTA Button - Opens DeeQasa's standard quotation/demo form */}
         <div className="hidden md:flex items-center gap-4">
           <Button
             asChild
             className="h-11 px-6 bg-white hover:bg-slate-100 text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 transition-all group"
           >
-            <Link href="/hp-intel-spark?intent=demo">
+            <Link href="/quotation">
               Book a Demo <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
@@ -94,32 +103,37 @@ export function Header() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="md:hidden bg-[#030716] border-b border-slate-800 p-6 space-y-4 font-mono text-sm"
-        >
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block text-slate-300 hover:text-cyan-400 py-2 border-b border-slate-900 uppercase tracking-widest"
-            >
-              {link.name}
-            </Link>
-          ))}
-          <Button
-            asChild
-            className="w-full h-12 bg-white text-slate-950 font-bold uppercase tracking-wider text-xs rounded-full mt-4"
+        <div className="md:hidden bg-slate-950/95 border-b border-slate-800 px-6 py-6 space-y-4 font-mono text-sm backdrop-blur-xl">
+          <Link 
+            href="/about" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-slate-300 hover:text-cyan-400 py-1"
           >
-            <Link href="/quotation" onClick={() => setMobileMenuOpen(false)}>
-              Book a Demo
-            </Link>
-          </Button>
-        </motion.div>
+            → About
+          </Link>
+          <Link 
+            href="/solutions" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-slate-300 hover:text-cyan-400 py-1"
+          >
+            → Solutions
+          </Link>
+          <Link 
+            href="/hp-intel-spark" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-cyan-300 hover:text-cyan-400 py-2 font-bold bg-cyan-950/80 border border-cyan-500/50 rounded-lg px-4 text-center shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+          >
+            📄 Obtain Document (HP & Intel SPARK)
+          </Link>
+          <Link 
+            href="/quotation" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="block text-white font-bold bg-cyan-600/20 p-3 rounded-lg border border-cyan-500/30 text-center uppercase tracking-wider text-xs"
+          >
+            Book a Demo
+          </Link>
+        </div>
       )}
-
     </header>
   );
 }
