@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/hp-intel-spark',
+        destination: '/hp-intel-spark/index.html',
+      },
+      {
+        source: '/hp-intel-spark/privacy-policy',
+        destination: '/hp-intel-spark/privacy-policy.html',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

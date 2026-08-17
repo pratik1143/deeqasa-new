@@ -1,0 +1,3801 @@
+* {
+-webkit-box-sizing:border-box;
+-moz-box-sizing:border-box;
+box-sizing:border-box
+}
+
+html {
+text-rendering:optimizeLegibility!important;
+-webkit-font-smoothing:antialiased!important
+}
+
+/*carousel*/
+
+ @font-face {font-family: 'Forma DJR Banner';
+    src: url('HPSimplified-Light.woff2') format('woff2'),
+        url('HPSimplified-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+
+/*carousel*/
+
+ 
+.align {
+    float: right;
+    width: 100%;
+    height: 0px;
+    padding: -6px 0 5px 0;
+    text-align: right;
+    margin-top: -11px;
+    margin-right: 17px;
+}
+
+
+
+
+.elbok{margin-top:5%; }
+
+
+
+.cru80{width:80%;}
+
+
+
+
+
+
+
+
+.video-module { 
+   
+}
+.max960{max-width: 960px;}
+
+
+.vcon>.max960>.wor>p{color:#5a5a5a;font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+   
+
+}
+
+ 
+.vcon h1{color:#000; padding-top: 50px;}
+
+
+
+.discraption{ line-height: 1.5;font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+    color: #5a5a5a;text-align: center;width:75%;  display: inline-block; 
+
+}
+
+
+.discraption2{ line-height: 1.5;font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+    color: #fff;text-align: center;width:75%; display: inline-block; padding-bottom:50px;  
+
+}
+
+.molecule-ocmhpifootnotes {
+    display: block;
+    background-color: #e8e8e8;
+    width: 100%;
+	    padding: 20px 30px 30px;
+}
+
+
+
+
+.fsBr2 {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: block;
+    text-align: center;
+    background: url(../images/bac2.jpg) 50% 50% / cover no-repeat scroll rgb(98, 112, 119);
+    
+    height: 600px;
+    position: relative!important; margin-bottom:100px;
+}
+
+
+
+.eliteBook>.row>.elbok> p{font-size: 50px;
+    letter-spacing: 0.02rem;    color: #5a5a5a }
+
+
+.eliteBook>.row>.elbok{padding-top:0px;}
+
+
+
+
+
+.fsBr3 {
+    margin: 0;
+    padding:0 0%;
+    width: 100%;
+    display: block;
+    text-align: center;
+    background: url(../images/background4.jpg) 50% 50% / cover no-repeat scroll rgb(98, 112, 119);
+    
+    height: 800px;
+    position: relative!important; margin-bottom:100px;
+}
+
+.fsBr3>h1{    font-size: 2.125rem;color:#fff;
+    letter-spacing: 0.2rem;margin-top: 50px;}
+
+
+.fsBr3>p{  line-height: 1.5;     color: #FFFFFF;
+margin-top: 1rem;font-size: 1.25rem;
+    letter-spacing: 0.02rem;}
+
+
+
+.features{padding-bottom:80px;}
+
+
+.features>h1{margin-bottom:70px;}
+
+
+.features>.row>.fichepra{     font-size: 1.25rem;
+    letter-spacing: 0.02rem;padding:0 3%; }
+
+
+.features>.row>.fichepra h3{    font-size: 1.5rem;}
+
+
+
+.width80{
+	
+	line-height: 1.5;
+    font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+    color: #fff;
+    text-align: center;
+    width:75%;
+    display: inline-block;
+    padding-bottom: 50px;
+}
+
+.width82{
+	
+	    line-height: 1.5;
+    font-size: 1.5rem;
+    letter-spacing: 0.02rem;
+    color: #5a5a5a;
+    text-align: center;
+    width:75%;
+    display: inline-block;
+    padding-bottom: 50px;
+	margin-top: 1rem;
+}
+
+
+
+.molecule-ocmhpifootnotes p{  font-size: 0.875rem;}
+
+.light-black { width: 100%; overflow: hidden;padding-top:80px;
+    background-color: #191919;
+    border-color: #FFFFFF;
+    color: #FFFFFF;
+	padding-bottom:80px;
+	
+	   
+}
+
+.hpsur{margin-bottom:5%; }
+
+.light-black  figure{padding:5% 0;}
+
+
+.vcon>.row>.ptag> p{font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+	    color: #5a5a5a;
+	    font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+}
+
+
+
+.seemore{
+	position: absolute; left: 49%;
+	color: #fff;
+	font-size: 1.25rem;
+	bottom:-35px;
+	 
+	 
+    
+    
+    height: 50px;
+    display: inline-block;
+   
+	
+}
+
+.bluebg a{color: #fff!important; }
+.icon-arrow { position: absolute; left: 50%;  
+	
+	
+	 
+    
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    border: 1px solid #fff!important;
+    border-color: inherit;
+    border-radius: 100%;
+    -webkit-transition: -webkit-transform .3s ease;
+    transition: -webkit-transform .3s ease;
+    transition: transform .3s ease;
+    transition: transform .3s ease,-webkit-transform .3s ease;
+}
+
+.icon-arrow:after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    border-right: 1px solid #767676;
+    border-bottom: 1px solid #767676;
+    border-color: inherit;
+    margin-top: 10px;
+	margin-left: 13px;
+}
+
+
+
+
+
+
+
+
+
+
+.video-module>video{ text-align: center; margin:0 auto; width:806px;
+    height: auto;
+    position: relative;
+    line-height: 0; }
+
+
+
+.nopadding-left {
+padding-left:0
+}
+
+.nopadding-right {
+padding-right:0
+}
+
+.nopadding {
+padding-left:0;
+padding-right:0
+}
+
+.mb10 {
+padding-left:10px;
+padding-right:10px
+}
+
+.tabbody {
+margin-right:-10px;
+margin-left:-10px
+}
+
+* {
+margin:0;
+padding:0
+}
+
+a {
+text-decoration:none
+}
+
+a:hover {
+text-decoration:none!important
+}
+
+header,nav,section,article,aside,footer {
+display:block
+}
+
+html {
+font-size:100%
+}
+
+body {font-size: 12px;font-family: 'Forma DJR Banner';
+    line-height: 26px;
+    color: #777;
+    -webkit-font-smoothing: antialiased;
+    font-weight: normal;
+}
+
+h1,h2,h3,h4,h5,h6 {width: 100%;
+    font-size:29px;
+    line-height: 1.2;font-family: 'Forma DJR Banner';
+    color: #000;
+}
+
+:-ms-input-placeholder {
+color:#000
+}
+
+
+/*Banner Full Screen*/
+
+
+.blcontaner{background-color:#009BA0; margin-top:8%;
+    border-color: #FFFFFF;
+    color: #FFFFFF;  clear: both; width: 100%; 
+padding-bottom:5%; 
+
+
+}
+
+.heading-1new{    font-size:27px;
+    line-height: 1.2;font-family: 'Forma DJR Banner';
+    font-weight: normal;
+    color: #000;
+    text-align: center;
+    float: left; width: 100%;
+	font-weight: bold;
+	margin: 2% 0 18px 0;}
+
+.bluebg{ 
+	    background: url(../images/full.jpg) 50% 50% / cover no-repeat scroll rgb(98, 112, 119);
+    min-height: 340px;
+ position: relative;
+
+}
+
+p{letter-spacing: 1px; font-size:16px;}
+
+
+
+.light-black>.container>.row>.hpsur> h1{font-size: 1.3rem;
+    letter-spacing: 0.1rem;color:#fff;}
+
+
+
+.light-black>.container>.row>.hpsur> p{font-size: 1.5rem;
+    letter-spacing: 0.1rem;    
+	
+}
+
+
+.layout-960 {
+	text-align: left;}
+.layout-960 span {
+	
+    font-size:18px;
+}
+.layout-960 h1, .layout-960 h2, .layout-960 h3, .layout-960 span {
+	font-weight: 100;
+    color: #000;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+}
+.layout-960 h1{
+    font-size:38px;
+	margin: 35px 0 10px 0;
+	text-transform: uppercase;
+	color: #1159a0
+}
+
+ 
+.layout-960 h2{
+    font-size:30px;
+}
+
+.layout-960 h3{
+    font-size:24px;
+	font-weight: 100;
+	margin: 10px 0;
+
+}
+
+ .wrapper{
+  width: 400px;
+  height: 320px;
+  margin:20px auto;
+  text-align:center;
+  border:1px dashed grey;
+  overflow-y: scroll;
+}
+
+
+.crystal {padding-top:80px;}
+
+ 
+.layout-960 p{
+	font-size: 1.25rem;
+    letter-spacing: 0.02rem;
+	
+}
+
+
+
+
+/*Banner Full Screen*/
+
+
+.fsBr{margin:0;    width: 100%; display: block; 
+	
+	    background:#efefef url("../images/halo.png") no-repeat right center;
+/*	 height: 500px;*/
+	position:relative !important;
+	padding: 80px 0;
+}
+.fsBr-white {margin:0;    width: 100%; display: block; 
+	
+	    background:#fff;
+/*	 height: 500px;*/
+	position:relative !important;
+	padding: 80px 0;
+}
+
+
+ 
+
+.fsBr>h1{color:#fff;  transform: translate(-50%,-50%);left:50%;top:60%;position: absolute;}
+
+
+
+.fsBr>figure{color:#fff;  transform: translate(-50%,-50%);left:50%;top:45%;position: absolute;} 
+
+
+.fsBr>figure>img{width:148px;
+   height:148px;
+   
+}
+
+
+
+
+.fsBr>figure> a{width:148px;display: block; 
+   height:148px; transition:all ease 0.5s; 
+	
+	 
+   }
+
+ 
+.fsBr>figure> a:hover{ 
+opacity: 0.5;
+    filter: alpha(opacity=40);
+  
+transition:all ease 0.5s; 
+
+
+}
+
+
+
+
+
+
+
+.style-bg-slate2 p {
+clear:both;
+text-align:center;
+color:#000!important;
+font-size:22px!important;
+line-height:26px!important;
+padding:0 12%
+}
+
+#hf-logo {
+flex:0 0 128px;
+padding:10px 0;}
+
+
+#hf-logo>#site-branding>img{width:80px; height:80px;}
+
+
+#site-branding {
+display:block;
+width:100%;
+height:100%;
+padding:1px;
+ margin: 4% 0 3% 0;
+}
+
+.hpe-header #hf-header .hf-icon,.hpe-header #hf-header .hf-link-text,.hpe-header #hf-header .hf-nav-link,.hpe-header #hf-header.dark .hf-icon,.hpe-header #hf-header.dark .hf-link-text,.hpe-header #hf-header.dark .hf-nav-link {
+fill:#333;
+color:#333
+}
+
+.text-center2 {
+clear:both;
+text-align:center;
+color:#000!important;
+font-size:22px!important;
+line-height:26px!important;
+padding:0 8% 2%
+}
+
+.style-bg-slate4 p {
+clear:both;
+text-align:center;
+color:#000!important;
+font-size:22px!important;
+line-height:26px!important;
+padding:0 12%
+}
+
+.text-center4 {
+clear:both;
+text-align:center;
+color:#000!important;
+font-size:22px!important;
+line-height:26px!important;
+padding:0 8% 2%
+}
+
+.style-bg-slate4 > div > h1 {
+font-size:40px;
+width:100%;
+line-height:normal;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.style-bg-slate4 h6 {
+font-size:40px;
+width:100%;
+line-height:normal;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.menu {
+width:95%;
+background-color:rgba(0,0,0,1);
+background-color:#fff;
+margin:0 0 0 45px
+}
+
+.light-menu {
+width:100%;
+background-color:rgba(255,255,255,1);
+position:fixed;
+background-color:rgba(4,180,49,0.6);
+-webkit-transition:all .3s ease;
+-moz-transition:all .3s ease;
+-o-transition:all .3s ease;
+transition:all .3s ease
+}
+
+#menu-center ul li {
+list-style:none;
+margin:0 30px 0 0;
+display:inline-block;
+transition:all ease .2s
+}
+
+#menu-center ul li active {
+border-bottom:1px solid #01A982;
+color:#01A982
+}
+
+#menu-center ul li a:focus,a:hover {
+text-decoration:none!important
+}
+
+
+.intelgo img{padding:15px 15px 15px 0px; font-size:14px;  }
+
+
+.carousel-inner .active{color:red;border-bottom: 2px solid #fff; }
+
+.carousel-inner>.item>p{font-family: 'Forma DJR Banner';
+    font-size: 20px;
+    line-height: 28px;
+    color: #5a5a5a;
+    text-align: center;
+    font-weight: normal;}
+
+
+
+.carousel-inner>.item>.font-lh3{ width: 100%;
+    font-size: 34px;
+    line-height: 1.2;font-family: 'Forma DJR Banner';
+    font-weight: normal;
+    color: #000;
+    text-align: center;
+    float: left;}
+
+
+.comparemodel{margin-top:100px; width:75%;}
+
+
+
+.comparemodel>.row>.compra>p{  line-height: 1.5;
+    font-size: 1.5rem;
+    letter-spacing: 0.02rem;
+    color: #5a5a5a;
+    text-align: center;
+     
+    display: inline-block;
+    padding-bottom: 50px;
+    margin-top: 1rem;}
+
+
+.computer{}
+
+.computer>.row>.computerpra>p{padding:0 15%; 
+	    line-height: 1.5;
+    font-size: 1.2rem;
+    letter-spacing: 0.02rem;
+    color: #5a5a5a;
+    text-align: center;
+    display: inline-block;
+    padding-bottom: 50px;
+    margin-top: 1rem;
+	
+}
+
+.computer>.row>.computerpra>h3{ margin:0; padding:0;font-size: 1.5rem;  
+	
+}
+
+
+.active {
+    font-family: 'MetricHPE-Light',sans-serif;
+    font-size: 14px;
+    color: #0099d8;
+    text-decoration: none;
+    line-height: 50px;
+    border-bottom: 2px solid #0099d7;
+}
+
+#nav a {
+color:#000;
+    font-size: 1.125rem;font-family: 'Forma DJR Banner';
+     line-height: 28px;
+  
+    font-weight: 200;
+}
+#nav a:hover {
+color:#1159a0;
+}
+.menu {
+background:red;
+width:95%;
+background-color:rgba(0,0,0,1);
+background-color:#fff;
+margin:0 0 0 45px
+}
+
+.light-menu {
+width:100%;
+background-color:rgba(255,255,255,1);
+position:fixed;
+background-color:rgba(4,180,49,0.6);
+-webkit-transition:all .3s ease;
+-moz-transition:all .3s ease;
+-o-transition:all .3s ease;
+transition:all .3s ease
+}
+
+#menu-center ul li {
+list-style:none;
+margin:0 30px 0 0;
+display:inline-block;
+transition:all ease .2s
+}
+
+#menu-center ul li active {
+border-bottom:1px solid #01A982;
+color:#01A982
+}
+
+#menu-center ul li a:focus,a:hover {
+text-decoration:none!important
+}
+
+.nav a {
+font-size:18px;
+color:#000;
+text-decoration:none
+}
+
+.nav > li > a {
+padding:10px 2px
+}
+
+.Success .container ul.bulletarrow {
+color:#000;
+list-style:square;
+font-size:18px;
+list-style:none
+}
+
+.Success .container ul.bulletarrow li {
+color:#000;
+font-size:18px;
+float:left
+}
+
+.Success .container ul.bulletarrow li a {
+cursor:pointer;font-family: 'Forma DJR Banner';
+font-weight:700;
+color:#000
+}
+
+h3.title2 {
+color:#614767;
+font-size:70px;
+line-height:normal;font-family: 'Forma DJR Banner';
+font-weight:700
+}
+
+.Success .container p.hpe-numeric-callout {
+font-size:16px;
+position:relative;
+top:-24px
+}
+
+.Success .container ul.bulletarrow li:before {
+float:left;
+content:" ";
+background-image:url(../images/bulletarrow.jpg);
+width:25px;
+height:15px;
+display:block;
+margin-top:5px;
+background-repeat:no-repeat;
+background-position:left!important;
+transition:all ease .2s
+}
+
+.Success .container ul.bulletarrow li:hover:before {
+background-position:right!important;
+transition:all ease .2s
+}
+
+.Success .container h4 {
+margin-bottom:0;
+padding-bottom:0;
+font-size:20px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+color:#000
+}
+
+.zoomimg img {
+cursor:pointer;
+padding:10px;
+transition:transform .2s;
+margin:0 auto
+}
+
+.zoomimg img:hover {
+transform:scale(1.1)
+}
+
+.padleftright {
+padding-left:4px;
+padding-right:4px
+}
+
+.Success .container h6 {
+margin-bottom:0;
+font-size:20px;
+width:84%!important;font-family: 'Forma DJR Banner';
+font-weight:700;
+color:#000;
+background:#fff;
+padding:15px;
+text-align:center;
+margin-top:-35px!important;
+z-index:99999999;
+position:absolute;
+margin-left:4%
+}
+
+.martop15 {
+margin-top:8%
+}
+
+.martopbot15 {
+margin:8% 0
+}
+
+.martopbot10 {
+margin:5% 0 2%
+}
+
+.margin10 {
+clear:both;
+margin:2% 0
+}
+
+.parent {
+width:100%;
+margin:20px;
+height:300px;
+overflow:hidden;
+position:relative;
+float:left;
+display:inline-block;
+cursor:pointer
+}
+
+.parent2 {
+width:100%;
+margin:20px;
+height:300px;
+overflow:hidden;
+position:relative;
+float:left;
+display:inline-block;
+cursor:pointer
+}
+
+.child {
+height:100%;
+width:100%;
+background-size:cover;
+background-repeat:no-repeat;
+-webkit-transition:all .5s;
+-moz-transition:all .5s;
+-o-transition:all .5s;
+transition:all .5s
+}
+
+.bg-two {
+background-image:url(../images/z.jpg)
+}
+
+.risimgsm {
+display:block
+}
+
+.risimgbg {
+display:none
+}
+
+.parent:hover .child,.parent:focus .child {
+-ms-transform:scale(1.2);
+-moz-transform:scale(1.2);
+-webkit-transform:scale(1.2);
+-o-transform:scale(1.2);
+transform:scale(1.2)
+}
+
+.parent:hover .child:before,.parent:focus .child:before {
+display:block
+}
+
+.parent:hover a,.parent:focus a {
+display:block
+}
+
+.child:before {
+content:"";
+display:none;
+height:100%;
+width:100%;
+position:absolute;
+top:0;
+left:0;
+background-color:rgba(52,73,94,0)
+}
+
+.pad15 {
+padding:0 3%
+}
+
+h3.tag-h3 {
+font-size:28px;
+text-align:center;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+float:left;
+color:#000
+}
+
+.bg-three {
+background-image:url(../images/z.jpg)
+}
+
+.parent2:hover .child2,.parent2:focus .child2 {
+-ms-transform:scale(1.2);
+-moz-transform:scale(1.2);
+-webkit-transform:scale(1.2);
+-o-transform:scale(1.2);
+transform:scale(1.2)
+}
+
+.parent2:hover .child2:before,.parent2:focus .child2:before {
+display:block
+}
+
+.parent2:hover a,.parent2:focus a {
+display:block
+}
+
+.child2:before {
+content:"";
+display:none;
+height:100%;
+width:100%;
+position:absolute;
+top:0;
+left:0;
+background-color:rgba(52,73,94,0)
+}
+
+.pad152 {
+padding:0 3%
+}
+
+h3.tag-h32 {
+font-size:28px;
+text-align:center;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+float:left;
+color:#000
+}
+
+@media screen and (max-width: 960px) {
+.parent2 {
+width:100%;
+margin:20px 0
+}
+
+.wrapper2 {
+padding:20px
+}
+}
+
+.style-bg-dark-steel {
+background-color:rgba(95,122,118,.93);
+position:absolute;
+left:4%;
+top:18%;
+padding:5% 3%
+}
+
+.style-bg-dark-steel h3 {
+font-family:'Metric Light',Arial,sans-serif;
+font-size:24px;
+margin-bottom:0;
+color:#fff;
+font-weight:700
+}
+
+.style-bg-dark-steel p {
+color:#fff;
+margin-top:0;
+font-size:18px;
+line-height:20px
+}
+
+.padding0 {
+padding-left:0!important;
+padding-right:0!important
+}
+
+.fullbanner {
+position:relative;
+background:url(../images/fullscreen.jpg) no-repeat center center;
+background-size:cover;
+height:416px;
+overflow:hidden
+}
+
+.align {
+float: left;
+width: 100%;
+height: 0;
+padding: 0 0 5px;
+text-align: left;
+margin: 0% 0 13% 0%;
+font-size: 11px;
+line-height: 16px;
+}
+
+figure.finesse-logo {
+width:28%;
+height:85px;
+padding-top:8px
+}
+
+.nagmargin {
+margin-bottom:-6%
+}
+
+.bootom-header-bar {
+background-color:#fff;
+padding:0 13px 3px;
+	    border-bottom: 1px solid #b9b8bb;
+}
+
+.logo {
+margin:14px auto;
+cursor:pointer;
+text-align:left
+}
+
+.logo img {
+padding:12px 0
+}
+
+.head-right {
+float:left
+}
+
+.login_nav {
+float:right;
+margin:15px 0
+}
+
+.navbar-toggle {
+background:#00bcd4
+}
+
+.navbar-toggle span {
+background:#fff
+}
+
+.bannertest {
+font-size:26px;
+width:100%;
+color:#333;
+line-height:28px
+}
+
+.lwork {
+width:1200px;
+margin:auto;
+text-align:center;
+clear:both
+}
+
+.YouTubePopUp-Wrap {
+position:fixed;
+width:100%;
+height:100%;
+background-color:#000;
+background-color:rgba(0,0,0,0.8);
+top:0;
+left:0;
+z-index:9999999999999
+}
+
+.YouTubePopUp-animation {
+opacity:0;
+-webkit-animation-duration:.5s;
+animation-duration:.5s;
+-webkit-animation-fill-mode:both;
+animation-fill-mode:both;
+-webkit-animation-name:YouTubePopUp;
+animation-name:YouTubePopUp
+}
+
+@-webkit-keyframes YouTubePopUp {
+0% {
+opacity:0
+}
+
+100% {
+opacity:1
+}
+}
+
+@keyframes YouTubePopUp {
+0% {
+opacity:0
+}
+
+100% {
+opacity:1
+}
+}
+
+body.logged-in .YouTubePopUp-Wrap {
+top:32px;
+z-index:99998
+}
+
+.YouTubePopUp-Content {
+max-width:680px;
+display:block;
+margin:0 auto;
+height:100%;
+position:relative
+}
+
+.YouTubePopUp-Content iframe {
+max-width:100%!important;
+width:100%!important;
+display:block!important;
+height:480px!important;
+border:none!important;
+position:absolute;
+top:0;
+bottom:0;
+margin:auto 0
+}
+
+.YouTubePopUp-Hide {
+-webkit-animation-duration:.5s;
+animation-duration:.5s;
+-webkit-animation-fill-mode:both;
+animation-fill-mode:both;
+-webkit-animation-name:YouTubePopUpHide;
+animation-name:YouTubePopUpHide
+}
+
+@-webkit-keyframes YouTubePopUpHide {
+0% {
+opacity:1
+}
+
+100% {
+opacity:0
+}
+}
+
+@keyframes YouTubePopUpHide {
+0% {
+opacity:1
+}
+
+100% {
+opacity:0
+}
+}
+
+.YouTubePopUp-Close {
+position:absolute;
+top:0;
+cursor:pointer;
+bottom:528px;
+right:0;
+margin:auto 0;
+width:24px;
+height:24px;
+background:url(../images/close.png) no-repeat;
+background-size:24px 24px;
+-webkit-background-size:24px 24px;
+-moz-background-size:24px 24px;
+-o-background-size:24px 24px
+}
+
+.YouTubePopUp-Close:hover {
+opacity:.5
+}
+
+@media all and (max-width: 768px) and (min-width: 10px) {
+.YouTubePopUp-Content {
+max-width:90%
+}
+}
+
+@media all and (max-width: 600px) and (min-width: 10px) {
+.YouTubePopUp-Content iframe {
+height:320px!important
+}
+
+.YouTubePopUp-Close {
+bottom:362px
+}
+}
+
+@media all and (max-width: 480px) and (min-width: 10px) {
+.YouTubePopUp-Content iframe {
+height:220px!important
+}
+
+.YouTubePopUp-Close {
+bottom:262px
+}
+}
+
+p.hedpar {font-family: 'Forma DJR Banner';
+    font-size: 20px;
+    line-height: 28px;
+    color: #5a5a5a;
+    text-align: center;
+   
+    font-weight: normal;
+}
+
+h1.headbanner {width: 100%;
+    font-size: 34px;
+    line-height: 1.2;font-family: 'Forma DJR Banner';
+    font-weight: normal;
+    color: #000;
+    text-align: center;
+    float: left;
+}
+
+h1.head {
+font-size:40px;
+color:#000;
+width:100%;
+line-height:42px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+margin-top:1%;
+float:left
+}
+
+h1.head1 {
+font-size:20px;
+text-align:center;
+line-height:14px;font-family: 'Forma DJR Banner';
+font-weight:700;
+color:#000;
+padding-bottom:0
+}
+
+h1.head4 {
+font-size:27px;
+line-height:30px;
+color:#000;font-family: 'Forma DJR Banner';
+font-weight:100;
+margin-bottom:0;
+padding-bottom:10px;
+text-align:center
+}
+
+h1.head3 {
+font-size:29px;
+line-height:34px;font-family: 'Forma DJR Banner';
+font-weight:800;
+margin-bottom:0;
+padding-bottom:0;
+color:#000;
+text-align:left;
+padding-top:0;
+margin-top:0
+}
+
+p.pragr {font-family: 'Forma DJR Banner';
+font-size:22px;
+line-height:28px;
+color:#000;
+text-align:center;
+margin-top:1%;
+font-weight:400
+}
+
+p.pragr2 {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+color:#000;
+text-align:left;
+margin-top:3%;
+font-weight:300
+}
+
+p.pragr3 {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:24px;
+color:#000!important;
+text-align:center;
+margin-top:3%;
+font-weight:500
+}
+
+.martop5 {
+margin-top:15px!important
+}
+
+p.pragr4 {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+color:#000;
+width:90%;
+margin:0 auto;
+font-weight:300;
+margin-bottom:0;
+text-align:center
+}
+
+ul.bullet {
+margin:0;
+padding:0
+}
+
+.bullet li {
+list-style:none;
+margin:0;
+padding:0;
+margin-left:23px;
+padding-left:35%;
+margin-top:5%;
+position:absolute
+}
+
+.bullet li a {
+font-size:18px;font-family: 'Forma DJR Banner';
+position:relative;
+color:#707070;
+text-decoration:none;
+cursor:pointer;
+display:block;
+padding:5px 0 0
+}
+
+.bullet li a:before {
+background:url(../images/bullet.png) no-repeat 0 4px;
+width:20px;
+height:25px;
+display:block;
+position:absolute;
+content:" ";
+transition:all 300ms linear 0;
+left:-24px;
+margin-top:-1px
+}
+
+.bullet li a:hover:before {
+background:url(../images/bullet.png) no-repeat -19px 4px;font-family: 'Forma DJR Banner';
+transition:all 300ms linear 0
+}
+
+ul.PrimaryNav {
+margin:0;
+padding:0;
+margin-left:3%
+}
+
+.PrimaryNav li {
+list-style:none;
+float:left;
+font-family:'MetricHPE-Light',sans-serif
+}
+
+.PrimaryNav li a {
+display:block;
+font-size:18px;
+color:#000;
+padding:20px 15px;
+transition:all 300ms linear 0
+}
+
+.menu-item.active {
+border-bottom:1px solid #01A982;
+margin-bottom:0;
+transition:all 300ms linear 0;
+transition:all .3s ease
+}
+
+ul.bullet2 {
+margin:0;
+padding:0
+}
+
+.bullet2 li {
+list-style:none;
+margin:0;
+padding:0;
+margin-left:23px;
+padding-left:-15px!important;
+position:absolute
+}
+
+.bullet2 li a {
+font-size:18px;
+font-weight:600;
+position:relative;
+color:#fff;
+text-decoration:none;
+cursor:pointer;
+display:block;
+padding:5px 0 0 8px
+}
+
+.bullet2 li a:before {
+background:url(../images/bullet.png) no-repeat -17px 4px;
+width:17px;
+height:23px;
+display:block;
+position:absolute;
+content:" ";
+transition:all 300ms linear 0;
+left:-24px;
+margin-top:3px
+}
+
+.bullet2 li a:hover:before {
+background:url(../images/bullet.png) no-repeat 0 4px;
+transition:all 300ms linear 0;
+left:-14px
+}
+
+.clearbot {
+clear:both
+}
+
+.style-bg-slate {
+margin-top:0;
+margin-bottom:30px;
+background-color:#425563;
+padding:60px 15px 35px
+}
+
+.title {
+color:#FFF;
+font-size:55px;
+letter-spacing:4px
+}
+
+.style-bg-slate span {
+font-size:14px;
+display:block;
+clear:both;
+text-align:center;
+color:#fff;
+margin-top:25px
+}
+
+.mtop3 {
+margin-top:30px;
+float:left
+}
+
+.mbottom3 {
+margin-bottom:30px;
+float:left
+}
+
+.mtop5 {
+margin-top:50px;
+float:left
+}
+
+.mbottom5 {
+margin-bottom:15px;
+float:left;
+text-align:center
+}
+
+.affix {
+background:#fff;
+top:105px;
+width:100%;
+z-index:9!important
+}
+
+.affix + .container-fluid {
+padding-top:0
+}
+
+.style-bg-slate {
+background-color:#425563
+}
+
+.style-bg-slate h1 {
+color:#fff!important
+}
+
+.style-bg-slate p span {
+color:#fff!important;
+font-size:22px!important;
+line-height:26px!important
+}
+
+.style-bg-slate p {
+color:#fff!important;
+font-size:18px!important
+}
+
+.navbar {
+margin-bottom:0;
+margin-top:11px
+}
+
+.navbar-nav>li>a {
+font-size:12px;
+text-transform:uppercase;
+color:#3d3c3c;
+font-weight:500;
+padding-top:10px;
+padding-bottom:10px
+}
+
+.navbar-nav>.active>a,.navbar-nav>.active>a:hover,.navbar-nav>.active>a:focus {
+color:#1abb9c
+}
+
+.nav>li>a:focus,.nav>li>a:hover {
+text-decoration:none;
+background-color:#fff;
+color:#1abb9c
+}
+
+.dropdown-menu {
+background:#fff;
+border-radius:0;
+border:none;
+border-bottom:solid 3px #FF9800;
+width:230px
+}
+
+.dropdown-menu > li a {
+display:block;
+padding:7px 15px;
+line-height:28px;
+font-size:12px;font-family: 'Forma DJR Banner';
+letter-spacing:.5px;
+white-space:normal;
+color:#3d3c3c;
+text-decoration:none
+}
+
+.navbar-nav>li>.dropdown-menu {
+background:#fff;
+padding:10px 0;
+border-bottom:3px solid #ffa726;
+z-index:9;
+vertical-align:top;
+border-radius:0;
+border-left:none;
+border-right:none;
+border-top:none
+}
+
+.btn-account-login {
+font-size:14px;
+line-height:32px;
+color:#fff;
+font-weight:600;font-family: 'Forma DJR Banner';
+background:#ff9e00;
+background:#008ecc;
+padding:10px 15px;
+border-radius:10px
+}
+
+.btn-account-sign {
+font-size:14px;
+line-height:32px;
+color:#fff;
+font-weight:600;font-family: 'Forma DJR Banner';
+background:#ff9e00;
+background:-moz-linear-gradient(top,#ff9e00 0%,#ff4c01 100%);
+background:-webkit-linear-gradient(top,#ff9e00 0%,#ff4c01 100%);
+background:linear-gradient(to bottom,#ff9e00 0%,#ff4c01 100%);
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff9e00',endColorstr='#ff4c01',GradientType=0);
+padding:10px 15px;
+border-radius:10px
+}
+
+.btn-account-sign:hover,.btn-account-login:hover {
+color:#fff
+}
+
+.renault {
+width:34%;
+float:right;
+margin-top:2%;
+text-align:right
+}
+
+.login {
+width:45%;
+float:left;
+margin:6% 0 0 18%
+}
+
+.login .icon {
+padding:0 0 0 5px;
+text-align:left;
+float:left;
+margin:-5px 0 0
+}
+
+.login ul {
+list-style:none;
+margin:0;
+padding:0
+}
+
+.login ul li {
+line-height:18px;
+padding:1px 0 0 9px;
+float:left;font-family: 'Forma DJR Banner';
+font-weight:300;
+color:#191919;
+font-size:13px;
+text-transform:uppercase
+}
+
+.leftcon {
+padding-left:6%;
+float:left;
+width:100%;
+color:#000
+}
+
+.jk-slider {
+width:100%
+}
+
+.glyphicon-chevron-left::before {
+content:none
+}
+
+.glyphicon-chevron-right::before {
+content:none
+}
+
+.hero {
+position:absolute;
+top:40%;
+left:21%;
+z-index:3;
+color:#fff;
+text-align:center;
+text-transform:uppercase;
+text-shadow:1px 1px 0 rgba(0,0,0,.75);
+-webkit-transform:translate3d(-50%,-50%,0);
+-moz-transform:translate3d(-50%,-50%,0);
+-ms-transform:translate3d(-50%,-50%,0);
+-o-transform:translate3d(-50%,-50%,0);
+transform:translate3d(-50%,-50%,0)
+}
+
+.hero h1 {
+font-size:44px;
+font-weight:700;
+margin:0;
+padding:0;font-family: 'Forma DJR Banner';
+text-align:left;
+border-bottom:#f6c003 solid 4px;
+color:#101010
+}
+
+.fade-carousel .carousel-inner .item .hero {
+opacity:0;
+-webkit-transition:2s all ease-in-out .1s;
+-moz-transition:2s all ease-in-out .1s;
+-ms-transition:2s all ease-in-out .1s;
+-o-transition:2s all ease-in-out .1s;
+transition:2s all ease-in-out .1s
+}
+
+.fade-carousel .carousel-inner .item.active .hero {
+opacity:1;
+-webkit-transition:2s all ease-in-out .1s;
+-moz-transition:2s all ease-in-out .1s;
+-ms-transition:2s all ease-in-out .1s;
+-o-transition:2s all ease-in-out .1s;
+transition:2s all ease-in-out .1s
+}
+
+.jk-slider .carousel-inner > .item > a > img,.carousel-inner > .item > img,.img-responsive,.thumbnail a > img,.thumbnail > img {
+width:100%
+}
+
+.form-bg {
+padding: 20px 20px 69px;
+color: #000;
+height:auto;
+float: left;
+background:#eaeaea;
+border-radius:10px;
+margin: 2% 0 0 0;
+ padding-top: 31px;
+	
+}
+.thanks {
+padding:20px 20px 24px;
+background:#0197d6;
+color:#fff;
+height:300px
+}
+
+.shadow {
+box-shadow:0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)
+}
+
+.form-control:focus {
+border-color:#ff80ff!important;
+background:#fff!important;
+box-shadow:0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19)!important
+}
+
+.logomtp img {
+    margin-top: 28px;margin: 4% 0 2% 0;
+}
+
+.form-bg h1 {width: 100%;
+    font-size: 34px;
+    line-height: 1.2;font-family: 'Forma DJR Banner';
+    font-weight: normal;
+    color: #fff;
+    text-align: center;
+    float: left;
+}
+
+.form-bg h3 {
+    font-size: 32px!important;
+    text-align: center;
+    color: #fff!important;
+    margin: 0;
+    padding: 0;
+    margin-top:0%;
+    text-transform: uppercase;
+	font-weight: 100;
+	
+}
+
+.logo-2{}
+
+.form-bg h4 {
+    font-size: 34px;
+    text-align: left;
+    color: #000;
+    padding: 0;
+    font-weight: 400;
+	font-family: 'Forma DJR Banner';
+}
+
+.mtop {
+margin-top:6%;
+font-size:62px;
+font-weight:700;
+line-height:64px
+}
+
+.bg-1 {
+background-image:url(../images/banner-1.jpg);
+background-repeat:no-repeat;
+background-position:bottom;
+padding:36% 0 0;
+width:100%;
+margin:0
+}
+
+.bg-1 h1 {font-family: 'Forma DJR Banner';
+font-size:35px;
+font-weight:700;
+color:#010101;
+text-align:center;
+text-transform:uppercase
+}
+
+.bg-1 .line {
+border-bottom:#f6c003 solid 3px;
+width:15%;
+margin:0 auto
+}
+
+.work-1 {
+width:100%;
+margin-top:19%;
+margin-left:20%
+}
+
+.work-1 .icon {
+margin:0 0 0 22%
+}
+
+.work-1 h2 {font-family: 'Forma DJR Banner';
+font-size:27px;
+font-weight:300;
+color:#010101;
+background-image:url(../images/line.png);
+background-repeat:no-repeat;
+background-position:right;
+width:326px
+}
+
+.work-2 {
+width:100%;
+margin-left:28%
+}
+
+.work-2 h2 {font-family: 'Forma DJR Banner';
+font-size:20px;
+font-weight:300;
+color:#010101;
+margin-left:17%
+}
+
+.work-2 h3 {font-family: 'Forma DJR Banner';
+font-size:13px;
+font-weight:300;
+color:#010101;
+margin-left:-41%;
+line-height:19px;
+text-align:center;
+padding:0;
+margin-top:0
+}
+
+.work-2 .icon {
+border-radius:50%;
+border:#818181 dashed 1px;
+width:166px;
+height:166px;
+text-align:center
+}
+
+.work-2 .icon:hover {
+background-color:#f6c003
+}
+
+.work-2 .icon img {
+margin-top:18%
+}
+
+.hover02 figure img {
+-webkit-transform:scale(1);
+transform:scale(1);
+-webkit-transition:.4s ease-in-out;
+transition:.4s ease-in-out;
+vertical-align:inherit
+}
+
+.hover02 figure:hover img {
+-webkit-transform:scale(1.1);
+transform:scale(1.1)
+}
+
+.work-2 .line-1 {
+margin:28% 0 -32% 63%
+}
+
+.work-2 .line-3 {
+margin:2% 0 0 29%
+}
+
+.work-3 {
+width:100%;
+margin-left:24%
+}
+
+.work-3 h2 {font-family: 'Forma DJR Banner';
+font-size:20px;
+font-weight:300;
+color:#010101;
+margin-left:17%
+}
+
+.work-3 h3 {font-family: 'Forma DJR Banner';
+font-size:13px;
+font-weight:300;
+color:#010101;
+margin-left:-41%;
+line-height:19px;
+text-align:center;
+padding:0;
+margin-top:0
+}
+
+.work-3 .icon {
+border-radius:50%;
+border:#818181 dashed 1px;
+width:166px;
+height:166px;
+text-align:center
+}
+
+.work-3 .icon:hover {
+background-color:#f6c003
+}
+
+.hover03 figure img {
+-webkit-transform:scale(1);
+transform:scale(1);
+-webkit-transition:.4s ease-in-out;
+transition:.4s ease-in-out;
+vertical-align:inherit
+}
+
+.hover03 figure:hover img {
+-webkit-transform:scale(1.1);
+transform:scale(1.1)
+}
+
+.work-3 .icon img {
+margin-top:10%
+}
+
+.work-3 .line-1 {
+margin:28% 0 -32% 63%
+}
+
+.work-3 .line-4 {
+margin:2% 0 0 29%
+}
+
+.work-4 {
+width:100%
+}
+
+.work-4 h2 {font-family: 'Forma DJR Banner';
+font-size:20px;
+font-weight:300;
+color:#010101;
+margin-left:20%
+}
+
+.work-4 h3 {font-family: 'Forma DJR Banner';
+font-size:13px;
+font-weight:300;
+color:#010101;
+margin-left:-2%;
+line-height:19px;
+text-align:center;
+padding:0;
+margin-top:0
+}
+
+.work-4 .icon {
+border-radius:50%;
+border:#818181 dashed 1px;
+width:166px;
+height:166px;
+text-align:center;
+margin:5% 0 0 20%;
+padding:10px 0 0
+}
+
+.work-4 .icon:hover {
+background-color:#f6c003
+}
+
+.work-4 .line-5 {
+margin:2% 0 0 49%
+}
+
+.hover04 figure img {
+-webkit-transform:scale(1);
+transform:scale(1);
+-webkit-transition:.4s ease-in-out;
+transition:.4s ease-in-out;
+vertical-align:inherit
+}
+
+.hover04 figure:hover img {
+-webkit-transform:scale(1.1);
+transform:scale(1.1)
+}
+
+ 
+
+.body-copy-large {
+color:#000;
+padding:0 12%;
+display:block;
+font-size:23px;
+line-height:25px
+}
+
+.body-copy-large2 {
+color:#000;
+padding:0;
+display:block;
+font-size:23px;
+line-height:25px;
+text-align:center
+}
+
+.body-copy-large4 {
+color:#000;
+padding:0 2%;
+display:block;
+font-size:23px;
+line-height:25px;
+text-align:center
+}
+
+.fbold {
+font-size:40px!important;
+width:100%;
+line-height:72px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.bg-2 > h1 {font-family: 'Forma DJR Banner';
+font-size:48px;
+font-weight:700;
+color:#000;
+text-align:center;
+text-transform:uppercase;
+margin-top:12%
+}
+
+.bg-2 .line {
+border-bottom:#f6c003 solid 3px;
+width:15%;
+margin:0 auto
+}
+
+.contact-1 .button,.newsletter .button {
+color:#000;
+display:inline-block;
+font-family:Arial,Helvetica,sans-serif;
+font-size:16px;
+line-height:27px;
+margin:41% 25% 0 0;
+padding:4px 1px 0 13px;
+height:35px;
+background-position:center;
+position:relative;
+text-transform:none;
+transition:all .3s ease-in-out 0;
+background-color:#f6c003;
+z-index:1;
+font-family:MetricHPE-Light,sans-serif;
+width:165px;
+background-image:url(../images/button.png);
+background-repeat:no-repeat
+}
+
+.contact-1 .button:after,.newsletter .button:after {
+content:"";
+display:block;
+height:100%;
+left:0;
+position:absolute;
+top:0;
+transition:all .3s ease-in-out 0;
+width:0;
+color:#fff;
+background-color:#000;
+z-index:-1;font-family: 'Forma DJR Banner';
+background-image:url(../images/button-2.png);
+background-repeat:no-repeat;
+background-position:center
+}
+
+.contact-1 .button:hover,.newsletter .button:hover {
+color:hsl(0,0%,100%);
+text-decoration:none
+}
+
+.contact-1 .button:hover:after,.newsletter .button:hover:after {
+width:100%
+}
+
+.contact-1,.newsletter {
+text-align:center
+}
+
+.box-1 {
+width:100%;
+margin-top:7%
+}
+
+.box-1 h1 {font-family: 'Forma DJR Banner';
+font-size:24px;
+font-weight:700;
+color:#fff;
+text-align:center
+}
+
+.box-1 .pic {
+text-align:center
+}
+
+figure {
+margin:0;
+padding:0;
+overflow:inherit
+}
+
+figure:hover+span {
+bottom:-36px;
+opacity:1
+}
+
+.hover01 figure img {
+-webkit-transform:scale(1);
+transform:scale(1);
+-webkit-transition:.4s ease-in-out;
+transition:.4s ease-in-out;
+vertical-align:inherit
+}
+
+.hover01 figure:hover img {
+-webkit-transform:scale(1.1);
+transform:scale(1.1)
+}
+
+.contact-2 .button,.newsletter .button {
+color:#000;
+display:inline-block;
+font-family:Arial,Helvetica,sans-serif;
+font-size:16px;
+line-height:27px;
+margin:4% 2% 0 0;
+padding:4px 1px 0 13px;
+height:35px;
+background-position:center;
+position:relative;
+text-transform:none;
+transition:all .3s ease-in-out 0;
+background-color:#f6c003;
+z-index:1;
+font-family:MetricHPE-Light,sans-serif;
+width:165px;
+background-image:url(../images/button-3.png);
+background-repeat:no-repeat
+}
+
+.contact-2 .button:after,.newsletter .button:after {
+content:"";
+display:block;
+height:100%;
+left:0;
+position:absolute;
+top:0;
+transition:all .3s ease-in-out 0;
+width:0;
+color:#000;
+background-color:#fff;
+z-index:-1;font-family: 'Forma DJR Banner';
+background-image:url(../images/button-3.png);
+background-repeat:no-repeat;
+background-position:center
+}
+
+.contact-2 .button:hover,.newsletter .button:hover {
+color:#000;
+text-decoration:none
+}
+
+.contact-2 .button:hover:after,.newsletter .button:hover:after {
+width:100%
+}
+
+.contact-2,.newsletter {
+text-align:center
+}
+
+.box-2 {
+width:100%;
+margin-top:7%
+}
+
+.box-2 h1 {font-family: 'Forma DJR Banner';
+font-size:24px;
+font-weight:700;
+color:#fff;
+text-align:center
+}
+
+.box-2 .pic {
+text-align:center
+}
+
+.contact-3 .button,.newsletter .button {
+color:#000;
+display:inline-block;
+font-family:Arial,Helvetica,sans-serif;
+font-size:16px;
+line-height:27px;
+margin:4% 2% 0 0;
+padding:4px 1px 0 13px;
+height:35px;
+background-position:center;
+position:relative;
+text-transform:none;
+transition:all .3s ease-in-out 0;
+background-color:#f6c003;
+z-index:1;
+font-family:MetricHPE-Light,sans-serif;
+width:165px;
+background-image:url(../images/button-4.png);
+background-repeat:no-repeat
+}
+
+.contact-3 .button:after,.newsletter .button:after {
+content:"";
+display:block;
+height:100%;
+left:0;
+position:absolute;
+top:0;
+transition:all .3s ease-in-out 0;
+width:0;
+color:#000;
+background-color:#fff;
+z-index:-1;font-family: 'Forma DJR Banner';
+background-image:url(../images/button-4.png);
+background-repeat:no-repeat;
+background-position:center
+}
+
+.contact-3 .button:hover,.newsletter .button:hover {
+color:#000;
+text-decoration:none
+}
+
+.contact-3 .button:hover:after,.newsletter .button:hover:after {
+width:100%
+}
+
+.contact-3,.newsletter {
+text-align:center
+}
+
+.bg-2-NWEW{    width: 100%;
+    background-color: #024ad8;
+    text-align: left;
+    float: left;
+    font-size: 12px;
+    font-weight: 300;
+    padding: 15px 0 15px 0;
+    color: #fff;
+    letter-spacing: 1px;
+	font-family: 'Forma DJR Banner'; 
+}
+
+.line-2 {
+background-image:url(../images/line2.png);
+background-repeat:no-repeat;
+width:1px;
+height:333px;
+float:left;
+margin-top:5%;
+margin-left:-1%
+}
+.bg-blue{width: 100%; background-color:#425563; height: 90px;}
+
+.footer {
+padding: 15px 0 5px 0;
+background: #e5e5e5;
+color: #fff;
+margin: 4% 0 0 0;
+padding: 1% 0 1% 0;
+}
+
+.footer p {
+    color: #333;
+    padding-top: 4px;
+	
+    font-family: 'Forma DJR Banner'; 
+    font-size: 16px;
+	font-weight: 300;
+    line-height: 22px;
+	    margin: 0 0 0 2%;
+	
+}
+
+ul.social-network {
+list-style:none;
+display:inline;
+margin-left:0!important;
+padding:0;
+float:right;
+margin-top:1%
+}
+
+ul.social-network li {
+display:inline;
+margin:0 3px
+}
+
+ul.social-network li a {
+background-color:#000
+}
+
+.social-network a.icoFacebook:hover {
+background-color:#3B5998
+}
+
+.social-network a.icoTwitter:hover {
+background-color:#3cf
+}
+
+.social-network a.icoyoutube:hover {
+background-color:#d32322
+}
+
+.social-network a.icoinstagram:hover {
+background-color:#a73191
+}
+
+.social-network a.icoRss:hover i,.social-network a.icoFacebook:hover i,.social-network a.icoTwitter:hover i,.social-network a.icoGoogle:hover i,.social-network a.icoVimeo:hover i,.social-network a.icoLinkedin:hover i {
+color:#fff
+}
+
+a.socialIcon:hover,.socialHoverClass {
+color:#44BCDD
+}
+
+.social-circle li a {
+display:inline-block;
+position:relative;
+margin:0 auto;
+-moz-border-radius:50%;
+-webkit-border-radius:50%;
+border-radius:50%;
+text-align:center;
+width:25px;
+height:25px;
+font-size:14px
+}
+
+.social-circle li i {
+margin:0;
+line-height:25px;
+text-align:center
+}
+
+.social-circle li a:hover i,.triggeredHover {
+-moz-transform:rotate(360deg);
+-webkit-transform:rotate(360deg);
+-ms--transform:rotate(360deg);
+transform:rotate(360deg);
+-webkit-transition:all .2s;
+-moz-transition:all .2s;
+-o-transition:all .2s;
+-ms-transition:all .2s;
+transition:all .2s
+}
+
+.social-circle i {
+color:#fff;
+-webkit-transition:all .8s;
+-moz-transition:all .8s;
+-o-transition:all .8s;
+-ms-transition:all .8s;
+transition:all .8s
+}
+
+.bg-banner4 {
+background-image:url(../images/image-1x-xs.jpg);
+background-repeat:no-repeat;
+background-size:cover;
+height:517px;
+margin-top:4%
+}
+
+.bg-banner {
+ background-color:#0092c7;
+margin-top:0%;
+}
+
+.bg-banner-2 {
+background-image:url(../images/banner.jpg);
+background-repeat:no-repeat;
+background-size:cover;
+height:500px;
+margin-top:0;
+margin-top:6%
+}
+
+
+
+.bg-bannerthanks {
+background-image:url(../images/bannerthanks.jpg);
+background-repeat:no-repeat;
+background-size:cover;
+height:525px;
+margin-top:0;
+margin-top:6%
+}
+
+
+.bg-banner-12 {
+background-image:url(../images/banner.jpg);
+background-repeat:no-repeat;
+background-size:cover;
+height:535px;
+margin-top:0;
+margin-top:6%
+}
+
+.pic-1 {
+margin-top:19%;
+width:262px;
+margin-left:15%
+}
+
+.pic-2 {
+text-align:right
+}
+
+.bg-new-1 {
+background-color:#425563;
+width:100%;
+margin-top:2px;
+padding:20px 0 40px;
+float:left
+}
+
+.bg-new-1 h1 {
+font-size:36px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#fff
+}
+
+.bg-new-1 h2 {
+font-size:30px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+float:left;
+color:#fff;
+line-height:33px
+}
+
+.bg-new-1 p {font-family: 'Forma DJR Banner';
+font-size:23px;
+line-height:25px;
+text-align:center;
+font-weight:500;
+color:#fff;
+width:100%;
+margin:0 auto
+}
+
+.bg-new-2 p {font-family: 'Forma DJR Banner';
+font-size:23px;
+line-height:25px;
+text-align:center;
+font-weight:500;
+color:#fff;
+width:83%;
+margin:0 auto
+}
+
+.bg-new-1 .text p {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+text-align:left;
+margin-top:3%;
+font-weight:500;
+color:#fff
+}
+
+.bg-new-1 p a {
+color:#f1f1f1;
+text-decoration:underline
+}
+
+.bg-new-1 p a:hover {
+color:#fff;
+text-decoration:underline
+}
+
+.bg-new-1 hr {
+border-top:1px solid #687782;
+margin:4% 0 4% 1%;
+width:98%
+}
+
+.list {
+width:100%;
+float:left;
+margin-top:4%
+}
+
+.list ul {
+list-style:none;
+margin:0;
+padding:0
+}
+
+.list ul li {
+line-height:18px;
+float:left;font-family: 'Forma DJR Banner';
+font-size:18px
+}
+
+.list ul li a {
+color:#fff;
+background-image:url(../images/icon-1.png);
+background-repeat:no-repeat;
+background-position:top left;
+padding:0 30px
+}
+
+.list ul li a:hover {
+color:rgba(255,255,255,.6)
+}
+
+.why-bg {
+float:left;
+width:100%;
+padding:22px 0
+}
+
+.why-bg h1 {
+font-size:40px;
+width:100%;
+line-height:42px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.why-bg p {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+text-align:center;
+font-weight:500;
+color:#000;
+margin:0 auto;
+width:80%;
+padding-bottom:15px
+}
+
+.button-1 {
+width:382px;
+height:35px;
+margin:0 auto;
+text-align:center;
+margin-top:3%
+}
+
+.button-1 a {
+border:2px solid #01A982;
+text-align:center;
+padding:10px 30px;font-family: 'Forma DJR Banner';
+font-size:16px;
+color:#000;
+text-transform:uppercase
+}
+
+.button-1 a:hover {
+border:4px solid #01A982
+}
+
+.flexible-box-1 {
+width:100%;
+float:left;
+margin-top:10%
+}
+
+.flexible-box-1 h1 {
+font-size:21px;
+line-height:12px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+float:left;
+color:#000;
+text-align:left
+}
+
+.flexible-box-1 p {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+color:#000;
+text-align:left;
+margin-top:3%;
+font-weight:300;
+width:100%
+}
+
+.flexible-box-1 ul {
+list-style:none;
+margin:0;
+padding:0
+}
+
+.flexible-box-1 ul li {
+line-height:22px;
+float:left;font-family: 'Forma DJR Banner';
+font-size:18px;
+color:#000;
+width:100%;
+background-image:url(../images/icon-2.png);
+background-repeat:no-repeat;
+background-position:left center;
+padding:0 10px
+}
+
+.flexible-box-1 ul li a {
+color:#000;
+border-bottom:1px solid #01A982
+}
+
+.flexible-box-1 ul li a:hover {
+border-bottom:1px solid #000
+}
+
+.flexible-box-2 {
+width:100%;
+float:left;
+margin-top:0;
+margin-bottom:2%
+}
+
+.flexible-box-2 h1 {
+font-size:30px;
+line-height:16px;font-family: 'Forma DJR Banner';
+color:#000;
+font-weight:300;
+text-align:left
+}
+
+.flexible-box-2 p {
+ont-family:MetricHPE-Light,sans-serif;
+font-size:18px;
+line-height:22px;
+color:#000;
+text-align:left;
+font-weight:300;
+width:100%;
+margin-top:2%
+}
+
+.bg-3 {
+width:100%;
+background-image:url(../images/bg-3.jpg);
+background-repeat:no-repeat;
+background-size:cover;
+height:417px;
+margin-top:4%
+}
+
+.bg-3 .box {
+background-color:#425563;
+padding:30px;
+margin-top:19%
+}
+
+.bg-3 .box h1 {
+font-size:31px;
+line-height:33px;
+margin:0;font-family: 'Forma DJR Banner';
+color:#fff;
+font-weight:700;
+text-align:left
+}
+
+.bg-3 .box p {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+color:#fff;
+text-align:left;
+font-weight:300;
+width:100%;
+margin-top:0
+}
+
+.bg-4 {
+background-color:#F6F6F6;
+width:100%;
+float:left;
+padding:20px 0 50px;
+margin-top:4%;
+margin-bottom:1%
+}
+
+.bg-4 h1 {
+font-size:40px;
+width:100%;
+line-height:42px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.bg-4 h2 {
+font-size:21px;
+line-height:12px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+float:left;
+color:#000;
+text-align:left
+}
+
+.list-3 ul {
+list-style:none;
+margin:0;
+padding:0
+}
+
+.list-3 ul li {
+line-height:22px;
+float:left;font-family: 'Forma DJR Banner';
+font-size:18px;
+color:#000;
+width:100%;
+background-image:url(../images/icon-2.png);
+background-repeat:no-repeat;
+background-position:left center;
+padding:0 10px
+}
+
+.bg-5 {
+width:100%;
+float:left;
+margin-bottom:2%
+}
+
+.bg-5 h1 {
+font-size:40px;
+width:100%;
+line-height:42px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.bg-5 h2 {
+font-size:20px;
+width:100%;
+line-height:23px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+float:left;
+color:#000
+}
+
+.bg-5 p {
+font-size:21px;
+line-height:25px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:300;
+text-align:center;
+float:left;
+color:#000
+}
+
+.list-4 {
+width:100%;
+float:left;
+margin-top:4%
+}
+
+.list-4 ul {
+list-style:none;
+margin:0;
+padding:0
+}
+
+.list-4 ul li {
+line-height:18px;
+float:left;font-family: 'Forma DJR Banner';
+font-size:18px;
+width:100%;
+line-height:33px
+}
+
+.list-4 ul li a {
+color:#707070;
+background-image:url(../images/icon-3.png);
+background-repeat:no-repeat;
+background-position:top left;
+padding:0 27px
+}
+
+.list-4 ul li a:hover {
+color:#707070;
+background-image:url(../images/icon-4.png);
+background-repeat:no-repeat;
+background-position:top left;
+padding:0 27px
+}
+
+.bg-5 .text p {
+font-size:18px;
+margin-top:-3%;
+margin-bottom:-7%;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:300;
+text-align:left;
+float:left;
+color:#000
+}
+
+.thankyou-pic {
+text-align:center;
+width:342px;
+margin:8% auto
+}
+
+.thankyou-pic img {
+width:350px;
+text-align:center
+}
+
+.thankyou-pic-text {
+background:rgba(0,0,0,0.2);
+font-size:24px;
+text-shadow:1px 1px 1px #000;
+padding:22px;
+float:right;
+width:70%;
+margin:18% 0 0 6%;
+color:#fff
+}
+
+.m40 {
+margin-top:40px;
+margin-bottom:0;
+padding-bottom:0
+}
+
+.m0 {
+margin-top:0;
+padding-top:0
+}
+
+.flexible-bg {
+width:86%;
+margin-top:1%;
+margin-left:10%
+}
+
+.flexible-bg h1 {
+font-size:40px;
+width:100%;
+line-height:18px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.flexible-bg p {
+font-size:16px;
+line-height:25px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:300;
+text-align:center;
+float:left;
+color:#000
+}
+
+.flexible-bg .pro {
+text-align:center;
+width:90%
+}
+
+.flexible-bg h2 {
+font-size:20px;
+width:100%;
+line-height:0;
+padding:0;
+line-height:21px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000;
+width:80%
+}
+
+.flexible-bg .text {
+color:#000;font-family: 'Forma DJR Banner';
+font-size:15px;
+margin:0;
+text-align:center;
+width:80%
+}
+
+.support-bg {
+width:100%;
+margin-top:1%;
+padding:23px 0 0
+}
+
+.support-bg h1 {
+font-size:40px;
+width:100%;
+line-height:18px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.support-bg .pro {
+width:100%
+}
+
+.support-bg .bg {
+background-color:#F6F6F6;
+width:90%;
+margin:-33px 0 0 14px;
+padding:5px 9px 20px 0;
+position:relative;
+z-index:999
+}
+
+.support-bg h2 {
+font-size:20px;
+width:100%;
+line-height:0;
+padding:0;
+line-height:21px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.support-bg .text {
+color:#000;font-family: 'Forma DJR Banner';
+font-size:16px;
+margin:0 auto;
+text-align:center;
+width:94%;
+line-height:23px
+}
+
+.flexible-bg-2 {
+margin-top:8%;
+width:93%;
+margin-left:4%
+}
+
+.align-1 {
+margin:0 0 0 8%
+}
+
+.align-2 {
+margin:2% 0 0
+}
+
+.align-3 {
+margin:0 0 0 8%
+}
+
+.gap {
+height:50px;
+clear:both
+}
+
+.gap-2 {
+height:40px;
+clear:both
+}
+
+.gap-3 {
+height:25px;
+clear:both
+}
+
+.gap-4 {
+height:30px;
+clear:both
+}
+
+.line-1 {
+background-color:#ccc;
+height:1px;
+float:left;
+width:100%
+}
+
+.arrow-icon {
+float:left;
+width:100%;
+margin:2% 0 0 6%
+}
+
+.arrow-icon-left {
+width:23px;
+text-align:left;
+float:left
+}
+
+.arrow-icon-right {
+width:auto;
+text-align:left;font-family: 'Forma DJR Banner';
+font-weight:700;
+font-size:18px;
+color:#000;
+width:50%;
+float:left
+}
+
+.arrow-icon-right a {
+color:#fff;
+margin-left:6%;
+margin-top:2%
+}
+
+.arrow-icon-right a:hover {
+color:#fff;
+margin-left:6%;
+margin-top:2%
+}
+
+.border-line {
+margin-top:5%;
+width:100%
+}
+
+.border-line-2 {
+margin-top:2%;
+width:100%
+}
+
+
+.hybrid {
+width:100%
+}
+
+.hybrid h1 {
+font-size:30px;
+width:100%;
+line-height:42px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000;
+margin-top:2%
+}
+
+.hybrid p {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+text-align:center;
+font-weight:500;
+color:#000;
+margin:0 auto;
+width:90%;
+padding-bottom:15px
+}
+
+.hybrid .pro {
+text-align:center;
+padding:15px
+}
+
+.reduction {
+width:100%;
+margin-top:4%
+}
+
+.reduction .largetext {
+width:100%;
+color:#614767;
+font-size:70px;font-family: 'Forma DJR Banner';
+text-align:center;
+font-weight:600
+}
+
+.reduction p {font-family: 'Forma DJR Banner';
+font-size:16px;
+text-align:center;
+font-weight:500;
+color:#614767;
+margin-top:5%;
+width:85%
+}
+
+.size-1 {
+font-size:56px
+}
+
+
+.slide-bg h1 {
+font-size:40px;
+width:100%;
+line-height:35px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000;
+padding:30px 0 0
+}
+
+.slide-bg h2 {
+font-size:20px;
+width:100%;
+line-height:0;
+padding:0;
+line-height:21px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000;
+width:100%
+}
+
+.slide-bg .text {
+color:#000;font-family: 'Forma DJR Banner';
+font-size:15px;
+margin:0;
+text-align:center;
+width:100%;
+float:left;
+line-height:21px
+}
+
+.deta {
+width:100%
+}
+
+.deta h1 {
+font-size:20px;
+width:100%;
+line-height:0;
+padding:0;
+line-height:21px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+float:left;
+color:#000
+}
+
+.deta p {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+text-align:left;
+font-weight:500;
+color:#000;
+margin:0 auto;
+width:100%;
+padding-bottom:15px
+}
+
+.bottom8 {
+margin-bottom:4%
+}
+
+.top8 {
+margin-top:4%
+}
+
+.how h1 {
+padding:0;
+margin:0;
+font-size:40px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.how .pic {
+padding:0 15%
+}
+
+.how>.row>.fonsm {
+font-size:18px;
+color:#000
+}
+
+.technical>.row>.tcb>h1 {
+padding:0;
+margin:0;
+font-size:40px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.technical>.row>.pcb>h2 {font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+font-size:20px;
+color:#000;
+padding-bottom:0;
+margin-bottom:0
+}
+
+.technical>.row>.pcb>ul {
+margin:0;
+padding:0;
+list-style:none;
+margin-left:2.8%
+}
+
+.technical>.row>.pcb>ul>li {
+font-size:18px;
+list-style-type:square;
+line-height:22px;
+color:#C6C9CA;
+padding-right:15%
+}
+
+.technical>.row>.pcb>ul>li span {
+font-size:18px;
+list-style-type:square;
+line-height:22px;
+color:#000
+}
+
+.how> p {
+clear:both;
+font-size:18px;
+color:#000;
+line-height:18px;
+text-align:center;
+padding:0 12%
+}
+
+.how h3 {
+padding:0 18%;
+margin:0;
+font-size:20px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.Success {
+width:100%;
+margin:0 0 30px
+}
+
+.Success h1 {
+font-size:40px;
+width:100%;
+line-height:42px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.Success p {font-family: 'Forma DJR Banner';
+font-size:18px;
+text-align:center;
+font-weight:500;
+color:#000;
+margin:0 auto;
+width:100%
+}
+
+.Success .left {
+width:100%;
+float:left;
+margin:40px 0 0
+}
+
+.Success .right {
+width:100%;
+float:right
+}
+
+.Success h2 {
+font-size:30px;
+width:100%;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+float:left;
+color:#000
+}
+
+.Success .text {font-family: 'Forma DJR Banner';
+font-size:18px;
+line-height:22px;
+text-align:left;
+font-weight:500;
+color:#000;
+margin:0 auto;
+width:100%;
+padding-bottom:15px
+}
+
+.container-fluid {
+padding-right:15px;
+padding-left:15px;
+width:100%
+}
+
+.heading-1 {
+font-family:'MetricHPE-bold',sans-serif;
+font-size:33px;
+font-weight:700;
+text-align:center;
+color:#000;
+padding:50px 0 40px
+}
+
+.content-bg { }
+
+.content-bg4 {
+background-color:rgba(66,85,99,.93);
+padding:8%;
+float:left;
+width:70%;
+margin:12% 0 0 20%
+}
+
+h3.tag-h3 {
+font-size:30px;
+line-height:33px
+}
+
+p.tag-p {
+padding:0 8%;
+text-align:center;
+font-size:18px;
+line-height:22px
+}
+
+.content-bg4 h1 {
+font-size:28px;
+width:100%;
+color:#fff;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+float:left;
+padding:0;
+margin:0
+}
+
+.content-bg4 p {
+font-size:18px;
+color:#fff;
+margin:0
+}
+
+.product-main {
+width:100%;
+float:left;
+background-color:#fff
+}
+
+.product-main2 {
+width:100%;
+float:left;
+background-color:#fff
+}
+
+.product-main2>.container>.row>div>h2 {
+color:#000;
+font-size:20px;font-family: 'Forma DJR Banner';
+font-weight:700;
+margin-bottom:0;
+padding-bottom:0
+}
+
+.product-main2>.container>.row>.pstyle>p {
+font-size:18px;
+line-height:22px;
+color:#000;
+padding:0 22% 0 0
+}
+
+.product-main .pic {
+width:24%;
+float:left;
+text-align:left;
+margin:0 5px;
+padding:0 15px 30px
+}
+
+.product-main .pic ul {
+margin:0;
+padding:0;
+list-style:none;
+padding-top:2%;
+clear:both
+}
+
+.product-main .pic ul li {
+color:#C6C9CA;
+list-style:square;
+font-size:18px;
+line-height:22px
+}
+
+.product-main .pic ul li span {
+color:#000;
+font-size:18px;
+line-height:22px
+}
+
+.product-main .pic ul li a {
+color:#000;
+color:inherit;
+text-decoration:none;
+cursor:pointer;
+border-bottom:1px solid #01A982;
+transition:all .2s ease
+}
+
+.product-main .pic ul li a:hover {
+border-bottom:1px solid #000;
+transition:all .2s ease
+}
+
+.product-main h6 {
+font-size:40px;
+width:100%;
+line-height:normal;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.product-main2 h6 {
+font-size:40px;
+width:100%;
+line-height:normal;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:center;
+float:left;
+color:#000
+}
+
+.product-main h2 {
+font-size:20px;
+width:100%;
+padding:0;
+line-height:21px;font-family: 'Forma DJR Banner';
+font-weight:700;
+text-align:left;
+float:left;
+color:#000;
+width:100%
+}
+
+.product-main p {
+font-size:18px;
+line-height:22px;
+color:#000;font-family: 'Forma DJR Banner';
+text-align:center;
+width:100%;
+float:left
+}
+
+.pic-pro {
+display:none
+}
+
+.pic-pro-1 {
+display:block
+}
+
+.back-to-top {
+position: fixed;
+bottom: 25px;
+right: 25px;
+display: none;
+background:#efefef url("../images/top.png") no-repeat center center;
+width: 50px;
+height: 50px;
+background-color:#0e0905;
+}
+
+.back-to-top:hover {
+background-color:#000;
+}
+
+/*********csss start here *****************/
+.bg-banner{ width: 100%; background-color:#0092c7;}
+.pro-left{width: 100%; float: left;}
+.pro-right{width: 100%; float: right;}
+
+.responsive-wth { width: 100%;}
+
+
+
+.thank-you-bg {
+    padding: 20px 20px 24px;
+    background: #fff;
+    color: #fff;
+    height: auto;
+    float: left;
+    width: 100%;
+}
+.form-group-2 {
+margin-bottom: 10px;
+float: left;
+margin:5px 15px;
+width: 22%;
+height:95px;
+}
+
+.form-group-3 {
+margin-bottom: 10px;
+float: left;
+margin:5px 15px;
+width: 22%;
+height:95px;
+}
+
+.list-1{width:100%; float: left; margin: 3% 0 0 3%;}
+.list-1 ul{list-style: none; margin:0; padding:0;}
+.list-1 ul li{list-style:disc; font-size:17px; color:#000; letter-spacing: 1px; line-height:35px;}
+
+
+.agenda{margin:5% 0 0 0; float:left;}
+.align-check{font-family: 'Forma DJR Banner'; font-size: 12px; padding: 0 11px 0 8px;}
+
+
+/*********csss end here *****************/
+
+
+.checkbox-1{width:105%; float:left;}
+.checkbox-2{width:100%; float:left;}
+.align-4{margin:2% 0 6% 0;}
+.align-check-2{float: right;width: 93%;}
+.align-check-3{float: right;width: 93%;}
+.align-check-4{float: right;width: 93%;}
+.align-check-5{float: right;width: 93%;}
+.size-5{    font-size: 14px;font-family: 'Forma DJR Banner';
+    color: #fff;
+    font-weight: bold;
+    width: 100%;
+    float: left;
+    margin: 6% 0 -4% 0;}
+
+
+label {
+    display: inline-block;
+    max-width: 100%;
+    margin-bottom: 7px;
+    font-family: 'Open Sans';
+    font-size: 12px;
+    line-height: 18px;
+    float: right;
+    text-align: left;
+    margin: -5% 0 0 10%;
+}
+
+input[type=checkbox], input[type=radio] {
+    margin: 4px 0 0;
+    line-height: normal;
+    float: left;
+/*    width: 7%;*/
+    text-align: left;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: 40px;
+    margin: 0 0 3% 0;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 3.428571;
+	font-family: 'Forma DJR Banner'; 
+    color:#000;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+    -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #024ad8;
+    border-color: #024ad8;
+	margin:5% 0 0 0;
+	border-radius: 3px;
+	padding: 9px 20px;
+	letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #024ad8;
+	margin:5% 0 0 0;
+}
+
+.bg-gray{width:100%; float:left; background-color:#f4f4f4; margin:2% 0 0 0; padding: 2% 0 2% 0;}
+.bg-gray h1{margin:5% 0 3% 0;}
+
+
+.icon-main{width: 100%;float: left;margin: 3% 0 0 0;}
+.icon-main-left{float: left; width: 4%;}
+.icon-main-right{float: left;
+    margin: 1% 0 0 1%;
+    font-family: 'Forma DJR Banner';
+    font-size: 15px;
+    color: #000;
+    letter-spacing: 1px;
+    width: 92%;
+    line-height: 21px;
+}
+
+.icon-main2{width:23%;float: left;margin: 2% 0 0 0;}
+.icon-main2-left{float: left; width:17%;}
+.icon-main2-right{float: left;
+    margin: 0% 0 0 5%;
+    font-family: 'Forma DJR Banner';
+    font-size: 15px;
+    color: #000;
+    letter-spacing: 1px;
+    width: 27%;
+    line-height: 21px;}
+
+
+.icon-main3{width:23%;float: left;margin: 2% 0 0 0;}
+.icon-main3-left{float: left; width:17%; margin: 0 0 0 14%; 	}
+.icon-main3-right{float: left;
+    margin: 0% 0 0 2%;
+    font-family: 'Forma DJR Banner';
+    font-size: 15px;
+    color: #000;
+    letter-spacing: 1px;
+    width: 27%;
+    line-height: 21px;}
+
+
+.icon-main4{width:23%;float: left;margin: 2% 0 0 0;}
+.icon-main4-left{float: left;width: 17%;margin: 0 0 0 6%;}
+.icon-main4-right{float: left;
+    margin: 0% 0 0 0%;
+    font-family: 'Forma DJR Banner';
+    font-size: 15px;
+    color: #000;
+    letter-spacing: 1px;
+    width: 58%;
+    line-height: 21px;
+}
+
+
+
+.icon-main2-right a{color:#000;}
+.icon-main2-right a:hover{color:#024ad8; text-decoration: underline !important;}
+
+
+.heading-new h1{font-family: 'Forma DJR Banner'; font-size: 42px; color: #000; text-transform: none !important; margin: 0 0 0 0;}
+.heading-new-2 h1{font-family: 'Forma DJR Banner'; font-size: 42px; color: #000; text-transform: none !important; margin: 0 0 2% 2%;}
+.heading-new h2{font-family: 'Forma DJR Banner'; font-size: 25px; color: #000; text-transform: none !important; margin:2% 0 0 0;}
+
+
+.align-new-1 p{ margin:4% 0 0 0; font-size:18px;}
+.align-new-2 p{ margin:1% 0 3% 0; font-size:18px;}
+.align-new-3 p{ margin: 1% 0 3% 0;float: left;line-height: 18px; font-family: 'Forma DJR Banner'; font-size: 14px; color:#000;}
+.align-new-4 p{ margin:1% 0 3% 0; font-size:16px; float:left;}
+
+
+.icon-main-1{width: 100%; float: left; margin:3% 0 5% 0;}
+.icon-left{width:48%; float: left; margin: 0 0 0 -3%;}
+.icon-right{width:48%; float: right;}
+
+.icon-main-2{width: 100%; float: left; margin:3% 0 5% 0;}
+.icon-left-2{width:48%; float: left; margin: 0 0 0 -3%;}
+.icon-right-2{width:48%; float: right;}
+
+.icon{text-align: center; width: 100%; height: 70px;}
+.icon-heading{font-family: 'Forma DJR Banner'; font-size: 24px; color: #000; text-align: center; margin: 5% 0 0 0;}
+.icon-heading-2{font-family: 'Forma DJR Banner'; font-size: 16px; color: #000; text-align: center; margin: 2% 0 0 0;letter-spacing: 1px;}
+
+
+.form-main{width:100%; float:left;}
+
+.form-main-left{width:48%; float:left;}
+.form-main-right{width:48%; float:right; text-align: left; line-height:21px;}
+
+.check-box-main{width: 100%; float: left;}
+.check-box-left{width: 5%; float: left;}
+.check-box-right{width:92%; float: left; font-family: 'Forma DJR Banner'; font-size: 16px; color: #000; letter-spacing: 1px;}
+
+.book-demo-button{background-color: #024ad8; width: 200px; float: left; padding: 13px; text-align: center; color: #fff; border-radius: 4px; font-size: 23px; letter-spacing: 1px; margin: 0 0 0 16%;}
+.book-demo-button:hover{background-color: #000000; width: 200px; float: left; padding: 13px; text-align: center; color: #fff; border-radius: 4px; font-size: 23px; letter-spacing: 1px;}
+
+.book-demo-button-2{background-color: #024ad8; width: 200px; float: left; padding: 13px; text-align: center; color: #fff; border-radius: 4px; font-size: 23px; letter-spacing: 1px; margin: 0 0 0 39%;}
+.book-demo-button-2:hover{background-color: #000000; width: 200px; float: left; padding: 13px; text-align: center; color: #fff; border-radius: 4px; font-size: 23px; letter-spacing: 1px;}
+
+.Privacy{font-family: 'Forma DJR Banner'; font-size: 16px; color: #fff; }
+.Privacy a{color:#fff}
+.Privacy a:hover{color:#fff;  text-decoration: underline;}
+
+.Privacy-para p{font-family: 'Forma DJR Banner'; font-size: 16px; color: #000; line-height:21px;}
+
+.list-privacy{width:100%; float: left; margin: -1% 0 0 3%;}
+.list-privacy ul{list-style: none; margin:0; padding:0;}
+.list-privacy ul li{list-style:disc; font-size:17px; color:#000; letter-spacing: 1px; line-height:35px;}
+
+.form-logo{width: auto;}
+
+.footer-logo{width: auto;}
+.copyright{font-family: 'Forma DJR Banner'; font-size: 14px; color: #fff;}
+
+/*=======================================================
+			Responsive
+========================================================*/
+
+
+@media only screen and (max-width:1440px) and (min-width:1366px){}
+@media only screen and (max-width:1366px) and (min-width:1280px){}
+@media only screen and (max-width:1280px) and (min-width:1024px){}
+@media only screen and (max-width:1024px) and (min-width:991px){
+
+}
+
+@media (min-width: 800px) and (max-width: 1280px)
+{
+.icon-main2 { width: 28%;}
+.icon-main-right {margin: 0% 0 0 1%;}	
+}
+
+@media (min-width: 991px) and (max-width: 1024px) {}
+
+
+@media (min-width: 768px) and (max-width: 991px) {
+	
+	
+}
+
+@media only screen and (max-width:767px) and (min-width:640px){.align-check-2{float: right;width: 96%;}
+.align-check-3{float: right;width: 96%;}
+.align-check-4{float: right;width: 96%;}
+.align-check-5{float: right;width: 96%;}
+
+
+	
+}
+
+@media only screen and (max-width:640px) and (min-width:480px){}
+
+
+
+
+@media only screen and (max-width:480px) and (min-width:320px){ 
+
+.form-group {margin-bottom: 10px; float: left;margin: 5px 2px; width: 100%;}
+.align{ margin: 2% 0 0 0%;}
+.form-group-2{ width: 100%;margin: 0 0 0 1%; height: 128px;}
+.form-group-3{ width: 100%;margin: 0 0 0 1%; height: auto;}
+.form-bg h3{margin-top: 5%;font-size: 28px!important;}
+.form-bg	{margin: 0% 0 4% 0;}
+.align-check-2{float: right;width: 92%;}
+.align-check-3{float: right;width: 92%;}
+.align-check-4{float: right;width: 92%;}
+.align-check-5{float: right;width: 92%;}
+.bannerTop img{width: 121% !important; margin: 0 0 0 -71px !important;}
+	
+.icon-main{width: 100%;float: left;margin: 2% 0 0 0;}
+.icon-main-left{float:left; width: 4%;}
+.icon-main-right{float:left; width:86%; margin: 0 0 0 10%;}
+.icon-main2{width:100%;float: left;margin: 6% 0 0 0;}
+.icon-main2-left{float: left; width:13%;}
+.icon-main3-left{float: left; width:13%;}
+.icon-main2-right{float: left;width:80%; margin: 1% 0 0 1%;}
+.bg-gray {margin: 2% 0 5% 0; padding: 8% 0 8% 0;}
+.heading-new-2 h1 {font-size: 28px; padding: 2%;}
+.heading-new h1 {font-size: 28px; padding: 2%;}	
+.form-main-left {width: 100%;}
+.form-main-right {width: 100%;}
+	.form-logo img {width: 100%;}
+	.check-box-right {margin: 0 0 0 8px;}
+	.icon-heading {font-size:20px; }
+	
+.icon-left-2 { margin: 0 0 0 -3%;}
+	.book-demo-button {margin: 0 0 0 44%;}
+	.book-demo-button-2 {margin: 69px 0 0 -137%;}
+	
+	.icon-main3 {width: 83%;margin: 6% 0 0 -30px;}
+	.icon-main4 {width: 77%;
+        float: left;
+        margin: 4% 0 0 -9px;}
+	
+	.icon-main3-right {    margin: 1% 0 0 3%;}
+	
+	.footer-logo {width: auto;margin: 7% 0 0 0;}
+	
+	.copyright { font-family: 'Forma DJR Banner'; font-size: 10px;color: #fff;line-height: 17px;}
+	.Privacy {font-size: 11px;}
+	
+	
+	
+}
+
+
